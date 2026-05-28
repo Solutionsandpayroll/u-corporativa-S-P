@@ -1,0 +1,822 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Evaluación - {{ quiz.titulo }}</title>
+
+    <!-- Librerías Externas -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Tipografías del diseño corporativo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Calibri:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --azul-oscuro: #162b47;
+            --azul-medio: #105788;
+            --rojo-acento: #e51148;
+            --blanco: #ffffff;
+            --gris: #e0e5e5;
+            --sidebar-width: 250px;
+            --sidebar-collapsed: 70px;
+            --transition-speed: 0.3s;
+            --card-radius: 16px;
+            --shadow-sm: 0 2px 8px rgba(22, 43, 71, 0.08);
+            --shadow-md: 0 6px 20px rgba(22, 43, 71, 0.12);
+            --shadow-lg: 0 12px 32px rgba(22, 43, 71, 0.18);
+            --font-titulos: 'Nunito Sans', sans-serif;
+            --font-destacados: 'Calibri', 'Trebuchet MS', sans-serif;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f6f8;
+            overflow-x: hidden;
+        }
+
+        /* ========== PARTÍCULAS DECORATIVAS (FONDO ANIMADO) ========== */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 350px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.04;
+        }
+
+        .bg-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--azul-medio);
+            animation: floatParticle 8s infinite ease-in-out;
+        }
+
+        .bg-particle:nth-child(1) {
+            width: 60px; height: 60px; top: 10%; right: 20%; animation-delay: 0s;
+        }
+        .bg-particle:nth-child(2) {
+            width: 40px; height: 40px; top: 50%; right: 5%; animation-delay: 2s;
+        }
+        .bg-particle:nth-child(3) {
+            width: 80px; height: 80px; top: 70%; right: 30%; animation-delay: 4s;
+        }
+        .bg-particle:nth-child(4) {
+            width: 30px; height: 30px; top: 30%; right: 50%; animation-delay: 1s;
+        }
+
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            25% { transform: translateY(-40px) translateX(20px) scale(1.3); }
+            50% { transform: translateY(-10px) translateX(-15px) scale(0.8); }
+            75% { transform: translateY(-50px) translateX(10px) scale(1.2); }
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 1000;
+            transition: width var(--transition-speed) cubic-bezier(0.4,0,0.2,1);
+            box-shadow: 4px 0 24px rgba(22,43,71,0.25);
+            overflow: hidden;
+        }
+        .sidebar-brand {
+            display: flex; justify-content: center;
+            padding: 20px 16px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 8px;
+        }
+        .logo-wrapper {
+            width: 100%; display: flex; justify-content: center; align-items: center;
+            transition: transform 0.3s ease, filter 0.3s ease; cursor: pointer;
+        }
+        .logo-wrapper:hover { transform: scale(1.03); filter: drop-shadow(0 0 12px rgba(229,17,72,0.4)); }
+        .logo-wrapper img { width: 100%; height: auto; max-height: 78px; object-fit: contain; }
+
+        .sidebar-nav {
+            flex: 1; display: flex; flex-direction: column;
+            padding: 8px 12px; gap: 4px; overflow-y: auto;
+        }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 12px; text-decoration: none;
+            color: rgba(255,255,255,0.8); padding: 12px 14px; border-radius: 10px;
+            transition: all 0.25s; white-space: nowrap;
+            font-family: var(--font-destacados); font-weight: 700; font-size: 0.95rem;
+            letter-spacing: 0.2px;
+        }
+        .sidebar-nav a i { font-size: 1.2rem; width: 22px; text-align: center; min-width: 22px; transition: transform 0.3s, color 0.3s; }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08); color: var(--blanco);
+            transform: translateX(4px); box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+        .sidebar-nav a.active { background: rgba(255,255,255,0.12); font-weight: 800; }
+        .sidebar-nav a:hover i, .sidebar-nav a.active i { transform: scale(1.15); color: var(--blanco); }
+        .sidebar-nav a:active { transform: scale(0.97); transition: transform 0.1s; }
+        .sidebar-nav .logout-link {
+            margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 16px; color: rgba(255,255,255,0.6);
+        }
+        .sidebar-nav .logout-link:hover { background: rgba(229,17,72,0.15); color: #ff6b8a; box-shadow: inset 3px 0 0 var(--rojo-acento); }
+        .sidebar-nav .logout-link:hover i { color: #ff6b8a; animation: pulseLogout 0.6s ease-in-out; }
+
+        @keyframes pulseLogout {
+            0%,100% { transform: scale(1); }
+            30% { transform: scale(1.3) translateX(3px); }
+            60% { transform: scale(0.9); }
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            flex: 1; margin-left: var(--sidebar-width);
+            padding: 32px 36px; transition: margin-left var(--transition-speed);
+            min-height: 100vh; animation: fadeInContent 0.5s ease-out;
+            background: #f5f6f8;
+            position: relative;
+            z-index: 1;
+        }
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Botón volver */
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+            color: var(--azul-oscuro); font-family: var(--font-destacados); font-weight: 700;
+            font-size: 0.9rem; margin-bottom: 0; padding: 8px 16px; border-radius: 8px;
+            background: var(--blanco); box-shadow: 0 2px 6px rgba(22,43,71,0.08);
+            transition: all 0.25s;
+        }
+        .back-link:hover {
+            background: var(--azul-oscuro); color: var(--blanco);
+            box-shadow: 0 4px 12px rgba(22,43,71,0.15); transform: translateX(-2px);
+        }
+        .back-link i { font-size: 1rem; transition: transform 0.25s; }
+        .back-link:hover i { transform: translateX(-3px); }
+
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Header de Progreso */
+        .quiz-header {
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--azul-oscuro);
+            transition: box-shadow 0.3s;
+        }
+        .quiz-header:hover { box-shadow: var(--shadow-md); }
+
+        .progress {
+            height: 12px;
+            border-radius: 6px;
+            background-color: #e9ecef;
+        }
+        .progress-bar {
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--azul-medio) !important;
+        }
+        .badge-primary-custom {
+            background-color: var(--azul-medio);
+            color: white;
+            padding: 0.5em 1em;
+            border-radius: 8px;
+            font-weight: 600;
+            font-family: var(--font-destacados);
+        }
+
+        /* Estilo de Cards de Pregunta */
+        .question-card {
+            background: var(--blanco);
+            border: none;
+            border-radius: var(--card-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+        .question-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        /* Estados de Validación */
+        .is-correct {
+            border-left: 5px solid var(--success-color) !important;
+            background-color: #f8fdf9 !important;
+        }
+        .is-incorrect {
+            border-left: 5px solid var(--danger-color) !important;
+            background-color: #fff8f8 !important;
+        }
+
+        /* Opciones de Respuesta */
+        .custom-option {
+            border: 2px solid #e0e5e5;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            background: var(--blanco);
+            font-family: var(--font-destacados);
+            font-weight: 600;
+            color: var(--azul-oscuro);
+        }
+        .custom-option .form-check-input {
+            margin: 0 0.75rem 0 0 !important;
+            position: static;
+            flex: 0 0 auto;
+        }
+        .custom-option:hover {
+            border-color: var(--azul-medio);
+            background-color: #f0f7ff;
+        }
+        .custom-option.selected {
+            background-color: #eef5ff;
+            border-color: var(--azul-medio);
+        }
+
+        /* Ajuste para que el radio/checkbox no sobresalga del contenedor */
+        .custom-option .form-check-input {
+            margin-top: 0;
+            flex-shrink: 0;
+            position: relative;
+            width: 1.2em;
+            height: 1.2em;
+        }
+
+        .form-check-input:checked + .form-check-label {
+            font-weight: 700;
+            color: var(--azul-oscuro);
+        }
+
+        /* Multimedia */
+        .media-container {
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+            background: #fafafa;
+        }
+        .img-preview {
+            max-height: 400px;
+            object-fit: contain;
+            width: 100%;
+            border-radius: 10px;
+        }
+        .file-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--blanco);
+            border: 1px dashed #cbd5e0;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .file-box:hover {
+            border-color: var(--azul-medio);
+            background: #f8fbff;
+        }
+        .adjunto-card {
+            display: flex; align-items: center; padding: 12px; background: #f8fafc;
+            border-radius: 8px; margin-bottom: 8px; transition: background 0.2s;
+        }
+        .adjunto-card:hover { background: #f1f5f9; }
+        .adjunto-icon {
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            background: var(--azul-oscuro); color: white; border-radius: 8px;
+            font-size: 1.2rem; margin-right: 12px; flex-shrink: 0;
+        }
+        .adjunto-info { flex: 1; min-width: 0; }
+        .adjunto-nombre {
+            font-weight: 600; color: var(--azul-oscuro); font-size: 0.9rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .adjunto-tipo { font-size: 0.75rem; color: #64748b; }
+        .adjunto-acciones { display: flex; gap: 8px; flex-shrink: 0; }
+        .adjunto-btn {
+            padding: 6px 12px; border-radius: 6px; background: var(--azul-oscuro);
+            color: white; font-size: 0.8rem; font-weight: 600; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;
+            border: none; cursor: pointer;
+        }
+        .adjunto-btn:hover { background: var(--rojo-acento); color: white; text-decoration: none; transform: translateY(-1px); }
+
+        /* Botón Validar */
+        .btn-primary-custom {
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px;
+            background: var(--azul-oscuro); color: var(--blanco); border: none; border-radius: 10px;
+            cursor: pointer; font-family: var(--font-destacados); font-weight: 700; font-size: 0.95rem;
+            text-decoration: none; transition: all 0.3s; position: relative; overflow: hidden; z-index: 1;
+        }
+        .btn-primary-custom::after {
+            content: ''; position: absolute; inset: 0; background: var(--rojo-acento);
+            z-index: -1; transform: scaleX(0); transform-origin: right; transition: transform 0.35s;
+            border-radius: 10px;
+        }
+        .btn-primary-custom:hover::after { transform: scaleX(1); transform-origin: left; }
+        .btn-primary-custom:hover {
+            box-shadow: 0 6px 20px rgba(229,17,72,0.35); transform: translateY(-2px); color: white; text-decoration: none;
+        }
+        .btn-primary-custom:active { transform: scale(0.95); }
+
+        .btn-outline-primary-custom {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+            border: 2px solid var(--azul-oscuro); color: var(--azul-oscuro); background: transparent;
+            border-radius: 8px; font-weight: 600; font-family: var(--font-destacados);
+            transition: all 0.2s; text-decoration: none; cursor: pointer;
+        }
+        .btn-outline-primary-custom:hover { background: var(--azul-oscuro); color: white; text-decoration: none; }
+
+        /* Feedback */
+        .feedback-alert {
+            background: var(--blanco);
+            border-radius: 10px;
+            padding: 12px 18px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+            border: 1px solid transparent;
+        }
+        .feedback-alert.success { border-color: var(--success-color); background: #f1f9f5; }
+        .feedback-alert.danger { border-color: var(--danger-color); background: #fff5f5; }
+        .feedback-icon { font-size: 1.8rem; }
+        .feedback-icon.success { color: var(--success-color); }
+        .feedback-icon.danger { color: var(--danger-color); }
+
+        .validacion-nota {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #eaf3ff;
+            color: var(--azul-oscuro);
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .quiz-form.is-disabled {
+            opacity: 0.85;
+        }
+
+        .quiz-form.is-disabled .btn-primary-custom,
+        .quiz-form.is-disabled .custom-option {
+            cursor: not-allowed;
+        }
+
+        .text-extra { font-size: 0.9rem; color: #4b5563; margin-top: 6px; }
+
+        .completion-card {
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            padding: 40px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border-left: 5px solid var(--success-color);
+        }
+        .completion-icon { font-size: 4rem; color: var(--success-color); margin-bottom: 20px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: var(--sidebar-collapsed); }
+            .sidebar-nav a span { display: none; }
+            .sidebar-nav a { justify-content: center; padding: 14px; gap: 0; }
+            .sidebar-nav a i { font-size: 1.3rem; }
+            .main-content { margin-left: var(--sidebar-collapsed); padding: 20px 16px; }
+        }
+        @media (max-width: 480px) {
+            .sidebar { width: 56px; }
+            .main-content { margin-left: 56px; padding: 14px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Partículas decorativas -->
+    <div class="bg-particles" aria-hidden="true">
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-wrapper" title="Inicio">
+                <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca">
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'panel_empleado' %}">
+                <i class="fa-solid fa-table-columns"></i>
+                <span>Panel de Empleado</span>
+            </a>
+            <a href="{% url 'listar_cursos_empleado' %}"  class="active">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Cursos</span>
+            </a>
+            <a href="{% url 'ver_noticias' %}">
+                <i class="fa-solid fa-newspaper"></i>
+                <span>Ver Noticias</span>
+            </a>
+            <a href="{% url 'logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="top-actions">
+            <a href="{% url 'ver_curso_empleado' id_curso=quiz.curso.id_curso %}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Volver al contenido del curso
+            </a>
+            <a href="{% url 'subir_archivo' %}?id_curso={{ quiz.curso.id_curso }}" class="btn-outline-primary-custom">
+                <i class="fas fa-circle-question"></i> Como subir un archivo
+            </a>
+        </div>
+
+        <!-- Header de Progreso -->
+        <div class="quiz-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="fw-bold" style="color: var(--azul-oscuro); font-family: var(--font-titulos); font-weight: 800;">
+                        {{ quiz.titulo }}
+                    </h2>
+                    <p class="text-muted mb-0" style="font-family: var(--font-destacados);">{{ quiz.descripcion }}</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="badge-primary-custom mb-2 d-inline-block">
+                        <i class="fas fa-graduation-cap me-1"></i> Evaluación
+                    </span>
+                    <div class="d-flex align-items-center justify-content-end mt-2">
+                        <div class="me-3 fw-bold" style="color: var(--azul-oscuro); font-family: var(--font-destacados);">
+                            <span id="porcentaje-texto">{{ porcentaje|floatformat:0 }}</span>% Completado
+                        </div>
+                    </div>
+                    <div class="progress mt-2">
+                        <div id="quiz-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: {{ porcentaje }}%; background-color: var(--azul-medio);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if completado and mensaje %}
+        <!-- Quiz completado -->
+        <div class="completion-card">
+            <i class="fas fa-check-circle completion-icon"></i>
+            <h2 style="color: var(--azul-oscuro); font-family: var(--font-titulos);">¡Quiz Completado!</h2>
+            <p style="color: #4b5563; font-size: 1.1rem; margin: 20px 0;">{{ mensaje }}</p>
+            <a href="{% url 'panel_empleado' %}" class="btn-primary-custom">
+                <i class="fas fa-arrow-left"></i> Volver al Panel
+            </a>
+        </div>
+        {% else %}
+
+        <!-- Lista de preguntas -->
+        {% for p in preguntas %}
+        {% with estado=progreso|get_item:p.id %}
+        <div class="question-card" id="card-{{ p.id }}">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <span class="fw-bold small" style="color: var(--azul-medio); text-transform: uppercase; font-family: var(--font-destacados);">
+                        PREGUNTA {{ forloop.counter }}
+                    </span>
+                    <h4 class="mt-1" style="font-family: var(--font-titulos); color: var(--azul-oscuro); font-weight: 700;">{{ p.texto }}</h4>
+                    {% if p.descripcion %}
+                        <p class="text-muted" style="font-size: 0.95rem;">{{ p.descripcion }}</p>
+                    {% endif %}
+                    {% if p.tipo_respuesta == 'abierta' %}
+                        <div class="validacion-nota">
+                            <i class="fas fa-info-circle"></i>
+                            La información va a ser validada por el administrador.
+                        </div>
+                    {% endif %}
+                </div>
+                <div id="status-{{ p.id }}" class="ms-3">
+                    {% if estado and estado.es_correcta %}
+                        <i class="fas fa-check-circle" style="color: var(--success-color); font-size: 2rem;"></i>
+                    {% endif %}
+                    <!-- Icono de estado -->
+                </div>
+            </div>
+
+            <!-- Contenido Multimedia Unificado (misma lógica que en CÓDIGO 1) -->
+            <div class="row g-4 mb-4">
+                {% if p.imagen_url %}
+                <div class="col-lg-6">
+                    <div class="media-container border">
+                        {% if 'sharepoint.com' in p.imagen_url or 'embed.aspx' in p.imagen_url %}
+                            <!-- iframe para SharePoint -->
+                            <div class="iframe-apoyo-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px; background: #f8fafc;">
+                                <iframe src="{{ p.imagen_url }}" frameborder="0" scrolling="no" allowfullscreen
+                                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 10px;"></iframe>
+                            </div>
+                        {% else %}
+                            <img src="{{ p.imagen_url }}" class="img-preview" alt="Imagen de apoyo"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'p-3 text-center text-muted\'><i class=\'fas fa-image fa-2x mb-2\'></i><p>No se pudo cargar la imagen</p></div>';">
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if p.archivo_apoyo %}
+                <div class="col-lg-6">
+                    {% with archivo=p.archivo_apoyo %}
+                        {% if archivo.nombre|lower|slice:"-4:" == '.jpg' or archivo.nombre|lower|slice:"-5:" == '.jpeg' or archivo.nombre|lower|slice:"-4:" == '.png' or archivo.nombre|lower|slice:"-4:" == '.gif' or archivo.nombre|lower|slice:"-4:" == '.svg' or archivo.nombre|lower|slice:"-5:" == '.webp' %}
+                            <!-- Es una imagen: previsualización directa -->
+                            <div class="media-container border">
+                                <img src="{{ archivo.url_visualizacion }}" class="img-preview" alt="{{ archivo.nombre }}"
+                                     onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'p-3 text-center text-muted\'><i class=\'fas fa-image fa-2x mb-2\'></i><p>No se pudo cargar la imagen</p></div>';">
+                            </div>
+                        {% else %}
+                            <!-- Es un documento: tarjeta con icono y acciones -->
+                            <div class="adjunto-card" data-url="{{ archivo.url_visualizacion }}">
+                                <div class="adjunto-icon">
+                                    {% with ext=archivo.nombre|lower|slice:"-5:" %}
+                                        {% if '.pdf' in ext or '.doc' in ext or '.docx' in ext or '.xls' in ext or '.xlsx' in ext or '.ppt' in ext or '.pptx' in ext %}
+                                            {% if '.pdf' in ext %}<i class="fas fa-file-pdf"></i>
+                                            {% elif '.doc' in ext %}<i class="fas fa-file-word"></i>
+                                            {% elif '.xls' in ext %}<i class="fas fa-file-excel"></i>
+                                            {% elif '.ppt' in ext %}<i class="fas fa-file-powerpoint"></i>
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                                <div class="adjunto-info">
+                                    <div class="adjunto-nombre" title="{{ archivo.nombre }}">{{ archivo.nombre }}</div>
+                                    <div class="adjunto-tipo">Documento</div>
+                                </div>
+                                <div class="adjunto-acciones">
+                                    <a href="{{ archivo.url_visualizacion }}" target="_blank" rel="noopener noreferrer" class="adjunto-btn abrir-archivo">
+                                        <i class="fas fa-external-link-alt"></i> Abrir
+                                    </a>
+                                    {% if archivo.url_descarga %}
+                                    <a href="{{ archivo.url_descarga }}" class="adjunto-btn descargar-archivo" download>
+                                        <i class="fas fa-download"></i> Descargar
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Formulario de Respuesta -->
+            <form class="quiz-form {% if estado and estado.es_correcta %}is-disabled{% endif %}" data-pregunta="{{ p.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="pregunta_id" value="{{ p.id }}">
+                
+                <div class="row">
+                    {% for o in p.opciones.all %}
+                    <div class="col-md-6">
+                        <div class="custom-option form-check">
+                            <input class="form-check-input me-3" 
+                                   type="{% if p.tipo_respuesta == 'multiple' %}checkbox{% else %}radio{% endif %}" 
+                                   name="opcion_ids[]" value="{{ o.id }}" id="opt-{{ o.id }}"
+                                {% if estado and estado.es_correcta %}disabled{% endif %}
+                                   style="border: 2px solid var(--azul-oscuro);">
+                            <label class="form-check-label w-100" for="opt-{{ o.id }}" style="cursor: pointer;">
+                                {{ o.texto }}
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if p.tipo_respuesta == 'abierta' %}
+                    <textarea name="respuesta_texto" class="form-control mb-3" rows="3" placeholder="Escribe tu respuesta aquí..."
+                              {% if estado and estado.es_correcta %}disabled{% endif %}
+                              style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px;"></textarea>
+                {% endif %}
+
+                {% if p.tipo_respuesta == 'archivo' %}
+                    <select name="tipo_archivo" class="form-select mb-3" {% if estado and estado.es_correcta %}disabled{% endif %}
+                            style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px;">
+                        <option value="">Selecciona el tipo de archivo</option>
+                        <option value="imagen_video">Imagen o video</option>
+                        <option value="documento">Archivos (PDF, Word, Excel, PowerPoint, etc.)</option>
+                    </select>
+                    <textarea name="archivo_url" class="form-control mb-3" rows="3" placeholder="Pega aquí el iframe o enlace del archivo..."
+                              {% if estado and estado.es_correcta %}disabled{% endif %}
+                              style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px;"></textarea>
+                    <small class="text-muted d-block mb-3">Pega el iframe completo de SharePoint/OneDrive o la URL directa del archivo. El sistema detecta automáticamente si es imagen, video o documento.</small>
+                {% endif %}
+
+                <div class="d-flex align-items-center mt-3">
+                    <button type="submit" class="btn-primary-custom" {% if estado and estado.es_correcta %}disabled{% endif %}>
+                        <i class="fas fa-check-circle"></i> Validar Respuesta
+                    </button>
+                    
+                    <div id="feedback-{{ p.id }}" class="ms-4 d-none">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% endwith %}
+        {% endfor %}
+        {% endif %}
+    </main>
+
+    <script>
+    $(document).ready(function() {
+        // 1. Manejo del envío del formulario (AJAX)
+        $('.quiz-form').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            if (form.hasClass('is-disabled')) {
+                return;
+            }
+            const preguntaId = form.data('pregunta');
+            const feedbackDiv = $(`#feedback-${preguntaId}`);
+            const statusIcon = $(`#status-${preguntaId}`);
+            const card = $(`#card-${preguntaId}`);
+
+            const opciones = [];
+            form.find('input[name="opcion_ids[]"]:checked').each(function() {
+                opciones.push($(this).val());
+            });
+            
+            const respuestaTexto = form.find('textarea[name="respuesta_texto"]').val() || '';
+            const archivoUrl = form.find('textarea[name="archivo_url"]').val() || '';
+            const tipoArchivo = form.find('select[name="tipo_archivo"]').val() || '';
+            const respuesta = opciones.length > 0 ? opciones.join(',') : respuestaTexto;
+
+            $.ajax({
+                url: "{% url 'responder_pregunta' %}",
+                method: "POST",
+                contentType: "application/json",
+                headers: {'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()},
+                data: JSON.stringify({
+                    pregunta_id: preguntaId,
+                    quiz_id: {{ quiz.id }},
+                    respuesta: respuesta,
+                    archivo_url: archivoUrl,
+                    tipo_archivo: tipoArchivo
+                }),
+                success: function(response) {
+                    feedbackDiv.removeClass('d-none');
+                    let alertClass = response.es_correcta ? 'success' : 'danger';
+                    let iconClass = response.es_correcta ? 'fa-check-circle' : 'fa-times-circle';
+                    let mainMsg = response.es_correcta ? '¡Respuesta validada!' : 'No es correcto.';
+                    let extraMsg = response.es_correcta ? (response.nota_validacion || 'Has acertado esta pregunta.') : 
+                        `<strong>Pista:</strong> ${response.pista || 'No disponible'}<br><strong>Recomendación:</strong> ${response.explicacion || ''}`;
+
+                    feedbackDiv.html(`
+                        <div class="feedback-alert ${alertClass}">
+                            <i class="fas ${iconClass} feedback-icon ${alertClass}"></i>
+                            <div>
+                                <div class="fw-bold">${mainMsg}</div>
+                                <div class="text-extra">${extraMsg}</div>
+                            </div>
+                        </div>
+                    `);
+
+                    if (response.es_correcta) {
+                        card.addClass('is-correct').removeClass('is-incorrect');
+                        statusIcon.html('<i class="fas fa-check-circle" style="color: var(--success-color); font-size: 2rem;"></i>');
+                        form.addClass('is-disabled');
+                        form.find('button[type="submit"]').prop('disabled', true);
+                        form.find('input, textarea').prop('disabled', true);
+                        
+                        if (response.completado) {
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1500);
+                        }
+                    } else {
+                        card.addClass('is-incorrect').removeClass('is-correct');
+                        statusIcon.html('<i class="fas fa-times-circle" style="color: var(--danger-color); font-size: 2rem;"></i>');
+                    }
+
+                    actualizarBarraProgreso();
+                },
+                error: function() {
+                    const xhr = arguments[0];
+                    const mensaje = xhr?.responseJSON?.error || 'Error al conectar con el servidor.';
+                    const responseYaValidada = xhr?.responseJSON?.ya_validada;
+                    if (responseYaValidada) {
+                        alert(mensaje);
+                        return;
+                    }
+                    alert(mensaje);
+                }
+            });
+        });
+
+        // 2. Barra de Progreso
+        function actualizarBarraProgreso() {
+            let total = $('.question-card').length;
+            let respondidasCorrectas = $('.is-correct').length;
+            let porcentaje = Math.round((respondidasCorrectas / total) * 100);
+            
+            $('#quiz-bar').css('width', porcentaje + '%');
+            $('#porcentaje-texto').text(porcentaje);
+        }
+
+        // 3. Selección visual de opciones
+        $('.custom-option').on('click', function() {
+            const input = $(this).find('input');
+            if(input.attr('type') === 'radio') {
+                $(this).closest('.row').find('.custom-option').removeClass('selected');
+                $(this).addClass('selected');
+            } else if (input.attr('type') === 'checkbox') {
+                $(this).toggleClass('selected');
+            }
+        });
+
+        $('.custom-option input').on('change', function() {
+            if ($(this).attr('type') === 'radio') {
+                $(this).closest('.row').find('.custom-option').removeClass('selected');
+                $(this).closest('.custom-option').addClass('selected');
+            } else if ($(this).attr('type') === 'checkbox') {
+                $(this).closest('.custom-option').toggleClass('selected');
+            }
+        });
+
+        // 4. Corrección de URLs de SharePoint para documentos (solo si no están ya en el formato correcto)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.adjunto-card').forEach(card => {
+                const abrirBtn = card.querySelector('.abrir-archivo');
+                const descargarBtn = card.querySelector('.descargar-archivo');
+                if (!abrirBtn) return;
+
+                let url = abrirBtn.getAttribute('href');
+                if (url && (url.includes('sharepoint.com') || url.includes('embed.aspx'))) {
+                    // Si la URL ya contiene 'Doc.aspx' o 'embed.aspx' con un action, la dejamos como está
+                    if (url.includes('Doc.aspx') || url.includes('embed.aspx')) {
+                        // No modificar, ya es un visor
+                        return;
+                    }
+                    // Intentar transformar si tiene un UniqueId/sourcedoc
+                    const uniqueIdMatch = url.match(/UniqueId=([a-f0-9\-]{36})/i) || 
+                                         url.match(/sourcedoc=([a-f0-9\-]{36})/i) ||
+                                         url.match(/%7B([a-f0-9\-]{36})%7D/i);
+                    if (uniqueIdMatch) {
+                        const uniqueId = uniqueIdMatch[1];
+                        const baseMatch = url.match(/(https?:\/\/[^\/]+\/[^\/]+\/[^\/]+)/);
+                        if (baseMatch) {
+                            const baseSP = baseMatch[1];
+                            const viewerUrl = `${baseSP}/_layouts/15/Doc.aspx?sourcedoc=%7B${uniqueId}%7D&action=default`;
+                            abrirBtn.setAttribute('href', viewerUrl);
+                            
+                            if (descargarBtn) {
+                                const downloadUrl = `${baseSP}/_layouts/15/download.aspx?UniqueId=${uniqueId}`;
+                                descargarBtn.setAttribute('href', downloadUrl);
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

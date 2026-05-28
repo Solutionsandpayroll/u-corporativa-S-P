@@ -1,0 +1,589 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Contenido - {{ curso.titulo }}</title>
+
+    <!-- Tipografías -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&family=Calibri:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="{% static 'css/contenido-dashboard.css' %}">
+</head>
+<body>
+
+    <!-- Partículas decorativas de fondo -->
+    <div class="bg-particles" aria-hidden="true">
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-wrapper" title="Dashboard">
+                <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca" style="max-height: 78px; width: auto;">
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'panel_admin' %}">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Panel de Administración</span>
+            </a>
+            <a href="{% url 'gestionar_cursos' %}" class="active">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>Gestionar Cursos</span>
+            </a>
+            <a href="{% url 'administrar_noticias' %}">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Administrar Noticias</span>
+            </a>
+
+
+             <a href="{% url 'subir_archivo' %}" >
+                    <i class="fa-solid fa-file"></i>
+                    <span>Subir Archivo</span>
+            </a>
+
+            <a href="{% url 'logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <!-- ✅ FIX 1: Solo el enlace de volver, SIN encabezado adicional -->
+        <a href="{% url 'gestionar_cursos' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Volver a Gestionar Cursos
+        </a>
+
+        <div class="dashboard-container">
+            <div class="content-layout">
+                
+                <!-- SECCIÓN IZQUIERDA -->
+                <div class="cards-principales-container">
+                    <!-- Card principal del curso -->
+                    <div class="card-bienvenida-premium">
+                        <div class="card-bienvenida-overlay"></div>
+                        <div class="decoracion-circulos">
+                            <div class="circulo circulo-1"></div>
+                            <div class="circulo circulo-2"></div>
+                            <div class="circulo circulo-3"></div>
+                        </div>
+                        <div class="card-bienvenida-contenido">
+                            <h2 class="card-bienvenida-titulo">{{ curso.titulo }}</h2>
+                            <p class="card-bienvenida-descripcion">{{ curso.descripcion }}</p>
+                            <div class="card-bienvenida-extra">
+                                {% if bloque and bloque.url_recurso and bloque.tipo == 'imagen_destacada' or bloque.tipo == 'banner' %}
+                                <div class="card-bienvenida-imagen-wrapper">
+                                    <img src="{{ bloque.url_recurso }}" alt="{{ bloque.titulo }}" class="card-bienvenida-imagen">
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-bienvenida-footer">
+                                <div class="footer-info">
+                                    <span class="footer-fecha">
+                                        <i class="far fa-calendar-alt"></i>
+                                        {{ curso.fecha_public|date:"d/m/Y" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Grid de bloques principales -->
+                    <div class="cards-grid" id="cardsPrincipalesGrid">
+                        {% for bloque in bloques_principal %}
+                            {% if bloque.render_type == 'imagen_fondo' and bloque.url_recurso %}
+                                {% if 'sharepoint.com' in bloque.url_recurso or 'embed.aspx' in bloque.url_recurso %}
+                                <div class="card-adicional-item card-fondo-sharepoint" 
+                                     id="bloque-{{ bloque.id }}" 
+                                     data-tipo="{{ bloque.tipo }}"
+                                     data-url-recurso="{{ bloque.url_recurso|default:'' }}"
+                                     data-archivos-urls="{% for contenido in bloque.contenidos.all %}{{ contenido.url_recurso|default:'' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-archivos-nombres="{% for contenido in bloque.contenidos.all %}{{ contenido.get_nombre_display|default:'' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-archivos-tipos="{% for contenido in bloque.contenidos.all %}{{ contenido.tipo_con|default:'archivos' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-render-type="{{ bloque.render_type }}">
+                                    {% if not readonly %}
+                                    <div class="card-buttons-group">
+                                        <button class="btn-editar-card" onclick="editarBloque({{ bloque.id }})" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-eliminar-card" onclick="dashboard.eliminarBloque({{ bloque.id }})" title="Eliminar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                    <iframe class="sharepoint-bg-iframe" src="{{ bloque.url_recurso }}" frameborder="0" scrolling="no" allowfullscreen></iframe>
+                                    <div class="card-fondo-overlay"></div>
+                                    <div class="card-contenido-superpuesto">
+                                        {% if bloque.titulo %}<h3 class="card-adicional-titulo">{{ bloque.titulo }}</h3>{% endif %}
+                                        {% if bloque.descripcion %}<div class="card-adicional-descripcion">{{ bloque.descripcion|linebreaksbr|safe }}</div>{% endif %}
+                                    </div>
+                                    <div class="card-adicional-footer"><span><i class="far fa-clock"></i> {{ bloque.fecha_creacion|date:"d/m/Y H:i" }}</span></div>
+                                </div>
+                                {% else %}
+                                <div class="card-adicional-item card-fondo-imagen" 
+                                     id="bloque-{{ bloque.id }}" 
+                                     data-tipo="{{ bloque.tipo }}"
+                                     data-url-recurso="{{ bloque.url_recurso|default:'' }}"
+                                     data-archivos-urls="{% for contenido in bloque.contenidos.all %}{{ contenido.url_recurso|default:'' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-archivos-nombres="{% for contenido in bloque.contenidos.all %}{{ contenido.get_nombre_display|default:'' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-archivos-tipos="{% for contenido in bloque.contenidos.all %}{{ contenido.tipo_con|default:'archivos' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-render-type="{{ bloque.render_type }}"
+                                     style="background-image: url('{{ bloque.url_recurso }}');">
+                                    {% if not readonly %}
+                                    <div class="card-buttons-group">
+                                        <button class="btn-editar-card" onclick="editarBloque({{ bloque.id }})" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button class="btn-eliminar-card" onclick="dashboard.eliminarBloque({{ bloque.id }})" title="Eliminar"><i class="fas fa-times"></i></button>
+                                    </div>
+                                    {% endif %}
+                                    <div class="card-fondo-overlay"></div>
+                                    <div class="card-contenido-superpuesto">
+                                        {% if bloque.titulo %}<h3 class="card-adicional-titulo">{{ bloque.titulo }}</h3>{% endif %}
+                                        {% if bloque.descripcion %}<div class="card-adicional-descripcion">{{ bloque.descripcion|linebreaksbr|safe }}</div>{% endif %}
+                                    </div>
+                                    <div class="card-adicional-footer"><span><i class="far fa-clock"></i> {{ bloque.fecha_creacion|date:"d/m/Y H:i" }}</span></div>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <!-- Modo normal -->
+                                <div class="card-adicional-item" id="bloque-{{ bloque.id }}" 
+                                     data-tipo="{{ bloque.tipo }}"
+                                     data-url-recurso="{{ bloque.url_recurso|default:'' }}"
+                                     data-archivos-urls="{% for contenido in bloque.contenidos.all %}{{ contenido.url_recurso|default:'' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-archivos-nombres="{% for contenido in bloque.contenidos.all %}{{ contenido.get_nombre_display|default:'' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-archivos-tipos="{% for contenido in bloque.contenidos.all %}{{ contenido.tipo_con|default:'archivos' }}{% if not forloop.last %}|{% endif %}{% endfor %}"
+                                     data-render-type="{{ bloque.render_type }}">
+                                    {% if not readonly %}
+                                    <div class="card-buttons-group">
+                                        <button class="btn-editar-card" onclick="editarBloque({{ bloque.id }})" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button class="btn-eliminar-card" onclick="dashboard.eliminarBloque({{ bloque.id }})" title="Eliminar"><i class="fas fa-times"></i></button>
+                                    </div>
+                                    {% endif %}
+                                    {% if bloque.titulo %}<h3 class="card-adicional-titulo">{{ bloque.titulo }}</h3>{% endif %}
+                                    {% if bloque.descripcion %}<div class="card-adicional-descripcion">{{ bloque.descripcion|linebreaksbr|safe }}</div>{% endif %}
+                                    {% if bloque.url_recurso and bloque.tipo == 'banner' %}
+                                    <div class="card-adicional-imagen">
+                                        {% if 'sharepoint.com' in bloque.url_recurso or 'embed.aspx' in bloque.url_recurso %}
+                                            <iframe src="{{ bloque.url_recurso }}" width="100%" height="400" frameborder="0" scrolling="no" allowfullscreen></iframe>
+                                        {% elif 'youtube.com' in bloque.url_recurso or 'youtu.be' in bloque.url_recurso or 'vimeo.com' in bloque.url_recurso %}
+                                            <iframe src="{{ bloque.url_recurso }}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>
+                                        {% else %}
+                                            <img src="{{ bloque.url_recurso }}" alt="{{ bloque.titulo|default:'Recurso' }}" onerror="this.parentElement.innerHTML='<div style=\'background:#f1f5f9;padding:40px;text-align:center;border-radius:8px;color:#94a3b8\'><i class=\'fas fa-image\' style=\'font-size:48px;margin-bottom:10px;display:block\'></i><p>El recurso no está disponible</p></div>' ;">
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    <div class="card-adicional-footer"><span><i class="far fa-clock"></i> {{ bloque.fecha_creacion|date:"d/m/Y H:i" }}</span></div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN DERECHA -->
+                <div class="columna-derecha" id="lateralScroll">
+                    <div class="lateral-header-independiente">
+                        <h3 class="lateral-title-independiente"><i class="fas fa-columns"></i> Recursos y Enlaces</h3>
+                        <span class="lateral-count-independiente">{{ bloques_lateral.count }} items</span>
+                    </div>
+                    {% for bloque in bloques_lateral %}
+                    <div class="card-lateral-item" id="bloque-{{ bloque.id }}" data-tipo="{{ bloque.tipo }}">
+                        {% if not readonly %}
+                        <div class="mini-card-buttons">
+                            <button class="btn-editar-mini" onclick="editarBloque({{ bloque.id }})" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button class="btn-eliminar-mini" onclick="dashboard.eliminarBloque({{ bloque.id }})" title="Eliminar"><i class="fas fa-times"></i></button>
+                        </div>
+                        {% endif %}
+                        <div class="card-lateral-header">
+                            <div class="mini-card-icon 
+                                {% if bloque.tipo == 'video' %}icon-video
+                                {% elif bloque.tipo == 'pdf' %}icon-pdf
+                                {% elif bloque.tipo == 'enlace' %}icon-enlace
+                                {% elif bloque.tipo == 'noticia_corta' %}icon-noticia
+                                {% else %}icon-mini{% endif %}">
+                                <i class="fas 
+                                    {% if bloque.tipo == 'video' %}fa-play
+                                    {% elif bloque.tipo == 'pdf' %}fa-file-pdf
+                                    {% elif bloque.tipo == 'enlace' %}fa-link
+                                    {% elif bloque.tipo == 'noticia_corta' %}fa-newspaper
+                                    {% else %}fa-th-large{% endif %}"></i>
+                            </div>
+                            <div class="card-lateral-title-section">
+                                <h4 class="mini-card-title">{{ bloque.titulo|default:'Sin título' }}</h4>
+                                <span class="card-tipo-label">
+                                    {% if bloque.tipo == 'video' %}Video
+                                    {% elif bloque.tipo == 'pdf' %}PDF
+                                    {% elif bloque.tipo == 'enlace' %}Enlace
+                                    {% elif bloque.tipo == 'noticia_corta' %}Noticia
+                                    {% else %}Mini Card{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% if bloque.descripcion %}<p class="mini-card-description">{{ bloque.descripcion }}</p>{% endif %}
+                        {% if bloque.url_recurso %}
+                            {% if bloque.tipo == 'video' %}
+                            <div class="video-container"><iframe src="{{ bloque.url_recurso }}" frameborder="0" allowfullscreen></iframe></div>
+                            {% elif bloque.tipo == 'pdf' %}
+                            <a href="{{ bloque.url_recurso }}" target="_blank" class="btn-mini-action"><i class="fas fa-file-pdf"></i> Ver Documento</a>
+                            {% elif bloque.tipo == 'enlace' %}
+                            <a href="{{ bloque.url_recurso }}" target="_blank" class="btn-mini-action"><i class="fas fa-external-link-alt"></i> Visitar Enlace</a>
+                            {% else %}
+                            <a href="{{ bloque.url_recurso }}" target="_blank" class="btn-mini-action"><i class="fas fa-eye"></i> Ver Recurso</a>
+                            {% endif %}
+                        {% endif %}
+                        {% for contenido in bloque.contenidos.all %}
+                            {% if contenido.tipo_con == 'imagen' or contenido.tipo_con == 'video' %}
+                            <div style="margin: 15px 0;" id="contenido-{{ contenido.id_contenido }}" class="media-contenedor">
+                                {% if contenido.tipo_con == 'imagen' %}
+                                    {% if 'sharepoint.com' in contenido.url_recurso or 'embed.aspx' in contenido.url_recurso %}
+                                    <div style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden; border-radius: 8px;">
+                                        <iframe src="{{ contenido.url_recurso }}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" frameborder="0" scrolling="no" allowfullscreen></iframe>
+                                    </div>
+                                    {% else %}
+                                    <a href="{{ contenido.url_recurso }}" target="_blank" style="display: block; border-radius: 8px; overflow: hidden; background: #f1f5f9;">
+                                        <img src="{{ contenido.url_recurso }}" alt="{{ contenido.get_nombre_display }}" style="width: 100%; height: 200px; object-fit: cover; display: block;" onerror="this.parentElement.innerHTML='<div style=\'padding:40px;text-align:center;background:#f1f5f9;border-radius:8px;color:#94a3b8\'><i class=\'fas fa-image\' style=\'font-size:32px;margin-bottom:10px;display:block\'></i><p style=\'font-size:12px\'>Imagen no disponible</p></div>';">
+                                    </a>
+                                    {% endif %}
+                                {% elif contenido.tipo_con == 'video' %}
+                                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px;">
+                                    <iframe src="{{ contenido.url_recurso }}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" allowfullscreen></iframe>
+                                </div>
+                                {% endif %}
+                                <div style="margin-top: 8px; font-size: 12px; color: #94a3b8;">
+                                    <i class="fas {% if contenido.tipo_con == 'imagen' %}fa-image{% else %}fa-video{% endif %}"></i> {{ contenido.get_tipo_con_display }}
+                                </div>
+                                <!-- 🔹 NUEVO: botón eliminar igual que en archivos normales -->
+                                <div class="adjunto-acciones" style="margin-top: 8px;">
+                                    <a href="{{ contenido.url_recurso }}" target="_blank" rel="noopener noreferrer" class="adjunto-btn" title="Abrir archivo">
+                                        <i class="fas fa-external-link-alt"></i> Abrir
+                                    </a>
+                                    <button class="adjunto-btn adjunto-btn-eliminar"
+                                            data-url="{% url 'eliminar_contenido_ajax' contenido.id_contenido %}"
+                                            onclick="dashboard.eliminarArchivoAdjunto(this)"
+                                            title="Eliminar archivo">
+                                        <i class="fas fa-trash-alt"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% with archivos=bloque.contenidos.all %}
+                            {% if archivos %}
+                            <div class="archivos-adjuntos-lista">
+                                <div class="archivos-adjuntos-titulo"><i class="fas fa-paperclip"></i> Archivos</div>
+                                {% for contenido in archivos %}
+                                {% if contenido.tipo_con != 'imagen' and contenido.tipo_con != 'video' %}
+                                <div class="adjunto-card" id="contenido-{{ contenido.id }}">
+                                    <div class="adjunto-icon">
+                                        {% if contenido.tipo_con == 'pdf' %}<i class="fas fa-file-pdf"></i>
+                                        {% elif contenido.tipo_con == 'word' %}<i class="fas fa-file-word"></i>
+                                        {% elif contenido.tipo_con == 'excel' %}<i class="fas fa-file-excel"></i>
+                                        {% elif contenido.tipo_con == 'powerpoint' %}<i class="fas fa-file-powerpoint"></i>
+                                        {% elif contenido.tipo_con == 'sharepoint' %}<i class="fas fa-cloud"></i>
+                                        {% elif contenido.tipo_con == 'url' %}<i class="fas fa-link"></i>
+                                        {% else %}<i class="fas fa-file"></i>{% endif %}
+                                    </div>
+                                    <div class="adjunto-info">
+                                        <div class="adjunto-nombre" title="{{ contenido.get_nombre_display }}">{{ contenido.get_nombre_display|truncatechars:35 }}</div>
+                                        <div class="adjunto-tipo">{{ contenido.get_tipo_con_display }}</div>
+                                    </div>
+                                    <div class="adjunto-acciones">
+                                        {% if contenido.es_sharepoint %}
+                                            <a href="{{ contenido.url_visualizacion }}" target="_blank" rel="noopener noreferrer" class="adjunto-btn btn-abrir" title="Abrir archivo"><i class="fas fa-external-link-alt"></i> Abrir</a>
+                                            <a href="{{ contenido.url_descarga }}" class="adjunto-btn btn-descargar" title="Descargar archivo" download><i class="fas fa-download"></i> Descargar</a>
+                                        {% else %}
+                                            <a href="{{ contenido.url_recurso }}" target="_blank" rel="noopener noreferrer" class="adjunto-btn btn-abrir" title="Abrir archivo"><i class="fas fa-external-link-alt"></i></a>
+                                        {% endif %}
+                                        <!-- 🆕 Botón eliminar archivo -->
+                                        <button class="adjunto-btn btn-eliminar"
+                                                data-url="{% url 'eliminar_contenido_ajax' contenido.id_contenido %}"
+                                                onclick="dashboard.eliminarArchivoAdjunto(this)" title="Eliminar archivo">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% endwith %}
+
+                        <div class="mini-card-meta">
+                            <span><i class="far fa-calendar-alt"></i> {{ bloque.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                            <span><i class="fas fa-hashtag"></i> {{ bloque.orden|default:0 }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ✅ FIX 2: FAB único con menú desplegable -->
+    <div class="fab-container">
+        <button class="fab-main-btn" id="fabToggle" title="Agregar contenido">
+            <i class="fas fa-plus"></i>
+        </button>
+        <div class="fab-menu" id="fabMenu">
+            <button class="fab-menu-item" onclick="abrirModalContenido('principal')">
+                <span class="fab-menu-icon"><i class="fas fa-image"></i></span>
+                <span class="fab-menu-label">Contenido Principal</span>
+            </button>
+            <button class="fab-menu-item" onclick="abrirModalContenido('lateral')">
+                <span class="fab-menu-icon"><i class="fas fa-link"></i></span>
+                <span class="fab-menu-label">Agregar Recurso</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL AGREGAR CONTENIDO -->
+    {% csrf_token %}
+        <div class="modal-editar-overlay" id="modalContenido" style="display: none;">
+            <div class="modal-editar-content">
+                <!-- Header idéntico al modal de editar -->
+                <div class="modal-editar-header">
+                    <div class="modal-editar-header-left">
+                        <div class="modal-editar-icon"><i class="fas fa-plus-circle"></i></div>
+                        <div>
+                            <h3 class="modal-editar-titulo">Agregar Contenido</h3>
+                            <p class="modal-editar-subtitulo">Completa los campos y guarda el nuevo bloque</p>
+                        </div>
+                    </div>
+                    <button class="modal-editar-close" onclick="dashboard.cerrarModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Cuerpo (mismo padding y estructura) -->
+                <div class="modal-editar-body">
+                    <form id="formBloqueContenido">
+                        <!-- Fila de 2 columnas -->
+                        <div class="editar-form-row">
+                            <div class="form-group">
+                                <label class="editar-label">Sección:</label>
+                                {{ form_bloque.seccion }}
+                            </div>
+                            <div class="form-group">
+                                <label class="editar-label">Tipo de Contenido:</label>
+                                {{ form_bloque.tipo }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="editar-label">Título:</label>
+                            {{ form_bloque.titulo }}
+                        </div>
+
+                        <div class="form-group" id="grupoDescripcion">
+                            <label class="editar-label">Descripción / Contenido:</label>
+                            {{ form_bloque.descripcion }}
+                            <small class="editar-help">
+                                <i class="fas fa-info-circle"></i> 
+                                Para <strong>Card Informativa</strong>: escribe aquí el contenido.<br>
+                                Para <strong>Archivos</strong>: puedes agregar una descripción opcional.
+                            </small>
+                        </div>
+
+                        <div class="form-group" id="grupoUrlRecurso" style="display: none;">
+                            <label class="editar-label" id="labelUrlRecurso">URL del recurso:</label>
+                            {{ form_bloque.url_recurso }}
+                            <small class="editar-help" id="helpUrlRecurso">
+                                <i class="fas fa-info-circle"></i> Pega la URL o el iframe completo.
+                            </small>
+                        </div>
+
+                        <div class="form-group" id="grupoUrlsArchivos" style="display: none;">
+                            <label class="editar-label"><i class="fas fa-paperclip"></i> Archivos Adjuntos:</label>
+                            <div id="urlsArchivosContainer">
+                                <div class="input-link-row">
+                                    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                                        <select class="editar-input input-tipo-archivo" style="font-size: 12px; padding: 8px 12px;">
+                                            <option value="archivos">Archivos (PDF, Word, Excel, PowerPoint)</option>
+                                            <option value="imagen">Imagen</option>
+                                            <option value="video">Video</option>
+                                        </select>
+                                        <input type="text" class="editar-input input-link-archivo" placeholder="Pega la URL o el iframe completo de SharePoint">
+                                        <input type="text" class="editar-input input-nombre-archivo" placeholder="Nombre del archivo" style="font-size: 12px; padding: 8px 12px;">
+                                    </div>
+                                    <button type="button" class="editar-btn-remover" title="Eliminar"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" id="btnAgregarLink" class="editar-btn-agregar-link">
+                                <i class="fas fa-plus-circle"></i> Agregar otro archivo
+                            </button>
+                            <textarea name="urls_archivos" id="id_urls_archivos" style="display:none;"></textarea>
+                            <textarea name="nombres_archivos" id="id_nombres_archivos" style="display:none;"></textarea>
+                            <textarea name="tipos_archivos" id="id_tipos_archivos" style="display:none;"></textarea>
+                            <small class="editar-help"><i class="fas fa-info-circle"></i> Soporta PDF, Word, Excel, PowerPoint, SharePoint, imágenes, videos, etc.</small>
+                        </div>
+
+                        <div class="form-group" id="renderTypeGroup" style="display: none;">
+                            <label class="editar-label">Modo de Visualización</label>
+                            <div class="render-toggle-group-editar">
+                                <button type="button" class="render-toggle-btn-editar active" data-render="imagen_debajo">
+                                    <i class="fas fa-arrow-down"></i> Imagen Debajo
+                                </button>
+                                <button type="button" class="render-toggle-btn-editar" data-render="imagen_fondo">
+                                    <i class="fas fa-image"></i> Imagen de Fondo
+                                </button>
+                            </div>
+                            <input type="hidden" id="id_render_type" name="render_type" value="imagen_debajo">
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer (mismo estilo que editar) -->
+                <div class="modal-editar-footer">
+                    <button class="editar-btn-cancelar" onclick="dashboard.cerrarModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" id="btnGuardarContenido" class="editar-btn-guardar">
+                        <i class="fas fa-save"></i> Guardar Contenido
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    <!-- ✅ FIX 3: MODAL EDITAR BLOQUE — rediseñado completamente -->
+    <div id="modal-editar-bloque" class="modal-editar-overlay" style="display: none;">
+        <div class="modal-editar-content">
+            <div class="modal-editar-header">
+                <div class="modal-editar-header-left">
+                    <div class="modal-editar-icon"><i class="fas fa-pen"></i></div>
+                    <div>
+                        <h3 class="modal-editar-titulo">Editar Bloque</h3>
+                        <p class="modal-editar-subtitulo">Modifica los campos y guarda los cambios</p>
+                    </div>
+                </div>
+                <button class="modal-editar-close" onclick="cerrarModalEditarBloque()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-editar-body">
+                <form id="form-editar-bloque">
+                    <input type="hidden" id="editar-id" name="id">
+
+                    <div class="editar-form-row">
+                        <div class="form-group">
+                            <label class="editar-label">Sección</label>
+                            <select id="editar-seccion" name="seccion" class="editar-input" disabled>
+                                <option value="principal">Principal</option>
+                                <option value="lateral">Lateral</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="editar-label">Tipo de Contenido</label>
+                            <select id="editar-tipo" name="tipo" class="editar-input" disabled>
+                                <option value="banner">Banner Grande</option>
+                                <option value="informativa">Card Informativa</option>
+                                <option value="archivos">Archivos</option>
+                                <option value="enlace">Enlace Web</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="grupoTituloEditar">
+                        <label class="editar-label" for="editar-titulo">Título</label>
+                        <input type="text" id="editar-titulo" name="titulo" class="editar-input" placeholder="Título del bloque">
+                    </div>
+
+                    <div class="form-group" id="grupoDescripcionEditar">
+                        <label class="editar-label" for="editar-descripcion">Descripción / Contenido</label>
+                        <textarea id="editar-descripcion" name="descripcion" class="editar-textarea" rows="4" placeholder="Escribe aquí el contenido..."></textarea>
+                    </div>
+
+                    <div class="form-group" id="grupoUrlRecursoEditar" style="display: none;">
+                        <label class="editar-label" id="labelUrlRecursoEditar">URL del recurso</label>
+                        <input type="text" id="editar-url-recurso" name="url_recurso" class="editar-input" placeholder="URL o iframe">
+                        <small id="helpUrlRecursoEditar" class="editar-help"><i class="fas fa-info-circle"></i> Pega la URL o el iframe completo.</small>
+                    </div>
+
+                    <div class="form-group" id="grupoUrlsArchivosEditar" style="display: none;">
+                        <label class="editar-label"><i class="fas fa-paperclip"></i> Archivos Adjuntos</label>
+                        <div id="urlsArchivosContainerEditar">
+                            <div class="input-link-row">
+                                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                                    <select class="editar-input input-tipo-archivo-editar" style="font-size: 12px; padding: 8px 12px;">
+                                        <option value="archivos">Archivos (PDF, Word, Excel, PowerPoint)</option>
+                                        <option value="imagen">Imagen</option>
+                                        <option value="video">Video</option>
+                                    </select>
+                                    <input type="text" class="editar-input input-link-archivo-editar" placeholder="Pega la URL o el iframe completo de SharePoint">
+                                    <input type="text" class="editar-input input-nombre-archivo-editar" placeholder="Nombre del archivo" style="font-size: 12px; padding: 8px 12px;">
+                                </div>
+                                <button type="button" class="editar-btn-remover" title="Eliminar"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button type="button" id="btnAgregarLinkEditar" class="editar-btn-agregar-link">
+                            <i class="fas fa-plus-circle"></i> Agregar otro archivo
+                        </button>
+                        <textarea name="urls_archivos" id="editar-urls-archivos" style="display:none;"></textarea>
+                        <textarea name="nombres_archivos" id="editar-nombres-archivos" style="display:none;"></textarea>
+                        <textarea name="tipos_archivos" id="editar-tipos-archivos" style="display:none;"></textarea>
+                        <small class="editar-help"><i class="fas fa-info-circle"></i> Soporta PDF, Word, Excel, PowerPoint, SharePoint, imágenes, videos.</small>
+                    </div>
+
+                    <div class="form-group" id="grupoRenderTypeEditar" style="display: none;">
+                        <label class="editar-label">Modo de Visualización</label>
+                        <div class="render-toggle-group-editar">
+                            <button type="button" class="render-toggle-btn-editar active" data-render="imagen_debajo">
+                                <i class="fas fa-arrow-down"></i> Imagen Debajo
+                            </button>
+                            <button type="button" class="render-toggle-btn-editar" data-render="imagen_fondo">
+                                <i class="fas fa-image"></i> Imagen de Fondo
+                            </button>
+                        </div>
+                        <input type="hidden" id="editar-render-type" name="render_type" value="imagen_debajo">
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-editar-footer">
+                <button class="editar-btn-cancelar" onclick="cerrarModalEditarBloque()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" id="btnGuardarEditarBloque" class="editar-btn-guardar">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+        <!-- Modal de confirmación genérico -->
+    <div id="confirmDashModal" class="confirm-modal">
+        <div class="confirm-content">
+            <i class="fas fa-question-circle"></i>
+            <p id="confirmDashMessage">¿Estás seguro?</p>
+            <div class="confirm-buttons">
+                <button class="btn" id="confirmDashYes">Sí, aceptar</button>
+                <button class="btn" id="confirmDashNo">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div id="successDashModal" class="success-modal">
+        <div class="success-content">
+            <i class="fas fa-check-circle"></i>
+            <p id="successDashMessage">Operación exitosa</p>
+        </div>
+    </div>
+    <!-- Script principal -->
+    <script src="{% static 'js/contenido-dashboard.js' %}"></script>
+</body>
+</html>

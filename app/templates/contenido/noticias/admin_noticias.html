@@ -1,0 +1,1086 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Noticias</title>
+
+    <!-- Tipografías de marca -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Calibri:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* ============================================
+           TODOS LOS ESTILOS PREMIUM (sidebar, botones, tabla, modales)
+           ============================================ */
+        :root {
+            --azul-oscuro: #162b47;
+            --azul-medio: #105788;
+            --rojo-acento: #e51148;
+            --blanco: #ffffff;
+            --gris: #e0e5e5;
+            --negro: #000000;
+            --sidebar-width: 250px;
+            --sidebar-collapsed: 70px;
+            --transition-speed: 0.3s;
+            --card-radius: 16px;
+            --shadow-sm: 0 2px 8px rgba(22, 43, 71, 0.08);
+            --shadow-md: 0 6px 20px rgba(22, 43, 71, 0.12);
+            --shadow-lg: 0 12px 32px rgba(22, 43, 71, 0.18);
+            --font-titulos: 'Nunito Sans', sans-serif;
+            --font-destacados: 'Calibri', 'Trebuchet MS', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f6f8;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 24px rgba(22, 43, 71, 0.25);
+            overflow: hidden;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            justify-content: center;
+            padding: 20px 16px 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+        }
+
+        .logo-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-wrapper:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 0 12px rgba(229, 17, 72, 0.4));
+        }
+
+        .logo-wrapper img {
+            width: 100%;
+            height: auto;
+            max-height: 78px;
+            object-fit: contain;
+            display: block;
+            background: transparent;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 8px 12px;
+            gap: 4px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 14px;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-nav a i {
+            font-size: 1.2rem;
+            width: 22px;
+            text-align: center;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--blanco);
+            transform: translateX(4px);
+            box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.12);
+            font-weight: 800;
+        }
+
+        .sidebar-nav .logout-link {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 16px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .sidebar-nav .logout-link:hover {
+            background: rgba(229, 17, 72, 0.15);
+            color: #ff6b8a;
+            box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px 36px;
+            transition: margin-left var(--transition-speed) ease;
+            min-height: 100vh;
+            animation: fadeInContent 0.5s ease-out;
+        }
+
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-header h1 {
+            font-family: var(--font-titulos);
+            font-weight: 800;
+            font-size: 2rem;
+            color: var(--azul-oscuro);
+        }
+
+        /* Botón crear curso premium */
+        .btn-create-premium {
+            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            color: white;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 87, 136, 0.3);
+        }
+
+        .btn-create-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22, 43, 71, 0.35);
+            filter: brightness(1.05);
+        }
+
+        /* Botones de acciones de tabla */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .acciones .btn {
+            background: var(--gris);
+            color: var(--azul-oscuro);
+        }
+        .acciones .btn i {
+            color: var(--azul-medio);
+        }
+        .acciones .btn:hover {
+            background: var(--azul-medio);
+            color: var(--blanco);
+        }
+        .acciones .btn:hover i {
+            color: var(--blanco);
+        }
+
+        /* Tabla */
+        .tabla-container {
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            overflow-x: auto;
+            box-shadow: var(--shadow-sm);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        thead {
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+        }
+
+        th {
+            padding: 16px 18px;
+            text-align: left;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--gris);
+            vertical-align: middle;
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        tbody tr:hover td {
+            background: #f8fafc;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .sin-registros {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .preview-media {
+            width: 110px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid var(--gris);
+            display: block;
+        }
+
+        .preview-cell-empty {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .preview-vacio {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* ============================================
+           MODAL PREMIUM (crear/editar noticia)
+           ============================================ */
+        .modal-editar-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 15, 26, 0.65);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .modal-editar-content {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.28);
+            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        .modal-editar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 28px 20px;
+            background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
+            flex-shrink: 0;
+        }
+
+        .modal-editar-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .modal-editar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .modal-editar-titulo {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            margin: 0 0 2px 0;
+            line-height: 1.2;
+        }
+
+        .modal-editar-subtitulo {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.65);
+            margin: 0;
+        }
+
+        .modal-editar-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-editar-close:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: white;
+        }
+
+        .modal-editar-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Layout de dos columnas */
+        .form-row-2cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-full-width {
+            margin-bottom: 20px;
+        }
+
+        .editar-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .editar-input, .editar-textarea, select.editar-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #1e293b;
+            background: #f9fafb;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .editar-input:focus, .editar-textarea:focus, select.editar-input:focus {
+            border-color: var(--azul-medio);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(16, 87, 136, 0.1);
+        }
+
+        .editar-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .field-error {
+            margin-top: 6px;
+            font-size: 0.82rem;
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .form-error-summary {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .is-invalid {
+            border-color: #dc2626 !important;
+            background: #fff7f7 !important;
+        }
+
+        .modal-editar-footer {
+            display: flex;
+            gap: 12px;
+            padding: 18px 28px 24px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+            background: #fafbfc;
+        }
+
+        .editar-btn-cancelar {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .editar-btn-cancelar:hover {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #ef4444;
+        }
+
+        .confirm-buttons .btn {
+    min-width: 120px;
+    transition: all 0.3s ease;
+    background: var(--gris);
+    color: var(--azul-oscuro);
+    border: 2px solid var(--gris);
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 10px 24px;
+    font-family: var(--font-destacados);
+    cursor: pointer;
+}
+.confirm-buttons .btn:hover {
+    background: var(--azul-medio);
+    color: white;
+    border-color: var(--azul-medio);
+}
+
+        .editar-btn-guardar {
+            flex: 2;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(16, 87, 136, 0.35);
+        }
+
+        .editar-btn-guardar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 87, 136, 0.45);
+            filter: brightness(1.05);
+        }
+
+        /* Modal de confirmación y éxito (idéntico al de cursos) */
+        .confirm-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2100;
+        }
+        .confirm-modal .confirm-content {
+            background: white;
+            padding: 35px 30px;
+            border-radius: 28px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: zoomIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .confirm-modal .confirm-content i {
+            font-size: 3.5rem;
+            color: var(--azul-medio);
+            margin-bottom: 10px;
+        }
+        .confirm-modal .confirm-content p {
+            margin: 20px 0;
+            font-size: 1.2rem;
+            color: var(--azul-oscuro);
+            font-weight: 600;
+        }
+        .confirm-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .confirm-buttons .btn {
+            min-width: 120px;
+        }
+
+        .success-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2200;
+            transition: opacity 0.5s ease;
+        }
+        .success-modal .success-content {
+            background: white;
+            padding: 35px 30px;
+            border-radius: 28px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: zoomIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+        .success-modal .success-content i {
+            font-size: 3.5rem;
+            color: var(--azul-medio);
+            margin-bottom: 10px;
+        }
+        .success-modal .success-content p {
+            margin: 20px 0;
+            font-size: 1.2rem;
+            color: var(--azul-oscuro);
+            font-weight: 600;
+        }
+        .success-modal.fade-out {
+            opacity: 0;
+        }
+
+        /* Partículas decorativas */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 350px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.04;
+        }
+        .bg-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--azul-medio);
+            animation: floatParticle 8s infinite ease-in-out;
+        }
+        .bg-particle:nth-child(1) { width: 60px; height: 60px; top: 10%; right: 20%; animation-delay: 0s; }
+        .bg-particle:nth-child(2) { width: 40px; height: 40px; top: 50%; right: 5%; animation-delay: 2s; }
+        .bg-particle:nth-child(3) { width: 80px; height: 80px; top: 70%; right: 30%; animation-delay: 4s; }
+        .bg-particle:nth-child(4) { width: 30px; height: 30px; top: 30%; right: 50%; animation-delay: 1s; }
+
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            25% { transform: translateY(-40px) translateX(20px) scale(1.3); }
+            50% { transform: translateY(-10px) translateX(-15px) scale(0.8); }
+            75% { transform: translateY(-50px) translateX(10px) scale(1.2); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: var(--sidebar-collapsed); }
+            .sidebar-nav a span { display: none; }
+            .sidebar-nav a { justify-content: center; padding: 14px; gap: 0; }
+            .sidebar-nav a i { font-size: 1.3rem; }
+            .main-content { margin-left: var(--sidebar-collapsed); padding: 20px 16px; }
+            .sidebar-brand { padding: 16px 8px 8px 8px; }
+            .logo-wrapper img { max-height: 58px; }
+            .page-header { flex-direction: column; align-items: stretch; }
+            .btn-create-premium { justify-content: center; }
+            .form-row-2cols { grid-template-columns: 1fr; gap: 15px; }
+        }
+        @media (max-width: 480px) {
+            .sidebar { width: 56px; }
+            .main-content { margin-left: 56px; padding: 14px 10px; }
+            .sidebar-brand { padding: 12px 4px 6px 4px; }
+            .logo-wrapper img { max-height: 46px; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles" aria-hidden="true">
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-wrapper" title="Dashboard">
+                <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca">
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'panel_admin' %}">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Panel de Administración</span>
+            </a>
+            <a href="{% url 'gestionar_cursos' %}">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>Gestionar Cursos</span>
+            </a>
+            <a href="{% url 'administrar_noticias' %}" class="active">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Administrar Noticias</span>
+            </a>
+
+            <a href="{% url 'subir_archivo' %}" >
+                <i class="fa-solid fa-file"></i>
+                <span>Subir Archivo</span>
+            </a>
+
+            
+            <a href="{% url 'logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Administrar Noticias</h1>
+            <button class="btn-create-premium" id="btnCrearNoticia">
+                <i class="fas fa-plus"></i> Crear Noticia
+            </button>
+        </div>
+
+        <div class="tabla-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Título</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for noticia in noticias %}
+                    <tr>
+                        {% with contenido=noticia.contenidos.first %}
+                        <td class="{% if not contenido or not contenido.url_recurso %}preview-cell-empty{% endif %}">
+                            {% if contenido and contenido.url_recurso %}
+                                {% if 'embed.aspx' in contenido.url_recurso %}
+                                    <iframe src="{{ contenido.url_recurso }}" width="110" height="70" frameborder="0" scrolling="no" class="preview-media"></iframe>
+                                {% elif 'sharepoint.com' in contenido.url_recurso or '.pdf' in contenido.url_recurso or '.doc' in contenido.url_recurso %}
+                                    <span class="preview-vacio">Sin img</span>
+                                {% else %}
+                                    <img src="{{ contenido.url_recurso }}" class="preview-media" alt="{{ noticia.titulo }}">
+                                {% endif %}
+                            {% else %}
+                                <span class="preview-vacio">Sin img</span>
+                            {% endif %}
+                        </td>
+                        {% endwith %}
+                        <td>{{ noticia.titulo }}</td>
+                        <td>{{ noticia.fecha_public }}</td>
+                        <td>
+                            <div class="acciones">
+                                <a href="{% url 'editar_noticia' noticia.id_noticia %}" class="btn">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="{% url 'ver_noticias' %}?from=admin" class="btn">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <a href="{% url 'eliminar_noticia' noticia.id_noticia %}" class="btn btn-delete" data-confirm="true">
+                                    <i class="fas fa-trash-alt"></i> Eliminar
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="sin-registros">
+                            <i class="fas fa-inbox"></i> No hay noticias registradas
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- MODAL PREMIUM PARA CREAR/EDITAR NOTICIA -->
+    <div id="modalNoticia" class="modal-editar-overlay">
+        <div class="modal-editar-content">
+            <div class="modal-editar-header">
+                <div class="modal-editar-header-left">
+                    <div class="modal-editar-icon"><i class="fas fa-plus-circle"></i></div>
+                    <div>
+                        <h3 class="modal-editar-titulo" id="modalTitle">Crear Noticia</h3>
+                        <p class="modal-editar-subtitulo" id="modalSubtitle">Completa los campos y guarda la noticia</p>
+                    </div>
+                </div>
+                <button class="modal-editar-close" onclick="cerrarModalNoticia()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-editar-body">
+                {% if noticia_form.errors or contenido_form.errors %}
+                    <div class="form-error-summary">
+                        Revisa los campos marcados en rojo. El título es obligatorio y la descripción es opcional.
+                    </div>
+                {% endif %}
+                <form method="POST" id="noticiaForm" action="{% if editando %}{% url 'editar_noticia' noticia.id_noticia %}{% else %}{% url 'administrar_noticias' %}{% endif %}">
+                    {% csrf_token %}
+                    <!-- Fila de dos columnas: Título y Tipo de Contenido -->
+                    <div class="form-row-2cols">
+                        <div>
+                            <label class="editar-label">Título *</label>
+                            {{ noticia_form.titulo }}
+                            {% if noticia_form.titulo.errors %}
+                                <div class="field-error">{{ noticia_form.titulo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="editar-label">Tipo de Contenido</label>
+                            {{ contenido_form.tipo_con }}
+                            {% if contenido_form.tipo_con.errors %}
+                                <div class="field-error">{{ contenido_form.tipo_con.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Descripción a ancho completo -->
+                    <div class="form-full-width">
+                        <label class="editar-label">Descripción</label>
+                        {{ noticia_form.descripcion }}
+                        {% if noticia_form.descripcion.errors %}
+                            <div class="field-error">{{ noticia_form.descripcion.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <!-- URL del recurso -->
+                    <div class="form-full-width">
+                        <label class="editar-label">URL del Recurso (iframe/imagen)</label>
+                        {{ contenido_form.url_recurso }}
+                        {% if contenido_form.url_recurso.errors %}
+                            <div class="field-error">{{ contenido_form.url_recurso.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-editar-footer">
+                <button class="editar-btn-cancelar" onclick="cerrarModalNoticia()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="editar-btn-guardar" id="guardarNoticiaBtn">
+                    <i class="fas fa-save"></i> Guardar Noticia
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-content">
+            <i class="fas fa-question-circle"></i>
+            <p id="confirmMessage">¿Aceptas guardar los cambios?</p>
+            <div class="confirm-buttons">
+                <button class="btn btn-primary" id="confirmYes">Sí, aceptar</button>
+                <button class="btn btn-secondary" id="confirmNo">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div id="successModal" class="success-modal">
+        <div class="success-content">
+            <i class="fas fa-check-circle"></i>
+            <p id="successMessage">Operación exitosa</p>
+        </div>
+    </div>
+
+    <script>
+        // Elementos DOM
+        const modalNoticia = document.getElementById('modalNoticia');
+        const noticiaForm = document.getElementById('noticiaForm');
+        const modalTitleSpan = document.getElementById('modalTitle');
+        const modalSubtitleSpan = document.getElementById('modalSubtitle');
+        const btnCrearNoticia = document.getElementById('btnCrearNoticia');
+        const guardarNoticiaBtn = document.getElementById('guardarNoticiaBtn');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const successModal = document.getElementById('successModal');
+        const successMessageSpan = document.getElementById('successMessage');
+        let confirmCallback = null;
+        let isEditMode = {{ editando|yesno:"true,false" }};
+        let formHasErrors = {% if noticia_form.errors or contenido_form.errors %}true{% else %}false{% endif %};
+        let tituloHasError = {% if noticia_form.titulo.errors %}true{% else %}false{% endif %};
+        let descripcionHasError = {% if noticia_form.descripcion.errors %}true{% else %}false{% endif %};
+        let tipoConHasError = {% if contenido_form.tipo_con.errors %}true{% else %}false{% endif %};
+        let urlRecursoHasError = {% if contenido_form.url_recurso.errors %}true{% else %}false{% endif %};
+
+        // Función para mostrar mensaje de éxito
+        function showSuccess(message) {
+            successMessageSpan.innerText = message;
+            successModal.style.display = 'flex';
+            successModal.classList.remove('fade-out');
+            setTimeout(() => {
+                successModal.classList.add('fade-out');
+                setTimeout(() => {
+                    successModal.style.display = 'none';
+                }, 500);
+            }, 1500);
+        }
+
+        function showConfirm(message, onConfirm) {
+            confirmMessage.innerText = message;
+            confirmModal.style.display = 'flex';
+            confirmCallback = onConfirm;
+        }
+
+        document.getElementById('confirmYes').onclick = () => {
+            confirmModal.style.display = 'none';
+            if (confirmCallback) confirmCallback();
+            confirmCallback = null;
+        };
+        document.getElementById('confirmNo').onclick = () => {
+            confirmModal.style.display = 'none';
+            confirmCallback = null;
+        };
+
+        // Aplicar clases CSS a los campos del formulario
+        function aplicarClasesInputs() {
+            const inputs = document.querySelectorAll('#noticiaForm input, #noticiaForm textarea, #noticiaForm select');
+            inputs.forEach(input => {
+                if (input.tagName === 'TEXTAREA') {
+                    input.classList.add('editar-textarea');
+                } else {
+                    input.classList.add('editar-input');
+                }
+            });
+
+            if (tituloHasError) {
+                const tituloInput = document.getElementById('id_titulo');
+                if (tituloInput) tituloInput.classList.add('is-invalid');
+            }
+            if (descripcionHasError) {
+                const descripcionInput = document.getElementById('id_descripcion');
+                if (descripcionInput) descripcionInput.classList.add('is-invalid');
+            }
+            if (tipoConHasError) {
+                const tipoConInput = document.getElementById('id_tipo_con');
+                if (tipoConInput) tipoConInput.classList.add('is-invalid');
+            }
+            if (urlRecursoHasError) {
+                const urlRecursoInput = document.getElementById('id_url_recurso');
+                if (urlRecursoInput) urlRecursoInput.classList.add('is-invalid');
+            }
+        }
+
+        // Limpiar todos los campos del formulario (para creación)
+        function limpiarFormulario() {
+            const fields = noticiaForm.querySelectorAll('input:not([type=hidden]), textarea, select');
+            fields.forEach(field => {
+                if (field.tagName === 'SELECT') {
+                    field.value = 'imagen';  // valor por defecto "imagen"
+                } else {
+                    field.value = '';
+                }
+            });
+            // Restablecer el campo oculto CSRF (no se toca)
+            document.querySelector('[name=csrfmiddlewaretoken]').value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        // Abrir modal para crear
+        function abrirModalCrear() {
+            limpiarFormulario();
+            noticiaForm.action = "{% url 'administrar_noticias' %}";
+            modalTitleSpan.innerText = 'Crear Noticia';
+            modalSubtitleSpan.innerText = 'Completa los campos y guarda la noticia';
+            document.querySelector('.modal-editar-icon i').className = 'fas fa-plus-circle';
+            isEditMode = false;
+            modalNoticia.style.display = 'flex';
+            aplicarClasesInputs();
+        }
+
+        function cerrarModalNoticia() {
+            modalNoticia.style.display = 'none';
+            isEditMode = false;
+        }
+
+        btnCrearNoticia.addEventListener('click', abrirModalCrear);
+
+        // Evento guardar
+        guardarNoticiaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (isEditMode) {
+                showConfirm('¿Aceptas guardar los cambios de la noticia?', () => {
+                    noticiaForm.submit();
+                });
+            } else {
+                noticiaForm.submit();
+            }
+        });
+
+        // Confirmación para enlaces de eliminar
+        document.querySelectorAll('.btn-delete[data-confirm="true"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = link.getAttribute('href');
+                showConfirm('¿Estás seguro de que quieres eliminar esta noticia? Esta acción no se puede deshacer.', () => {
+                    window.location.href = url;
+                });
+            });
+        });
+
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            if (event.target == modalNoticia) cerrarModalNoticia();
+            if (event.target == confirmModal) confirmModal.style.display = 'none';
+            if (event.target == successModal) successModal.style.display = 'none';
+        };
+
+        // Mostrar mensajes de Django como modal de éxito
+        {% if messages %}
+            {% for message in messages %}
+                showSuccess('{{ message }}');
+            {% endfor %}
+        {% endif %}
+
+        // Animación de entrada de filas y abrir modal si es edición
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(10px)';
+                row.style.transition = `opacity 0.4s ease ${index * 0.05}s, transform 0.4s ease ${index * 0.05}s`;
+                setTimeout(() => {
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, 100 + index * 50);
+            });
+
+            if (isEditMode) {
+                modalNoticia.style.display = 'flex';
+                document.querySelector('.modal-editar-icon i').className = 'fas fa-edit';
+                modalTitleSpan.innerText = 'Editar Noticia';
+                modalSubtitleSpan.innerText = 'Modifica los campos y guarda los cambios';
+                aplicarClasesInputs();
+            }
+
+            if (formHasErrors) {
+                modalNoticia.style.display = 'flex';
+                if (!isEditMode) {
+                    modalTitleSpan.innerText = 'Crear Noticia';
+                }
+                modalSubtitleSpan.innerText = 'Corrige los campos marcados y vuelve a guardar';
+                aplicarClasesInputs();
+            }
+        });
+    </script>
+</body>
+</html>

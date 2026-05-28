@@ -1,0 +1,614 @@
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cómo cargar un archivo en el portal</title>
+
+    <!-- Tipografías -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Calibri:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --azul-oscuro: #162b47;
+            --azul-medio: #105788;
+            --rojo-acento: #e51148;
+            --blanco: #ffffff;
+            --gris: #e0e5e5;
+            --negro: #000000;
+            --sidebar-width: 250px;
+            --sidebar-collapsed: 70px;
+            --transition-speed: 0.3s;
+            --card-radius: 16px;
+            --shadow-sm: 0 2px 8px rgba(22, 43, 71, 0.08);
+            --shadow-md: 0 6px 20px rgba(22, 43, 71, 0.12);
+            --shadow-lg: 0 12px 32px rgba(22, 43, 71, 0.18);
+            --font-titulos: 'Nunito Sans', sans-serif;
+            --font-destacados: 'Calibri', 'Trebuchet MS', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f6f8;
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 1000;
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 24px rgba(22, 43, 71, 0.25);
+            overflow: hidden;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            justify-content: center;
+            padding: 20px 16px 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 8px;
+        }
+
+        .logo-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-wrapper:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 0 12px rgba(229,17,72,0.4));
+        }
+
+        .logo-wrapper img {
+            width: 100%;
+            height: auto;
+            max-height: 78px;
+            object-fit: contain;
+            background: transparent;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 8px 12px;
+            gap: 4px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: rgba(255,255,255,0.8);
+            padding: 12px 14px;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.2px;
+        }
+
+        .sidebar-nav a i {
+            font-size: 1.2rem;
+            width: 22px;
+            text-align: center;
+            min-width: 22px;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08);
+            color: var(--blanco);
+            transform: translateX(4px);
+            box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.12);
+            font-weight: 800;
+        }
+
+        .sidebar-nav a:hover i,
+        .sidebar-nav a.active i {
+            transform: scale(1.15);
+        }
+
+        .sidebar-nav .logout-link {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 16px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .sidebar-nav .logout-link:hover {
+            background: rgba(229,17,72,0.15);
+            color: #ff6b8a;
+            box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px 36px;
+            transition: margin-left var(--transition-speed) ease;
+            min-height: 100vh;
+            animation: fadeInContent 0.5s ease-out;
+        }
+
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+            animation: slideDown 0.5s ease-out 0.1s both;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header h1 {
+            font-family: var(--font-titulos);
+            font-weight: 800;
+            font-size: 2rem;
+            color: var(--azul-oscuro);
+            letter-spacing: -0.4px;
+            line-height: 1.2;
+        }
+
+        .page-header .subtitle {
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #6b7d8e;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--azul-oscuro);
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: var(--blanco);
+            box-shadow: 0 2px 6px rgba(22,43,71,0.08);
+            transition: all 0.25s;
+        }
+
+        .back-link:hover {
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+            box-shadow: 0 4px 12px rgba(22,43,71,0.15);
+            transform: translateX(-2px);
+        }
+
+        .back-link i { font-size: 1rem; transition: transform 0.25s; }
+        .back-link:hover i { transform: translateX(-3px); }
+
+        /* Grid */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            animation: fadeInContent 0.5s ease-out 0.2s both;
+            align-items: stretch;
+        }
+
+        .step-card {
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid transparent;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--azul-oscuro) 0%, var(--azul-medio) 50%, var(--rojo-acento) 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: var(--card-radius) var(--card-radius) 0 0;
+            z-index: 2;
+        }
+
+        .step-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-6px);
+            border-color: rgba(22,43,71,0.06);
+        }
+
+        .step-card:hover::before { transform: scaleX(1); }
+
+        .step-image {
+            height: 200px;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+
+        .step-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .step-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .step-number {
+            width: 60px; height: 60px;
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: 800;
+            font-family: var(--font-destacados);
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(22,43,71,0.2);
+        }
+
+        .step-card h3 {
+            font-family: var(--font-titulos);
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--azul-oscuro);
+            line-height: 1.3;
+        }
+
+        .step-card p {
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.92rem;
+            color: #334155;
+            line-height: 1.7;
+            letter-spacing: -0.01em;
+            flex: 1;
+        }
+
+        .important-box {
+            margin-top: 50px;
+            background: #f8fafc;
+            border: 1px solid var(--gris);
+            border-left: 6px solid var(--azul-medio);
+            padding: 30px;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .important-box h2 {
+            font-family: var(--font-titulos);
+            font-weight: 800;
+            color: var(--azul-oscuro);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .important-box ul { padding-left: 20px; }
+        .important-box li {
+            margin-bottom: 12px;
+            font-family: 'Nunito Sans', sans-serif;
+            color: #334155;
+            line-height: 1.8;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 45px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            letter-spacing: 0.2px;
+        }
+
+        /* Partículas */
+        .bg-particles {
+            position: fixed;
+            top: 0; right: 0;
+            width: 350px; height: 350px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.04;
+        }
+        .bg-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--azul-medio);
+            animation: floatParticle 8s infinite ease-in-out;
+        }
+        .bg-particle:nth-child(1) { width: 60px; height: 60px; top: 10%; right: 20%; animation-delay: 0s; }
+        .bg-particle:nth-child(2) { width: 40px; height: 40px; top: 50%; right: 5%; animation-delay: 2s; }
+        .bg-particle:nth-child(3) { width: 80px; height: 80px; top: 70%; right: 30%; animation-delay: 4s; }
+        .bg-particle:nth-child(4) { width: 30px; height: 30px; top: 30%; right: 50%; animation-delay: 1s; }
+
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            25% { transform: translateY(-40px) translateX(20px) scale(1.3); }
+            50% { transform: translateY(-10px) translateX(-15px) scale(0.8); }
+            75% { transform: translateY(-50px) translateX(10px) scale(1.2); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: var(--sidebar-collapsed); }
+            .sidebar-nav a span { display: none; }
+            .sidebar-nav a { justify-content: center; padding: 14px; gap: 0; }
+            .sidebar-nav a i { font-size: 1.3rem; }
+            .main-content { margin-left: var(--sidebar-collapsed); padding: 20px 16px; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .sidebar-brand { padding: 16px 8px 8px 8px; }
+            .logo-wrapper img { max-height: 58px; }
+        }
+        @media (max-width: 480px) {
+            .sidebar { width: 56px; }
+            .main-content { margin-left: 56px; padding: 14px 10px; }
+            .sidebar-brand { padding: 12px 4px 6px 4px; }
+            .logo-wrapper img { max-height: 46px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles" aria-hidden="true">
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+    </div>
+
+    <!-- Sidebar definitiva -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-wrapper" title="Inicio">
+                <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca">
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            {% if es_admin %}
+                <!-- Enlaces de administrador -->
+                <a href="{% url 'panel_admin' %}">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Panel de Administración</span>
+                </a>
+                <a href="{% url 'gestionar_cursos' %}">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <span>Gestionar Cursos</span>
+                </a>
+                <a href="{% url 'administrar_noticias' %}">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Administrar Noticias</span>
+                </a>
+                <a href="{% url 'subir_archivo' %}" class="active">
+                    <i class="fa-solid fa-file"></i>
+                    <span>Subir Archivo</span>
+                </a>
+            {% else %}
+                <!-- Enlaces de empleado -->
+                <a href="{% url 'panel_empleado' %}">
+                    <i class="fa-solid fa-table-columns"></i>
+                    <span>Panel de Empleado</span>
+                </a>
+                <a href="{% url 'listar_cursos_empleado' %}">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Cursos</span>
+                </a>
+                <a href="{% url 'ver_noticias' %}">
+                    <i class="fa-solid fa-newspaper"></i>
+                    <span>Ver Noticias</span>
+                </a>
+            {% endif %}
+
+            <a href="{% url 'logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="page-header">
+            {% if not es_admin %}
+                {% if volver_quiz_url %}
+                <a href="{{ volver_quiz_url }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Volver al Quiz
+                </a>
+                {% endif %}
+            {% endif %}
+            <h1>Cómo cargar un archivo en el portal</h1>
+            <p class="subtitle">Manual de usuario</p>
+        </div>
+
+        <!-- Pasos -->
+        <div class="steps-grid">
+            {% for paso in pasos %}
+            <div class="step-card">
+                {% if paso.imagen %}
+                <div class="step-image">
+                    <img src="{{ paso.imagen }}" alt="{{ paso.titulo }}">
+                </div>
+                {% endif %}
+                <div class="step-body">
+                    <div class="step-number">{{ forloop.counter }}</div>
+                    <h3>{{ paso.titulo }}</h3>
+                    <p>{{ paso.descripcion }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Fallback estático (pasos 1-9, con imágenes en 2,3,4,5) -->
+            <div class="step-card">
+                <div class="step-body">
+                    <div class="step-number">1</div>
+                    <h3>Guardar el archivo en OneDrive</h3>
+                    <p>Suba el archivo en cualquier carpeta de OneDrive según su preferencia.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-image">
+                    <img src="{% static 'img/img_card_2.png' %}" alt="Paso 2 - Opciones del archivo">
+                </div>
+                <div class="step-body">
+                    <div class="step-number">2</div>
+                    <h3>Darle a los tres puntos del archivo</h3>
+                    <p>Ubique el archivo cargado y haga clic en los tres puntos (...) que aparecen junto al documento.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-image">
+                    <img src="{% static 'img/img_card_3.png' %}" alt="Paso 3 - Seleccionar Preview">
+                </div>
+                <div class="step-body">
+                    <div class="step-number">3</div>
+                    <h3>Seleccionar la opción Preview</h3>
+                    <p>En el menú desplegado seleccione la opción <strong>Preview</strong>.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-image">
+                    <img src="{% static 'img/img_card_4.png' %}" alt="Paso 4 - Opciones de visualización">
+                </div>
+                <div class="step-body">
+                    <div class="step-number">4</div>
+                    <h3>Abrir opciones de visualización</h3>
+                    <p>Cuando se abra el archivo en la preview, dé clic nuevamente en los tres puntos que están arriba a la izquierda.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-image">
+                    <img src="{% static 'img/img_card_5.png' %}" alt="Paso 5 - Opción Embed">
+                </div>
+                <div class="step-body">
+                    <div class="step-number">5</div>
+                    <h3>Escoger la opción Embed</h3>
+                    <p>En el menú de opciones seleccione <strong>Embed</strong> y luego haga clic para generar el enlace.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-body">
+                    <div class="step-number">6</div>
+                    <h3>Copiar el link que les genera</h3>
+                    <p>Copie el enlace o el iframe generado por OneDrive.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-body">
+                    <div class="step-number">7</div>
+                    <h3>Seleccionar el tipo de archivo</h3>
+                    <p>Dentro de la plataforma seleccione el tipo de archivo correspondiente.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-body">
+                    <div class="step-number">8</div>
+                    <h3>Pegar el link o el iframe</h3>
+                    <p>Pegue el link o iframe previamente copiado en el campo correspondiente.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-body">
+                    <div class="step-number">9</div>
+                    <h3>Dar clic en validar la respuesta/Crear archivo</h3>
+                    <p>Finalmente haga clic en el botón <strong>Validar respuesta/Crear</strong> para procesar el archivo.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Recomendaciones -->
+        <div class="important-box">
+            <h2>Recomendaciones importantes</h2>
+            <ul>
+                <li>Verifique que el archivo tenga permisos de visualización.</li>
+                <li>Asegúrese de copiar el iframe o link completo generado por OneDrive.</li>
+                <li>No modifique manualmente el contenido del iframe.</li>
+                <li>Revise que el archivo corresponda al tipo seleccionado.</li>
+            </ul>
+        </div>
+
+        <div class="footer-text">
+            Manual de usuario - Plataforma de validación de archivos
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            document.querySelectorAll('.step-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = `opacity 0.5s ease ${index * 0.12}s, transform 0.5s ease ${index * 0.12}s`;
+                observer.observe(card);
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 150 + index * 120);
+            });
+        });
+    </script>
+
+</body>
+</html>

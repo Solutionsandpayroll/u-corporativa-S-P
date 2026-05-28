@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+
+    <h2>Iniciar Sesión</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <input type="text" name="id_usuario" placeholder="Usuario">
+
+        <br><br>
+
+        <input type="password" name="password" placeholder="Contraseña">
+
+        <br><br>
+
+        <button type="submit">
+            Ingresar
+        </button>
+
+    </form>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+</body>
+</html>
