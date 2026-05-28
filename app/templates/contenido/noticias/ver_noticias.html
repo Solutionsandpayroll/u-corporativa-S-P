@@ -327,7 +327,7 @@
             white-space: pre-wrap;
             flex: 1;
             overflow: hidden;
-            margin-bottom: auto;
+            margin-bottom: 8px; /* 👈 separa el botón del borde inferior */
         }
 
         .ver-mas-link {
@@ -655,7 +655,7 @@
             const textoCompleto = descElement.getAttribute('data-full-text') || '';
             descElement.setAttribute('data-full-text', textoCompleto);
 
-            // Restauramos el texto completo para medir
+            // Restauramos el texto completo para medir la altura disponible real
             descElement.textContent = textoCompleto;
 
             // La altura disponible es la que Flexbox ya le ha asignado (clientHeight)
@@ -666,25 +666,56 @@
                 return;
             }
 
-            // Clon para medir sin parpadeos
-            const testClone = descElement.cloneNode(true);
+            // Clon para medir con la misma estructura final: span + span.ver-mas-link
+            const testClone = descElement.cloneNode(false); // copia solo el elemento, no hijos
             testClone.style.position = 'absolute';
             testClone.style.visibility = 'hidden';
             testClone.style.height = 'auto';
             testClone.style.maxHeight = 'none';
             testClone.style.flex = 'none';
             testClone.style.width = descElement.clientWidth + 'px';
+            // Copiamos estilos computados que afectan la altura
+            const computed = window.getComputedStyle(descElement);
+            testClone.style.fontFamily = computed.fontFamily;
+            testClone.style.fontSize = computed.fontSize;
+            testClone.style.fontWeight = computed.fontWeight;
+            testClone.style.lineHeight = computed.lineHeight;
+            testClone.style.letterSpacing = computed.letterSpacing;
+            testClone.style.wordWrap = computed.wordWrap;
+            testClone.style.whiteSpace = computed.whiteSpace;
+            testClone.style.padding = computed.padding;
+            testClone.style.margin = computed.margin;
+            testClone.style.border = computed.border;
             document.body.appendChild(testClone);
 
-            // Búsqueda binaria del máximo número de caracteres que cabe
+            // Construye la estructura real: span texto + span enlace
+            function buildContent(truncatedText) {
+                testClone.innerHTML = '';
+                const spanTexto = document.createElement('span');
+                spanTexto.textContent = truncatedText + '... ';
+                const enlace = document.createElement('span');
+                enlace.textContent = 'Ver más';
+                enlace.className = 'ver-mas-link';
+                // Aplicamos estilos del enlace real para exactitud
+                const linkStyle = window.getComputedStyle(document.querySelector('.ver-mas-link') || enlace);
+                enlace.style.fontWeight = linkStyle.fontWeight;
+                enlace.style.color = linkStyle.color;
+                enlace.style.textDecoration = linkStyle.textDecoration;
+                enlace.style.cursor = linkStyle.cursor;
+                testClone.appendChild(spanTexto);
+                testClone.appendChild(enlace);
+                return testClone.scrollHeight;
+            }
+
+            // Búsqueda binaria del máximo número de caracteres que cabe (incluyendo "Ver más")
             let left = 0;
             let right = textoCompleto.length;
             let best = 0;
 
             while (left <= right) {
                 const mid = Math.floor((left + right) / 2);
-                testClone.textContent = textoCompleto.substring(0, mid) + '... ';
-                if (testClone.scrollHeight <= maxHeight) {
+                const altura = buildContent(textoCompleto.substring(0, mid));
+                if (altura <= maxHeight) {
                     best = mid;
                     left = mid + 1;
                 } else {
@@ -694,7 +725,7 @@
 
             document.body.removeChild(testClone);
 
-            // Construimos el contenido final truncado con el enlace
+            // Aplicamos el truncado final
             const textoTruncado = textoCompleto.substring(0, best);
             descElement.innerHTML = '';
             const spanTexto = document.createElement('span');
