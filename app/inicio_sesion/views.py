@@ -7,11 +7,11 @@ def login_view(request):
 
     if request.method == 'POST':
 
-        id_usuario = request.POST.get('id_usuario')
+        username = request.POST.get('username')
         password = request.POST.get('password')
 
         try:
-            usuario = Usuario.objects.get(id_usuario=id_usuario)
+            usuario = Usuario.objects.get(username=username)
 
             if usuario.check_password(password):
 

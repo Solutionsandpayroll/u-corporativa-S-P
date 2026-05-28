@@ -9,9 +9,15 @@ class Usuario(models.Model):
         ('2', 'Empleado'),
     )
 
-    id_usuario = models.CharField(
-        max_length=20,
+    id_usuario = models.AutoField(
         primary_key=True
+    )
+
+    username = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True
     )
 
     nombre_completo = models.CharField(
@@ -51,8 +57,6 @@ class Usuario(models.Model):
 
     def __str__(self):
         return self.nombre_completo
-    
+
     class Meta:
         db_table = 'usuario'
-    
-    
