@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-n984k(e_yzds6=n_x($hyk&*s$_%3hd2_b^hf!m)6j3m)xje8b'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -85,6 +85,15 @@ DATABASES = {
     )
 }
 
+#DATABASES = {
+    #'default': dj_database_url.parse(
+    #    "",
+   #     conn_max_age=600,
+  #      ssl_require=True
+ #   )
+#}
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -108,9 +117,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-co'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
 
@@ -124,3 +133,8 @@ STATIC_URL = '/static/' # Added leading slash
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+POWER_AUTOMATE_RECUPERACION_URL = "https://default90167654ed084e3d85e72724f8597c.cf.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/74945f36f32c4724b9160588344b548d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZX1RM389CZHlmrnIXpPHvHgtNFtR1A0wrv98C-o4vb4"

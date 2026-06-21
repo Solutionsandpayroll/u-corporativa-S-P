@@ -1,0 +1,914 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+
+    <!-- Fuentes y Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Calibri:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* ============================================
+           ESTILOS GLOBALES (idénticos al Código 2)
+           ============================================ */
+        :root {
+            --azul-oscuro: #162b47;
+            --azul-medio: #105788;
+            --rojo-acento: #e51148;
+            --blanco: #ffffff;
+            --gris: #e0e5e5;
+            --negro: #000000;
+            --sidebar-width: 250px;
+            --sidebar-collapsed: 70px;
+            --transition-speed: 0.3s;
+            --card-radius: 16px;
+            --shadow-sm: 0 2px 8px rgba(22, 43, 71, 0.08);
+            --shadow-md: 0 6px 20px rgba(22, 43, 71, 0.12);
+            --shadow-lg: 0 12px 32px rgba(22, 43, 71, 0.18);
+            --font-titulos: 'Nunito Sans', sans-serif;
+            --font-destacados: 'Calibri', 'Trebuchet MS', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f6f8;
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 1000;
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 24px rgba(22, 43, 71, 0.25);
+            overflow: hidden;
+        }
+        .sidebar-brand {
+            display: flex;
+            justify-content: center;
+            padding: 20px 16px 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            margin-bottom: 8px;
+        }
+        .logo-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            cursor: pointer;
+        }
+        .logo-wrapper:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 0 12px rgba(229,17,72,.4));
+        }
+        .logo-wrapper img {
+            width: 100%; height: auto; max-height: 78px;
+            object-fit: contain; display: block;
+        }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 8px 12px;
+            gap: 4px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: rgba(255,255,255,.8);
+            padding: 12px 14px;
+            border-radius: 10px;
+            transition: all .25s ease;
+            white-space: nowrap;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: .95rem;
+        }
+        .sidebar-nav a i { font-size: 1.2rem; width: 22px; text-align: center; }
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,.08);
+            color: var(--blanco);
+            transform: translateX(4px);
+            box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+        .sidebar-nav a.active { background: rgba(255,255,255,.12); font-weight: 800; }
+        .sidebar-nav .logout-link {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,.1);
+            padding-top: 16px;
+            color: rgba(255,255,255,.6);
+        }
+        .sidebar-nav .logout-link:hover {
+            background: rgba(229,17,72,.15);
+            color: #ff6b8a;
+            box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px 36px;
+            transition: margin-left var(--transition-speed) ease;
+            min-height: 100vh;
+            animation: fadeInContent .5s ease-out;
+        }
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .page-header h1 {
+            font-family: var(--font-titulos);
+            font-weight: 800;
+            font-size: 2rem;
+            color: var(--azul-oscuro);
+        }
+
+        .btn-create-premium {
+            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
+            border: none;
+            padding: 11px 22px;
+            border-radius: 40px;
+            color: white;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: .875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all .3s ease;
+            box-shadow: 0 4px 12px rgba(16,87,136,.3);
+            white-space: nowrap;
+            text-decoration: none;
+        }
+        .btn-create-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22,43,71,.35);
+            filter: brightness(1.05);
+        }
+
+        /* BARRA DE BÚSQUEDA */
+        .top-bar {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            padding: 14px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+        .search-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: .9rem;
+            pointer-events: none;
+        }
+        #buscador {
+            width: 100%;
+            padding: 9px 14px 9px 36px;
+            border: 1.5px solid var(--gris);
+            border-radius: 10px;
+            font-size: .875rem;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #1e293b;
+            background: #f8fafd;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        #buscador:focus {
+            border-color: var(--azul-medio);
+            background: var(--blanco);
+            box-shadow: 0 0 0 3px rgba(16,87,136,.1);
+        }
+        #buscador::placeholder { color: #b0bec5; }
+
+        /* TABLA */
+        .tabla-container {
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .tabla-overflow { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 680px; }
+
+        thead { background: var(--azul-oscuro); }
+        thead tr th {
+            padding: 16px 18px;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--blanco);
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,.12);
+        }
+        thead tr th.th-left { text-align: left; }
+
+        tbody tr { border-bottom: 1px solid var(--gris); transition: background .15s ease; }
+        tbody tr:hover td { background: #f8fafc; }
+
+        td {
+            padding: 14px 18px;
+            vertical-align: middle;
+            font-size: .9rem;
+            color: #334155;
+            text-align: center;
+        }
+        td.td-name { text-align: left; font-family: var(--font-titulos); font-weight: 700; color: #1e293b; }
+        td.td-date { color: #64748b; font-size: .82rem; }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 12px;
+            border-radius: 99px;
+            font-size: .75rem;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+        }
+        .badge-blue   { background: #dbeafe; color: #1e40af; }
+        .badge-green  { background: #d1fae5; color: #065f46; }
+        .badge-red    { background: #fee2e2; color: #991b1b; }
+
+        .actions-cell {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: .85rem;
+            transition: all .3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+            background: var(--gris);
+            color: var(--azul-oscuro);
+        }
+        .btn i { color: var(--azul-medio); }
+        .btn:hover {
+            background: var(--azul-medio);
+            color: white;
+        }
+        .btn:hover i { color: white; }
+        .btn-danger { background: #fee2e2; color: #991b1b; }
+        .btn-danger i { color: #991b1b; }
+        .btn-danger:hover { background: var(--rojo-acento); color: white; }
+        .btn-danger:hover i { color: white; }
+
+        /* MODALES (sin cambios) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 15, 26, 0.65);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+        .modal-content {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 32px 80px rgba(0,0,0,.28);
+            animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
+            overflow: hidden;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 28px 20px;
+            background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
+            flex-shrink: 0;
+        }
+        .modal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .modal-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.15);
+            border: 1px solid rgba(255,255,255,.2);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+        .modal-titulo {
+            font-size: 18px; font-weight: 700; color: white;
+            margin: 0 0 2px; line-height: 1.2;
+        }
+        .modal-subtitulo {
+            font-size: 12px; color: rgba(255,255,255,.65); margin: 0;
+        }
+        .modal-close {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.2);
+            background: rgba(255,255,255,.1);
+            color: rgba(255,255,255,.8);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .modal-close:hover {
+            background: rgba(239,68,68,.3);
+            border-color: rgba(239,68,68,.5);
+            color: white;
+        }
+        .modal-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-footer {
+            display: flex; gap: 12px;
+            padding: 18px 28px 24px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+            background: #fafbfc;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block;
+            font-size: 12px; font-weight: 700;
+            color: #374151;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #1e293b;
+            background: #f9fafb;
+            transition: all .2s ease;
+            outline: none;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: var(--azul-medio);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(16,87,136,.1);
+        }
+        .form-input:disabled {
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+        }
+        .btn-cancel {
+            flex: 1; padding: 12px 20px;
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            background: white; color: #64748b;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-cancel:hover {
+            background: #fef2f2; border-color: #fecaca; color: #ef4444;
+        }
+        .btn-save {
+            flex: 2; padding: 12px 20px;
+            border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
+            color: white; font-size: 14px; font-weight: 700;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(16,87,136,.35);
+        }
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16,87,136,.45);
+            filter: brightness(1.05);
+        }
+
+        /* MODAL DE CONFIRMACIÓN */
+        .confirm-modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 2100;
+        }
+        .confirm-content {
+            background: white; padding: 35px 30px;
+            border-radius: 28px;
+            max-width: 450px; width: 90%;
+            text-align: center;
+            animation: zoomIn .25s cubic-bezier(.34,1.2,.64,1);
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .confirm-content i { font-size: 3.5rem; color: var(--azul-medio); margin-bottom: 10px; }
+        .confirm-content p { margin: 20px 0; font-size: 1.2rem; color: var(--azul-oscuro); font-weight: 600; }
+        .confirm-buttons { display: flex; gap: 20px; justify-content: center; margin-top: 15px; }
+        .confirm-buttons .btn { min-width: 120px; }
+
+        /* MODAL DE ÉXITO */
+        .success-modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 2200;
+        }
+        .success-content {
+            background: white; padding: 35px 30px;
+            border-radius: 28px;
+            max-width: 450px; width: 90%;
+            text-align: center;
+            animation: zoomIn .25s cubic-bezier(.34,1.2,.64,1);
+        }
+        .success-content i { font-size: 3.5rem; color: var(--azul-medio); margin-bottom: 10px; }
+        .success-content p { margin: 20px 0; font-size: 1.2rem; color: var(--azul-oscuro); font-weight: 600; }
+        .success-modal.fade-out { opacity: 0; transition: opacity 0.5s ease; }
+
+        /* FILA SIN RESULTADOS */
+        #fila-sin-resultados {
+            display: none;
+        }
+        #fila-sin-resultados td {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+            font-style: italic;
+        }
+        #fila-sin-resultados i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e0;
+        }
+
+        /* PARTÍCULAS */
+        .bg-particles { position: fixed; top: 0; right: 0; width: 350px; height: 350px; pointer-events: none; z-index: 0; opacity: .04; }
+        .bg-particle  { position: absolute; border-radius: 50%; background: var(--azul-medio); animation: floatParticle 8s infinite ease-in-out; }
+        .bg-particle:nth-child(1) { width:60px; height:60px; top:10%; right:20%; animation-delay:0s; }
+        .bg-particle:nth-child(2) { width:40px; height:40px; top:50%; right:5%;  animation-delay:2s; }
+        .bg-particle:nth-child(3) { width:80px; height:80px; top:70%; right:30%; animation-delay:4s; }
+        .bg-particle:nth-child(4) { width:30px; height:30px; top:30%; right:50%; animation-delay:1s; }
+        @keyframes floatParticle {
+            0%,100% { transform: translateY(0) translateX(0) scale(1); }
+            25%     { transform: translateY(-40px) translateX(20px) scale(1.3); }
+            50%     { transform: translateY(-10px) translateX(-15px) scale(.8); }
+            75%     { transform: translateY(-50px) translateX(10px) scale(1.2); }
+        }
+
+        @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar { width: var(--sidebar-collapsed); }
+            .sidebar-nav a span { display: none; }
+            .sidebar-nav a { justify-content: center; padding: 14px; gap: 0; }
+            .sidebar-nav a i { font-size: 1.3rem; }
+            .main-content { margin-left: var(--sidebar-collapsed); padding: 20px 16px; }
+            .sidebar-brand { padding: 16px 8px 8px; }
+            .logo-wrapper img { max-height: 58px; }
+            .page-header { flex-direction: column; align-items: stretch; }
+            .btn-create-premium { justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .sidebar { width: 56px; }
+            .main-content { margin-left: 56px; padding: 14px 10px; }
+            .logo-wrapper img { max-height: 46px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Partículas decorativas -->
+    <div class="bg-particles" aria-hidden="true">
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-wrapper" title="Dashboard">
+                <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo">
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'panel_admin' %}">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Panel de Administración</span>
+            </a>
+            <a href="{% url 'gestionar_usuarios' %}" class="active">
+                <i class="fa-solid fa-users"></i>
+                <span>Gestionar Usuarios</span>
+            </a>
+            <a href="{% url 'gestionar_cursos' %}">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>Gestionar Cursos</span>
+            </a>
+            <a href="{% url 'administrar_noticias' %}">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Administrar Noticias</span>
+            </a>
+            <a href="{% url 'estadisticas_cursos' %}">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Reporte Cursos</span>
+            </a>
+            <a href="{% url 'subir_archivo' %}">
+                <i class="fa-solid fa-file"></i>
+                <span>Subir Archivo</span>
+            </a>
+            <a href="{% url 'logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Gestión de Usuarios</h1>
+            <button class="btn-create-premium" id="btnNuevoUsuario">
+                <i class="fa-solid fa-plus"></i> Nuevo Usuario
+            </button>
+        </div>
+
+        <!-- BARRA DE BÚSQUEDA -->
+        <div class="top-bar">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="buscador" type="text"
+                       placeholder="Buscar usuario por nombre…"
+                       oninput="filtrarUsuarios(this.value)"
+                       autocomplete="off">
+            </div>
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <div class="tabla-container">
+            <div class="tabla-overflow">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="th-left">Nombre Completo</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Última modificación</th>
+                            <th style="width:120px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-usuarios">
+                        {% for usuario in usuarios %}
+                        <tr data-id="{{ usuario.pk }}"
+                            data-nombre="{{ usuario.nombre_completo|lower }}"
+                            data-rol="{{ usuario.rol }}"
+                            data-estado="{{ usuario.estado }}"
+                            data-correo="{{ usuario.correo|default:'' }}">
+                            <td class="td-name">{{ usuario.nombre_completo }}</td>
+                            <td>{{ usuario.correo|default:"-" }}</td>
+                            <td>
+                                <span class="badge {% if usuario.es_admin %}badge-red{% else %}badge-blue{% endif %}">
+                                    {{ usuario.get_rol_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if usuario.estado == 'Activo' %}badge-green{% else %}badge-red{% endif %}">
+                                    {{ usuario.estado }}
+                                </span>
+                            </td>
+                            <td class="td-date">{{ usuario.fecha_ultima_modificacion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <button class="btn" onclick="editarUsuario(this)" title="Editar">
+                                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                                    </button>
+                                    <button class="btn btn-danger" onclick="confirmarEliminar(this)" title="Eliminar">
+                                        <i class="fa-solid fa-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:40px; color:#64748b; font-style:italic;">
+                                <i class="fa-solid fa-users-slash" style="font-size:2rem; display:block; margin-bottom:8px; color:#cbd5e0;"></i>
+                                No hay usuarios registrados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <!-- Fila de "sin resultados" para el buscador -->
+                        <tr id="fila-sin-resultados">
+                            <td colspan="6">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                No se encontraron usuarios con ese nombre.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODALES (se mantienen exactamente igual) -->
+    <div id="modalUsuario" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-icon"><i class="fas fa-user"></i></div>
+                    <div>
+                        <h3 class="modal-titulo" id="modalTitulo">Nuevo Usuario</h3>
+                        <p class="modal-subtitulo" id="modalSubtitulo">Completa los campos y guarda</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="cerrarModalUsuario()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="formUsuario">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="inputIdUsuario">
+                    <div class="form-group">
+                        <label class="form-label">Nombre completo (también será el usuario)</label>
+                        <input type="text" name="nombre_completo" id="inputNombre" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rol</label>
+                        <select name="rol" id="inputRol" class="form-select" required>
+                            <option value="1">Administrador</option>
+                            <option value="2">Empleado</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="grupoCorreo" style="display: none;">
+                        <label class="form-label">Correo electrónico (no editable)</label>
+                        <input type="email" id="inputCorreo" class="form-input" disabled>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="cerrarModalUsuario()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn-save" id="btnGuardarUsuario">
+                    <i class="fas fa-save"></i> Guardar Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-content">
+            <i class="fas fa-question-circle"></i>
+            <p id="confirmMessage">¿Estás seguro?</p>
+            <div class="confirm-buttons">
+                <button class="btn" id="confirmYes">Sí, aceptar</button>
+                <button class="btn" id="confirmNo">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ÉXITO -->
+    <div id="successModal" class="success-modal">
+        <div class="success-content">
+            <i class="fas fa-check-circle"></i>
+            <p id="successMessage">Operación exitosa</p>
+        </div>
+    </div>
+
+    <!-- Formulario oculto para eliminación -->
+    <form id="deleteForm" method="post" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="accion" value="eliminar">
+    </form>
+
+    <script>
+        // ---- Elementos DOM ----
+        const modalUsuario     = document.getElementById('modalUsuario');
+        const modalTitulo      = document.getElementById('modalTitulo');
+        const modalSubtitulo   = document.getElementById('modalSubtitulo');
+        const formUsuario      = document.getElementById('formUsuario');
+        const inputIdUsuario   = document.getElementById('inputIdUsuario');
+        const inputNombre      = document.getElementById('inputNombre');
+        const inputRol         = document.getElementById('inputRol');
+        const grupoCorreo      = document.getElementById('grupoCorreo');
+        const inputCorreo      = document.getElementById('inputCorreo');
+        const btnGuardar       = document.getElementById('btnGuardarUsuario');
+        const confirmModal     = document.getElementById('confirmModal');
+        const confirmMessage   = document.getElementById('confirmMessage');
+        const successModal     = document.getElementById('successModal');
+        const successMessageP  = document.getElementById('successMessage');
+        const deleteForm       = document.getElementById('deleteForm');
+        const tbodyUsuarios    = document.getElementById('tbody-usuarios');
+        const filaSinResultados = document.getElementById('fila-sin-resultados');
+
+        let confirmCallback = null;
+        let editando = false;
+
+        // ---- Funciones de utilidad ----
+        function showSuccess(message) {
+            successMessageP.textContent = message;
+            successModal.style.display = 'flex';
+            successModal.classList.remove('fade-out');
+            setTimeout(() => {
+                successModal.classList.add('fade-out');
+                setTimeout(() => {
+                    successModal.style.display = 'none';
+                }, 500);
+            }, 1500);
+        }
+
+        function showConfirm(message, onConfirm) {
+            confirmMessage.textContent = message;
+            confirmModal.style.display = 'flex';
+            confirmCallback = onConfirm;
+        }
+
+        // ---- Filtro de búsqueda ----
+        function filtrarUsuarios(termino) {
+            const q = termino.toLowerCase().trim();
+            const filas = tbodyUsuarios.querySelectorAll('tr[data-nombre]'); // Solo filas con data-nombre
+            let visibles = 0;
+            filas.forEach(fila => {
+                const nombre = fila.dataset.nombre || '';
+                const match = nombre.includes(q);
+                fila.style.display = match ? '' : 'none';
+                if (match) visibles++;
+            });
+            // Mostrar/ocultar la fila "sin resultados"
+            filaSinResultados.style.display = (visibles === 0 && filas.length > 0) ? 'table-row' : 'none';
+        }
+
+        // ---- Modales ----
+        function cerrarModalUsuario() {
+            modalUsuario.style.display = 'none';
+        }
+
+        function abrirModalCrear() {
+            editando = false;
+            formUsuario.action = "?accion=crear";
+            modalTitulo.textContent = 'Nuevo Usuario';
+            modalSubtitulo.textContent = 'Completa los campos y guarda el usuario';
+            inputIdUsuario.value = '';
+            inputNombre.value = '';
+            inputRol.value = '2';
+            grupoCorreo.style.display = 'none';
+            inputCorreo.value = '';
+            modalUsuario.style.display = 'flex';
+        }
+
+        function editarUsuario(btn) {
+            const row = btn.closest('tr');
+            const id = row.dataset.id;
+            const nombre = row.dataset.nombre; // Este está en minúsculas por el filtro; mejor usar el texto visible
+            const nombreReal = row.querySelector('.td-name').textContent.trim();
+            const rol = row.dataset.rol;
+            const correo = row.dataset.correo || '';
+
+            editando = true;
+            formUsuario.action = `?accion=editar&id=${id}`;
+            modalTitulo.textContent = 'Editar Usuario';
+            modalSubtitulo.textContent = 'Modifica los campos y guarda los cambios';
+            inputIdUsuario.value = id;
+            inputNombre.value = nombreReal; // Usamos el texto visible para que aparezca bien
+            inputRol.value = rol;
+            grupoCorreo.style.display = 'block';
+            inputCorreo.value = correo;
+            modalUsuario.style.display = 'flex';
+        }
+
+        function confirmarEliminar(btn) {
+            const row = btn.closest('tr');
+            const id = row.dataset.id;
+            const nombreReal = row.querySelector('.td-name').textContent.trim();
+            showConfirm(`¿Estás seguro de eliminar al usuario "${nombreReal}"? Esta acción no se puede deshacer.`, () => {
+                deleteForm.action = `?accion=eliminar&id=${id}`;
+                deleteForm.submit();
+            });
+        }
+
+        // ---- Eventos ----
+        document.getElementById('btnNuevoUsuario').addEventListener('click', abrirModalCrear);
+
+        btnGuardar.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (editando) {
+                showConfirm('¿Aceptas guardar los cambios del usuario?', () => {
+                    formUsuario.submit();
+                });
+            } else {
+                formUsuario.submit();
+            }
+        });
+
+        document.getElementById('confirmYes').addEventListener('click', () => {
+            confirmModal.style.display = 'none';
+            if (confirmCallback) confirmCallback();
+            confirmCallback = null;
+        });
+
+        document.getElementById('confirmNo').addEventListener('click', () => {
+            confirmModal.style.display = 'none';
+            confirmCallback = null;
+        });
+
+        window.onclick = function(event) {
+            if (event.target == modalUsuario) cerrarModalUsuario();
+            if (event.target == confirmModal) confirmModal.style.display = 'none';
+            if (event.target == successModal) successModal.style.display = 'none';
+        };
+
+        // Animación de entrada de filas y mensajes de Django
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('#tbody-usuarios tr[data-nombre]');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(10px)';
+                row.style.transition = `opacity 0.4s ease ${index * 0.05}s, transform 0.4s ease ${index * 0.05}s`;
+                setTimeout(() => {
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, 100 + index * 50);
+            });
+
+            {% if messages %}
+                {% for message in messages %}
+                    showSuccess('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+
+</body>
+</html>

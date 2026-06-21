@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
-
+import random, string
+from django.utils import timezone
+from datetime import timedelta
 
 class Usuario(models.Model):
 
@@ -24,6 +26,12 @@ class Usuario(models.Model):
         max_length=255
     )
 
+    correo = models.EmailField(
+        unique=True,
+        null=True,
+        blank=True
+    )
+
     password = models.CharField(
         max_length=255
     )
@@ -34,11 +42,22 @@ class Usuario(models.Model):
         default='2'
     )
 
+
+
+    ESTADO_CHOICES = (
+        ('Activo', 'Activo'),
+        ('Inactivo', 'Inactivo'),
+    )
+    
     estado = models.CharField(
         max_length=50,
         blank=True,
         null=True,
         default='Activo'
+    )
+
+    fecha_ultima_modificacion = models.DateTimeField(
+        auto_now=True
     )
 
     def set_password(self, raw_password):
@@ -60,3 +79,23 @@ class Usuario(models.Model):
 
     class Meta:
         db_table = 'usuario'
+
+class RecuperacionCodigo(models.Model):
+    usuario = models.ForeignKey('Usuario', on_delete=models.CASCADE)
+    codigo = models.CharField(max_length=6, unique=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    expira_en = models.DateTimeField()
+    usado = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.codigo:
+            self.codigo = ''.join(random.choices(string.digits, k=6))
+        if not self.expira_en:
+            self.expira_en = timezone.now() + timedelta(minutes=3)
+        super().save(*args, **kwargs)
+
+    def es_valido(self):
+        return not self.usado and self.expira_en > timezone.now()
+
+    class Meta:
+        db_table = 'recuperacion_codigo'

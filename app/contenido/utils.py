@@ -1,5 +1,11 @@
-import re
+import re, calendar, io
 from django.utils import timezone
+from django.db.models import Count, Q
+from datetime import date
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+
 
 
 def limpiar_iframe(url_iframe):
@@ -115,3 +121,306 @@ def generar_id_unico(prefijo=''):
     timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
     return f"{prefijo}{timestamp}"
 
+#=========================================================
+# FUNCIONALIDAD DE GENERAR REPORTE DE LOS CURSOS COMPLETADOS POR MESES
+#=========================================================
+
+def get_stats_mes(quiz, year, month):
+    from .models import ProgresoUsuario
+    from inicio_sesion.models import Usuario  # ajusta según tu app
+
+    # Total de empleados activos en el sistema
+    total_empleados = Usuario.objects.filter(rol='2', estado='Activo').count()
+    # (si tu campo/valor es distinto, ajústalo, ej: activo=True, tipo='2', etc.)
+
+    total_completados = ProgresoUsuario.objects.filter(
+        quiz=quiz,
+        quiz_completado=True
+    ).values('usuario').distinct().count()
+
+    completados_mes = ProgresoUsuario.objects.filter(
+        quiz=quiz,
+        quiz_completado=True,
+        fecha_respuesta__year=year,
+        fecha_respuesta__month=month
+    ).values('usuario').distinct().count()
+
+    en_progreso = ProgresoUsuario.objects.filter(
+        quiz=quiz,
+        respondida=True,
+        quiz_completado=False
+    ).values('usuario').distinct().count()
+
+    pendientes = max(total_empleados - total_completados, 0)
+
+    return {
+        'total_completados': total_completados,
+        'completados_mes':   completados_mes,
+        'en_progreso':       en_progreso,
+        'pendientes':        pendientes,
+        'total_empleados':   total_empleados,
+    }
+
+
+def get_stats_rango(quiz, fecha_inicio, fecha_fin):
+    from .models import ProgresoUsuario
+    from inicio_sesion.models import Usuario
+
+    total_empleados = Usuario.objects.filter(rol='2', estado='Activo').count()
+
+    total_completados = ProgresoUsuario.objects.filter(
+        quiz=quiz,
+        quiz_completado=True
+    ).values('usuario').distinct().count()
+
+    completados_rango = ProgresoUsuario.objects.filter(
+        quiz=quiz,
+        quiz_completado=True,
+        fecha_respuesta__date__gte=fecha_inicio,
+        fecha_respuesta__date__lte=fecha_fin
+    ).values('usuario').distinct().count()
+
+    en_progreso = ProgresoUsuario.objects.filter(
+        quiz=quiz,
+        respondida=True,
+        quiz_completado=False
+    ).values('usuario').distinct().count()
+
+    pendientes = max(total_empleados - total_completados, 0)
+
+    return {
+        'total_completados': total_completados,
+        'completados_rango': completados_rango,
+        'en_progreso': en_progreso,
+        'pendientes': pendientes,
+        'total_empleados': total_empleados,
+    }
+
+
+MESES_ES = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+]
+
+def get_meses_historicos(curso, quiz):
+    """
+    Retorna una lista de stats mes a mes desde la creación del curso
+    hasta el mes anterior al actual. Máximo 6 meses hacia atrás.
+    """
+    hoy = date.today()
+    mes_actual_year  = hoy.year
+    mes_actual_month = hoy.month
+
+    # Cuántos meses tiene el curso de vida
+    if curso.fecha_public:
+        delta_meses = (
+            (hoy.year - curso.fecha_public.year) * 12
+            + (hoy.month - curso.fecha_public.month)
+        )
+    else:
+        delta_meses = 0
+
+    # Tomamos hasta 6 meses anteriores al mes actual
+    n_meses = min(delta_meses, 6)
+
+    historico = []
+    for i in range(1, n_meses + 1):      # i=1 → mes anterior, i=2 → hace 2 meses…
+        m = mes_actual_month - i
+        y = mes_actual_year
+        while m <= 0:
+            m += 12
+            y -= 1
+
+        if quiz:
+            stats = get_stats_mes(quiz, y, m)
+        else:
+            stats = {
+                'total_completados': 0,
+                'completados_mes': 0,
+                'en_progreso': 0,
+                'pendientes': 0,
+                'total_empleados': 0,
+            }
+
+        historico.append({
+        'label': f"{MESES_ES[m-1]} {y}",  # ← español
+        'month': m,
+        'year':  y,
+        **stats,
+    })
+
+    return historico 
+
+def get_cursos_stats(year=None, month=None):
+    from .models import Curso
+
+    hoy   = date.today()
+    year  = year  or hoy.year
+    month = month or hoy.month
+
+    cursos    = Curso.objects.prefetch_related('quiz').all()
+    resultado = []
+
+    for curso in cursos:
+        quiz = getattr(curso, 'quiz', None)
+
+        if quiz:
+            stats_actual  = get_stats_mes(quiz, year, month)
+            meses_hist    = get_meses_historicos(curso, quiz)
+        else:
+            stats_actual = {
+                'total_completados': 0,
+                'completados_mes':   0,
+                'en_progreso':       0,
+                'pendientes':        0,
+                'total_empleados':   0,
+            }
+            meses_hist = []
+
+        resultado.append({
+            'curso':        curso,
+            'tiene_quiz':   quiz is not None,
+            'mes_actual': {
+                'label': f"{MESES_ES[month-1]} {year}",   # ← Mes en español
+                **stats_actual,
+            },
+            'meses_hist':   meses_hist,
+        })
+
+    return resultado, {
+        'year':      year,
+        'month':     month,
+        'mes_label': f"{MESES_ES[month-1]} {year}",       # ← Mes en español
+    }
+
+
+def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
+    from .models import Curso
+
+    label_rango = f"{fecha_inicio.strftime('%d/%m/%Y')} — {fecha_fin.strftime('%d/%m/%Y')}"
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Estadísticas Cursos"
+
+    fill_titulo    = PatternFill("solid", fgColor="1F4E79")
+    fill_header    = PatternFill("solid", fgColor="1F4E79")
+    fill_subheader = PatternFill("solid", fgColor="2E75B6")
+    fill_alt       = PatternFill("solid", fgColor="EBF3FB")
+    fill_blanco    = PatternFill("solid", fgColor="FFFFFF")
+
+    font_titulo    = Font(name="Arial", bold=True,  size=14, color="FFFFFF")
+    font_sub_it    = Font(name="Arial", italic=True, size=10, color="FFFFFF")
+    font_header    = Font(name="Arial", bold=True,  size=11, color="FFFFFF")
+    font_subheader = Font(name="Arial", bold=True,  size=10, color="FFFFFF")
+    font_body      = Font(name="Arial", size=10)
+    font_pendiente = Font(name="Arial", bold=True,  size=10, color="9A3412")
+
+    al_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    al_left   = Alignment(horizontal="left",   vertical="center")
+    thin      = Side(style="thin", color="BFBFBF")
+    border    = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    # Fila 1: Título
+    ws.row_dimensions[1].height = 28
+    ws.merge_cells("A1:H1")
+    c = ws["A1"]
+    c.value, c.font, c.fill, c.alignment = (
+        f"Reporte de Cursos — {label_rango}", font_titulo, fill_titulo, al_center
+    )
+
+    # Fila 2: Subtítulo
+    ws.row_dimensions[2].height = 18
+    ws.merge_cells("A2:H2")
+    c = ws["A2"]
+    c.value, c.font, c.fill, c.alignment = (
+        f"Generado el {date.today().strftime('%d/%m/%Y')}", font_sub_it, fill_titulo, al_center
+    )
+
+    # Fila 3: Encabezados de grupo  (A=Curso, B=Creado, C-G=stats, H=Quiz)
+    ws.row_dimensions[3].height = 22
+    ws.row_dimensions[4].height = 22
+
+    grupos = [
+        (1, 1, "Curso"),
+        (2, 2, "Creado"),
+        (3, 7, label_rango),   # 5 columnas de stats
+        (8, 8, "Estado"),
+    ]
+    for col_ini, col_fin, texto in grupos:
+        c = ws.cell(row=3, column=col_ini)
+        c.value, c.font, c.fill, c.alignment, c.border = (
+            texto, font_header, fill_header, al_center, border
+        )
+        if col_ini != col_fin:
+            ws.merge_cells(
+                start_row=3, start_column=col_ini,
+                end_row=3,   end_column=col_fin
+            )
+
+    # Fila 4: Sub-encabezados
+    sub_textos = [
+        "Nombre del Curso",        # A
+        "Fecha Creación",          # B
+        "Total Empleados",         # C
+        "Total Completados",       # D
+        f"Completados en período", # E
+        "En Progreso",             # F
+        "Pendientes",              # G
+        "Tiene Quiz",              # H
+    ]
+    for col, texto in enumerate(sub_textos, start=1):
+        c = ws.cell(row=4, column=col)
+        c.value, c.font, c.fill, c.alignment, c.border = (
+            texto, font_subheader, fill_subheader, al_center, border
+        )
+
+    # Datos
+    cursos = Curso.objects.filter(id_curso__in=cursos_ids).prefetch_related('quiz')
+
+    for i, curso in enumerate(cursos):
+        row  = 5 + i
+        fill = fill_alt if i % 2 == 0 else fill_blanco
+        quiz = getattr(curso, 'quiz', None)
+
+        if quiz:
+            stats = get_stats_rango(quiz, fecha_inicio, fecha_fin)
+        else:
+            stats = {
+                'total_empleados': 0,
+                'total_completados': 0,
+                'completados_rango': 0,
+                'en_progreso': 0,
+                'pendientes': 0,
+            }
+
+        valores = [
+            curso.titulo,
+            curso.fecha_public.strftime('%d/%m/%Y') if curso.fecha_public else '',
+            stats['total_empleados'],
+            stats['total_completados'],
+            stats['completados_rango'],
+            stats['en_progreso'],
+            stats['pendientes'],
+            "Sí" if quiz else "No",
+        ]
+
+        for col_idx, val in enumerate(valores, start=1):
+            c = ws.cell(row=row, column=col_idx, value=val)
+            c.fill   = fill
+            c.border = border
+            if col_idx == 7 and isinstance(val, int) and val > 0:
+                c.font      = font_pendiente
+                c.alignment = al_center
+            else:
+                c.font      = font_body
+                c.alignment = al_left if col_idx == 1 else al_center
+
+    anchos = [35, 16, 16, 18, 22, 14, 14, 12]
+    for idx, w in enumerate(anchos, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = w
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output

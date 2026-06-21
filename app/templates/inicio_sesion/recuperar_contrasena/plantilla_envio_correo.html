@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recupera tu contraseña</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet" type="text/css">
+    <style>
+        /* Estilos generales para clientes que soporten CSS en <style> */
+        @media only screen and (max-width: 600px) {
+            .responsive-table {
+                width: 100% !important;
+            }
+            .responsive-padding {
+                padding: 20px !important;
+            }
+            .responsive-logo {
+                width: 140px !important;
+                height: auto !important;
+            }
+            .codigo-box {
+                font-size: 28px !important;
+                letter-spacing: 6px !important;
+                padding: 12px 20px !important;
+            }
+            .btn {
+                display: block !important;
+                width: 100% !important;
+            }
+        }
+        /* Clases auxiliares */
+        .ExternalClass, .ReadMsgBody {
+            width: 100%;
+            background-color: #f4f6f9;
+        }
+        body, table, td, p, a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        table, td {
+            border-collapse: collapse;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+        img {
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+            -ms-interpolation-mode: bicubic;
+        }
+    </style>
+</head>
+<body style="margin:0; padding:0; background:#f4f6f9; font-family: 'Nunito Sans', Helvetica, Arial, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#f4f6f9">
+    <tr>
+        <td align="center" style="padding: 30px 15px;">
+            <!-- Contenedor principal de la tarjeta -->
+            <table width="600" cellpadding="0" cellspacing="0" border="0" align="center" class="responsive-table"
+                   style="max-width:600px; width:100%; background:#ffffff; border-radius:16px; box-shadow:0 20px 48px rgba(22,43,71,0.12), 0 8px 20px rgba(22,43,71,0.08); overflow:hidden; border:1px solid #dde3ea;">
+                
+                <!-- Encabezado con logo y texto Universidad -->
+                <tr>
+                    <td align="center" style="padding: 30px 30px 10px 30px;">
+                        <a href="#" style="text-decoration: none; display: inline-block;">
+                            <!-- Reemplaza 'img/logo_fondo_blanco.png' con la URL de tu logo real -->
+                            <img src="https://u-corporativa-s-p.vercel.app/static/img/logo_fondo_blanco.png" alt="Logo Universidad S&P" 
+                                 style="width:200px; max-width:100%; height:auto; margin-bottom:12px; filter:drop-shadow(0 4px 8px rgba(16,87,136,0.2));"
+                                 class="responsive-logo">
+                        </a>
+                        <div style="font-size:0.7rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:2px;">
+                            Universidad Corporativa S&P
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Cuerpo del mensaje -->
+                <tr>
+                    <td style="padding: 20px 30px 30px 30px;" class="responsive-padding">
+                        
+                        <h2 style="color:#162b47; font-size:1.6rem; font-weight:900; margin:0 0 20px 0; letter-spacing:-0.3px;">
+                            Recupera tu contraseña
+                        </h2>
+                        
+                        <p style="color:#334155; font-size:1rem; font-weight:600; margin:0 0 16px 0; line-height:1.5;">
+                            Hola <strong style="color:#105788;">{{ usuario.nombre_completo }}</strong>,
+                        </p>
+                        
+                        <p style="color:#334155; font-size:1rem; font-weight:500; margin:0 0 20px 0; line-height:1.5;">
+                            Recibimos una solicitud para restablecer la contraseña de tu cuenta.
+                            Utiliza el siguiente código de verificación:
+                        </p>
+                        
+                        <!-- Código destacado -->
+                        <div style="text-align:center; margin:30px 0;">
+                            <span class="codigo-box" style="display:inline-block; background:#105788; color:#ffffff; font-size:32px; font-weight:800; font-family:'Nunito Sans', monospace; letter-spacing:10px; padding:16px 24px; border-radius:12px; box-shadow:0 4px 14px rgba(16,87,136,0.35);">
+                                {{ codigo }}
+                            </span>
+                        </div>
+                        
+                        <p style="color:#64748b; font-size:0.85rem; font-weight:600; margin:0 0 10px 0;">
+                            ⏱️ Este código expirará en <strong style="color:#e51148;">3 minutos</strong>.
+                        </p>
+                        
+                        <p style="color:#64748b; font-size:0.85rem; font-weight:500; margin:20px 0 0 0;">
+                            Si no solicitaste este cambio, puedes ignorar este mensaje. Tu contraseña no se modificará hasta que ingreses el código.
+                        </p>
+                        
+                        <!-- Botón de acción (opcional, en caso de que quieras redirigir a la web) -->
+                        
+                    </td>
+                </tr>
+                
+                <!-- Pie de página -->
+                <tr>
+                    <td style="background:#f8fafc; text-align:center; padding:20px 30px; border-top:1px solid #dde3ea;">
+                        <p style="color:#94a3b8; font-size:0.7rem; font-weight:600; margin:0;">
+                            © {% now "Y" %} Sistema de Gestión | Universidad Corporativa S&P
+                        </p>
+                        <p style="color:#94a3b8; font-size:0.65rem; font-weight:500; margin:10px 0 0 0;">
+                            Este es un correo automático, por favor no responder.
+                        </p>
+                    </td>
+                </tr>
+            </table>          
+        </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -2,16 +2,20 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from inicio_sesion.decorador import *
 from .models import * 
+from inicio_sesion.models import *
 from django.contrib import messages
 from .forms import *
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 import json
 import re
 from django.views.decorators.csrf import ensure_csrf_cookie
-from .utils import limpiar_iframe, extraer_nombre_archivo, preparar_archivo_sharepoint
+from .utils import *
 import uuid
+from django.utils import timezone
+from datetime import date
+import calendar
 
 
 def detectar_tipo_archivo_contenido(url_archivo, tipo_forzado=''):
@@ -125,7 +129,6 @@ def _guardar_pregunta_en_quiz(quiz, data, pregunta=None):
 
 
 
-
 # =========================================================
 # PANELES
 # =========================================================
@@ -133,31 +136,28 @@ def _guardar_pregunta_en_quiz(quiz, data, pregunta=None):
 @login_requerido
 @solo_admin
 def panel_admin(request):
-
+    usuario = Usuario.objects.get(pk=request.session['id_usuario'])
+    usar_password_default = usuario.check_password('Empleado2026*')
+    
     contexto = {
-        'nombre': request.session.get('nombre')
+        'nombre': request.session.get('nombre'),
+        'mostrar_modal_cambio': usar_password_default,
+        'correo': usuario.correo or '',   # ← lo usaremos en el template
     }
-
-    return render(
-        request,
-        'contenido/panel_admin.html',
-        contexto
-    )
-
+    return render(request, 'contenido/panel_admin.html', contexto)
 
 @login_requerido
 @solo_empleado
 def panel_empleado(request):
-
+    usuario = Usuario.objects.get(pk=request.session['id_usuario'])
+    usar_password_default = usuario.check_password('Empleado2026*')
+    
     contexto = {
-        'nombre': request.session.get('nombre')
+        'nombre': request.session.get('nombre'),
+        'mostrar_modal_cambio': usar_password_default,
+        'correo': usuario.correo or '',
     }
-
-    return render(
-        request,
-        'contenido/panel_empleado.html',
-        contexto
-    )
+    return render(request, 'contenido/panel_empleado.html', contexto)
     
     
 
@@ -321,7 +321,8 @@ def gestionar_cursos(request):
 # =========================================================
 # EDITAR CURSO
 # =========================================================
-
+@login_requerido
+@solo_admin
 def editar_curso(request, id_curso):
     curso = get_object_or_404(Curso, id_curso=id_curso)
     initial_data = {}
@@ -358,6 +359,8 @@ def editar_curso(request, id_curso):
 # ELIMINAR CURSO
 # =========================================================
 
+@login_requerido
+@solo_admin
 def eliminar_curso(request, id_curso):
     curso = get_object_or_404(Curso, id_curso=id_curso)
     curso.delete()
@@ -395,7 +398,8 @@ def agregar_contenido(request, id_curso):
     
     return render(request, 'contenido/cursos/agregar_contenido.html', context)
 
-
+@login_requerido
+@solo_admin
 @require_POST
 def guardar_bloque_contenido(request, id_curso):
     try:
@@ -502,7 +506,8 @@ def guardar_bloque_contenido(request, id_curso):
     except Exception as e:
         return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
 
-
+@login_requerido
+@solo_admin
 @require_POST
 def actualizar_render_type(request, id_curso):
     try:
@@ -521,7 +526,8 @@ def actualizar_render_type(request, id_curso):
     except Exception as e:
         return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
 
-
+@login_requerido
+@solo_admin
 @require_POST
 def eliminar_bloque(request, id_bloque):
     """Elimina un bloque y sus contenidos asociados en cascada."""
@@ -532,7 +538,8 @@ def eliminar_bloque(request, id_bloque):
     except Exception as e:
         return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
 
-
+@login_requerido
+@solo_admin
 @require_POST
 def editar_bloque_contenido(request, id_bloque):
     """Actualiza un bloque de contenido existente."""
@@ -632,7 +639,8 @@ def editar_bloque_contenido(request, id_bloque):
     except Exception as e:
         return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
     
-
+@login_requerido
+@solo_admin
 @require_POST
 def eliminar_contenido_ajax(request, id):
     try:
@@ -837,7 +845,8 @@ def resolver_quiz(request, id_curso):
     
     return render(request, 'contenido/quiz/resolver_quiz.html', context)
 
-
+@login_requerido
+@solo_empleado
 @require_POST
 def responder_pregunta(request):
     """API para responder una pregunta del quiz."""
@@ -1230,3 +1239,107 @@ def subir_archivo(request, from_admin=False):
         'volver_quiz_url': volver_quiz_url,
         'es_admin': es_admin,          # nueva variable
     })
+# =========================================================
+# VIEW DE REPORTE DE CURSOS PARA LLEVAR CONTROL DE LOS CURSOS REALIZADOS POR MESES
+# =========================================================
+
+@login_requerido
+@solo_admin
+def cursos_estadisticas(request):
+    hoy = date.today()
+    datos, meta = get_cursos_stats()  # sin filtro de mes, muestra acumulado
+
+    opciones_meses = _opciones_ultimos_meses(hoy)
+
+    context = {
+        'datos': datos,
+        'meta': meta,
+        'opciones_meses': opciones_meses,
+    }
+    return render(request, 'contenido/reporte/estadisticas.html', context)
+
+@login_requerido
+@solo_admin
+def descargar_excel_estadisticas(request):
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+
+    cursos_ids = request.POST.getlist('cursos')
+    if not cursos_ids:
+        return HttpResponse("No se seleccionaron cursos.", status=400)
+
+    hoy = date.today()
+
+    # Valores por defecto seguros ANTES del try
+    fecha_inicio = date(hoy.year, hoy.month, 1)
+    fecha_fin    = hoy
+
+    try:
+        tipo_periodo = request.POST.get('tipo_periodo', '6m')
+
+        if tipo_periodo == '6m':
+            year  = int(request.POST.get('year_6m',  hoy.year))
+            month = int(request.POST.get('month_6m', hoy.month))
+            if not (1 <= month <= 12):
+                raise ValueError("Mes fuera de rango")
+
+            mes_esp = request.POST.get('mes_especifico', '').strip()
+
+            if mes_esp:
+                m = int(mes_esp)
+                if not (1 <= m <= 12):
+                    raise ValueError("Mes específico fuera de rango")
+                # Si el mes puntual es posterior al mes final, pertenece al año anterior
+                y = year if m <= month else year - 1
+                fecha_inicio = date(y, m, 1)
+                fecha_fin    = date(y, m, calendar.monthrange(y, m)[1])
+            else:
+                fecha_fin = date(year, month, calendar.monthrange(year, month)[1])
+                m0 = month - 5
+                y0 = year
+                if m0 <= 0:
+                    m0 += 12
+                    y0 -= 1
+                fecha_inicio = date(y0, m0, 1)
+
+        elif tipo_periodo == 'year':
+            year         = int(request.POST.get('year_full', hoy.year))
+            fecha_inicio = date(year, 1,  1)
+            fecha_fin    = date(year, 12, 31)
+
+        elif tipo_periodo == 'custom':
+            fecha_inicio = date.fromisoformat(request.POST.get('fecha_inicio', ''))
+            fecha_fin    = date.fromisoformat(request.POST.get('fecha_fin',    ''))
+            if fecha_inicio > fecha_fin:
+                fecha_inicio, fecha_fin = fecha_fin, fecha_inicio
+
+        # tipo_periodo desconocido → se usan los valores por defecto definidos arriba
+
+    except (ValueError, TypeError):
+        # Fechas por defecto ya asignadas antes del try
+        pass
+
+    output = generar_excel(cursos_ids, fecha_inicio, fecha_fin)
+
+    nombre   = f"cursos_{fecha_inicio.isoformat()}_{fecha_fin.isoformat()}.xlsx"
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{nombre}"'
+    return response
+
+
+# Helper
+def _opciones_ultimos_meses(hoy, n=12):
+    y, m = hoy.year, hoy.month
+    opts = []
+    for _ in range(n):
+        opts.append({
+            'value': f"{y}-{m:02d}",
+            'label': f"{MESES_ES[m-1]} {y}"   # ← español
+        })
+        m -= 1
+        if m == 0:
+            m, y = 12, y - 1
+    return opts

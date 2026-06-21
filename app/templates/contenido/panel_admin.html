@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
 
+    <!-- Bootstrap 5 CSS (necesario para el modal) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Tipografías -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -450,6 +454,119 @@
         @keyframes rippleEffect {
             to { transform: scale(4); opacity: 0; }
         }
+
+        /* ESTILOS ADICIONALES PARA EL MODAL OBLIGATORIO */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 15, 26, 0.65);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+        .modal-content {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%; max-width: 580px; max-height: 90vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 32px 80px rgba(0,0,0,.28);
+            animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 24px 28px 20px;
+            background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
+            text-align: center;
+        }
+        .modal-icon {
+            width: 60px; height: 60px;
+            margin: 0 auto 12px;
+            background: rgba(255,255,255,.15);
+            border-radius: 30px;
+            display: flex;
+            align-items: center; justify-content: center;
+            color: white; font-size: 24px;
+        }
+        .modal-titulo {
+            font-size: 20px; font-weight: 800; color: white;
+            margin: 0 0 4px;
+        }
+        .modal-subtitulo {
+            font-size: 13px; color: rgba(255,255,255,.7);
+            margin: 0;
+        }
+        .modal-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+        }
+        .modal-footer {
+            padding: 18px 28px 24px;
+            border-top: 1px solid #f1f5f9;
+            background: #fafbfc;
+            display: flex;
+            justify-content: center;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block;
+            font-size: 12px; font-weight: 700;
+            color: #374151; margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #f9fafb;
+            transition: all .2s;
+        }
+        .form-input:focus {
+            border-color: var(--azul-medio);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(16,87,136,.1);
+        }
+        .requisitos-lista {
+            margin-top: 8px;
+            padding-left: 20px;
+            list-style: none;
+        }
+        .requisitos-lista li {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .requisito-cumplido {
+            color: #10b981 !important;
+        }
+        .btn-save {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16,87,136,.45);
+            filter: brightness(1.05);
+        }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
     </style>
 </head>
 <body>
@@ -464,7 +581,7 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="logo-wrapper" title="Dashboard">
-                <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca">
+                <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo de la marca">
             </div>
         </div>
 
@@ -472,6 +589,10 @@
             <a href="{% url 'panel_admin' %}" class="active">
                 <i class="fa-solid fa-gauge-high"></i>
                 <span>Panel de Administración</span>
+            </a>
+            <a href="{% url 'gestionar_usuarios' %}">
+                <i class="fa-solid fa-users"></i>
+                <span>Gestionar Usuarios</span>
             </a>
             <a href="{% url 'gestionar_cursos' %}">
                 <i class="fa-solid fa-chalkboard-user"></i>
@@ -481,10 +602,14 @@
                 <i class="fa-solid fa-pen-to-square"></i>
                 <span>Administrar Noticias</span>
             </a>
-             <a href="{% url 'subir_archivo' %}" >
+            <a href="{% url 'estadisticas_cursos' %}">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Reporte Cursos</span>
+            </a>
+            <a href="{% url 'subir_archivo' %}">
                 <i class="fa-solid fa-file"></i>
                 <span>Subir Archivo</span>
-             </a>
+            </a>
             <a href="{% url 'logout' %}" class="logout-link">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Cerrar Sesión</span>
@@ -504,6 +629,19 @@
         </header>
 
         <section class="cards-grid">
+
+            <article class="card">
+                <div class="card-icon-wrapper courses">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <h2>Gestionar Usuarios</h2>
+                <p>Administra los usuarios del sistema, sus permisos y actualiza sus credenciales.</p>
+                <a href="{% url 'gestionar_usuarios' %}" class="btn-card">
+                    <span>Ir a Gestionar</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </article>
+
             <article class="card">
                 <div class="card-icon-wrapper courses">
                     <i class="fa-solid fa-chalkboard-user"></i>
@@ -527,10 +665,161 @@
                     <i class="fa-solid fa-arrow-right"></i>
                 </a>
             </article>
+
+
+            <article class="card">
+                <div class="card-icon-wrapper news">
+                    <i class="fa-solid fa-chart-column"></i>
+                </div>
+                <h2>Genera Reporte De Tus Cursos</h2>
+                <p>Visualiza estadísticas y métricas sobre los cursos disponibles.</p>
+                <a href="{% url 'estadisticas_cursos' %}" class="btn-card">
+                    <span>Ir a Generar Reporte</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </article>
+
+
+            <article class="card">
+                <div class="card-icon-wrapper news">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+                <h2>Consulta Como Subir Contenido</h2>
+                <p>Conoce el proceso de subida de contenido al sistema.</p>
+                <a href="{% url 'subir_archivo' %}" class="btn-card">
+                    <span>Ir a Subir Archivo</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </article>
         </section>
     </main>
 
+    <!-- MODAL OBLIGATORIO DE CAMBIO DE CONTRASEÑA (SIN CIERRE) -->
+    {% if mostrar_modal_cambio %}
+    <div id="modalCambioPassword" class="modal-overlay" style="display: flex;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon"><i class="fas fa-lock"></i></div>
+                <h3 class="modal-titulo">Cambio obligatorio de contraseña</h3>
+                <p class="modal-subtitulo">Por seguridad, debes actualizar tu contraseña</p>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'cambiar_password_inicial' %}" id="passwordForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">Contraseña actual (la predeterminada)</label>
+                        <input type="password" name="password_actual" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Correo electrónico <span style="color:red;">*</span></label>
+                        <input type="email" name="correo" class="form-input" value="{{ correo|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nueva contraseña</label>
+                        <input type="password" name="nueva_password" id="nuevaPassword" class="form-input" required>
+                        <ul class="requisitos-lista" id="requisitosLista">
+                            <li id="reqLongitud"><i class="far fa-circle"></i> Mínimo 8 caracteres</li>
+                            <li id="reqMayuscula"><i class="far fa-circle"></i> Al menos una mayúscula</li>
+                            <li id="reqNumero"><i class="far fa-circle"></i> Al menos un número</li>
+                            <li id="reqEspecial"><i class="far fa-circle"></i> Al menos un carácter especial (!@#$%^&*)</li>
+                        </ul>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirmar nueva contraseña</label>
+                        <input type="password" name="confirm_password" id="confirmPassword" class="form-input" required>
+                        <div id="matchMessage" style="font-size:12px; margin-top:5px;"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-save" id="guardarPasswordBtn">
+                    <i class="fas fa-save"></i> Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Validación en tiempo real
+        const nuevaPassword = document.getElementById('nuevaPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const reqLongitud = document.getElementById('reqLongitud');
+        const reqMayuscula = document.getElementById('reqMayuscula');
+        const reqNumero = document.getElementById('reqNumero');
+        const reqEspecial = document.getElementById('reqEspecial');
+        const matchMsg = document.getElementById('matchMessage');
+        const form = document.getElementById('passwordForm');
+        const guardarBtn = document.getElementById('guardarPasswordBtn');
+
+        function actualizarRequisito(elemento, cumplido) {
+            if (cumplido) {
+                elemento.classList.add('requisito-cumplido');
+                elemento.innerHTML = '<i class="fas fa-check-circle"></i> ' + elemento.innerText.replace(/[✓✔]/, '').trim();
+            } else {
+                elemento.classList.remove('requisito-cumplido');
+                elemento.innerHTML = '<i class="far fa-circle"></i> ' + elemento.innerText.replace(/[✓✔]/, '').trim();
+            }
+        }
+
+        function validarPassword() {
+            const pass = nuevaPassword.value;
+            const tieneLongitud = pass.length >= 8;
+            const tieneMayuscula = /[A-Z]/.test(pass);
+            const tieneNumero = /[0-9]/.test(pass);
+            const tieneEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+            actualizarRequisito(reqLongitud, tieneLongitud);
+            actualizarRequisito(reqMayuscula, tieneMayuscula);
+            actualizarRequisito(reqNumero, tieneNumero);
+            actualizarRequisito(reqEspecial, tieneEspecial);
+            return tieneLongitud && tieneMayuscula && tieneNumero && tieneEspecial;
+        }
+
+        function verificarConfirmacion() {
+            const pass = nuevaPassword.value;
+            const confirm = confirmPassword.value;
+            if (confirm === '') {
+                matchMsg.innerHTML = '';
+                return;
+            }
+            if (pass === confirm) {
+                matchMsg.innerHTML = '<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Las contraseñas coinciden</span>';
+            } else {
+                matchMsg.innerHTML = '<span style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Las contraseñas no coinciden</span>';
+            }
+        }
+
+        nuevaPassword.addEventListener('input', () => {
+            validarPassword();
+            verificarConfirmacion();
+        });
+        confirmPassword.addEventListener('input', verificarConfirmacion);
+
+        guardarBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = document.querySelector('input[name="correo"]');
+            if (!email.value.trim()) {
+                alert('El correo electrónico es obligatorio.');
+                email.focus();
+                return;
+            }
+            if (!validarPassword()) {
+                alert('La nueva contraseña no cumple con todos los requisitos.');
+                return;
+            }
+            if (nuevaPassword.value !== confirmPassword.value) {
+                alert('Las contraseñas no coinciden.');
+                return;
+            }
+            form.submit();
+        });
+    </script>
+    {% endif %}
+
+    <!-- Bootstrap 5 JS (necesario para el modal, aunque usamos CSS propio, lo dejamos por compatibilidad) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Animación de entrada de las tarjetas (ya existente)
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.btn-card').forEach(btn => {
                 btn.addEventListener('click', function(e) {

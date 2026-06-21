@@ -7,11 +7,12 @@ urlpatterns = [
     path('admin-panel/', panel_admin, name='panel_admin'),
     path('empleado-panel/', panel_empleado, name='panel_empleado'),
     
-    # Rutas de contenido NOTICIAS
+    # Rutas de contenido NOTICIAS ADMINISTRADOR
     path('admin/noticias/',administrar_noticias,name='administrar_noticias'),
     path('admin/noticias/<str:id_noticia>/',administrar_noticias,name='editar_noticia'),
     path('noticias/eliminar/<str:id_noticia>/', eliminar_noticia, name='eliminar_noticia'),
     
+    # Rutas de contenido NOTICIAS EMPLEADO
     path('empleado/noticias/',ver_noticias,name='ver_noticias'),
     
     # Rutas de contenido CURSOS
@@ -20,34 +21,13 @@ urlpatterns = [
     path('curso/editar/<str:id_curso>/',editar_curso,name='editar_curso'),
     
     # Rutas de contenido BLOQUES DE CONTENIDO
-    path(
-        'curso/<str:id_curso>/contenido/',
-        agregar_contenido,
-        name='agregar_contenido'
-    ),
+    path('curso/<str:id_curso>/contenido/',agregar_contenido,name='agregar_contenido'),
     
-    # API endpoints
-    path(
-        'api/curso/<str:id_curso>/bloque/guardar/',
-        guardar_bloque_contenido,
-        name='guardar_bloque_contenido'
-    ),
-    path(
-        'api/bloque/<int:id_bloque>/editar/',
-        editar_bloque_contenido,
-        name='editar_bloque_contenido'
-    ),
-    path(
-        'api/curso/<str:id_curso>/render-type/',
-        actualizar_render_type,
-        name='actualizar_render_type'
-    ),
-    path(
-        'api/bloque/<int:id_bloque>/eliminar/',
-        eliminar_bloque,
-        name='eliminar_bloque'
-    ),
-    
+    # API endpoints para manejar bloques de contenido vía AJAX
+    path('api/curso/<str:id_curso>/bloque/guardar/',guardar_bloque_contenido,name='guardar_bloque_contenido'),
+    path('api/bloque/<int:id_bloque>/editar/',editar_bloque_contenido,name='editar_bloque_contenido'),
+    path('api/curso/<str:id_curso>/render-type/',actualizar_render_type,name='actualizar_render_type'),
+    path('api/bloque/<int:id_bloque>/eliminar/',eliminar_bloque,name='eliminar_bloque'),
     path('api/contenido/<int:id>/eliminar/', eliminar_contenido_ajax, name='eliminar_contenido_ajax'),
 
     # RUTAS DE QUIZ
@@ -67,5 +47,9 @@ urlpatterns = [
 
     # RUTAS DE SUBIR ARCHIVO
     path('subir-archivo/', subir_archivo, name='subir_archivo'),
+    
+    # RUTAS DE SUBIR ARCHIVO
+    path('estadisticas/', cursos_estadisticas, name='estadisticas_cursos'),
+    path('estadisticas/descargar/', descargar_excel_estadisticas, name='descargar_excel'),
 
 ]

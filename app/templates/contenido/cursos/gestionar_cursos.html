@@ -17,7 +17,7 @@
 
     <style>
         /* ============================================
-           TODOS LOS ESTILOS PREMIUM (sidebar, botones, tabla, modales)
+           ESTILOS PREMIUM (sidebar, botones, tabla, modales)
            ============================================ */
         :root {
             --azul-oscuro: #162b47;
@@ -37,11 +37,7 @@
             --font-destacados: 'Calibri', 'Trebuchet MS', sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             display: flex;
@@ -60,15 +56,12 @@
             display: flex;
             flex-direction: column;
             position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
+            top: 0; left: 0; bottom: 0;
             z-index: 1000;
             transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 4px 0 24px rgba(22, 43, 71, 0.25);
             overflow: hidden;
         }
-
         .sidebar-brand {
             display: flex;
             justify-content: center;
@@ -76,7 +69,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 8px;
         }
-
         .logo-wrapper {
             width: 100%;
             display: flex;
@@ -85,21 +77,15 @@
             transition: transform 0.3s ease, filter 0.3s ease;
             cursor: pointer;
         }
-
         .logo-wrapper:hover {
             transform: scale(1.03);
             filter: drop-shadow(0 0 12px rgba(229, 17, 72, 0.4));
         }
-
         .logo-wrapper img {
-            width: 100%;
-            height: auto;
-            max-height: 78px;
-            object-fit: contain;
-            display: block;
+            width: 100%; height: auto; max-height: 78px;
+            object-fit: contain; display: block;
             background: transparent;
         }
-
         .sidebar-nav {
             flex: 1;
             display: flex;
@@ -109,7 +95,6 @@
             overflow-y: auto;
             overflow-x: hidden;
         }
-
         .sidebar-nav a {
             display: flex;
             align-items: center;
@@ -124,13 +109,7 @@
             font-weight: 700;
             font-size: 0.95rem;
         }
-
-        .sidebar-nav a i {
-            font-size: 1.2rem;
-            width: 22px;
-            text-align: center;
-        }
-
+        .sidebar-nav a i { font-size: 1.2rem; width: 22px; text-align: center; }
         .sidebar-nav a:hover,
         .sidebar-nav a.active {
             background: rgba(255, 255, 255, 0.08);
@@ -138,19 +117,13 @@
             transform: translateX(4px);
             box-shadow: inset 3px 0 0 var(--rojo-acento);
         }
-
-        .sidebar-nav a.active {
-            background: rgba(255, 255, 255, 0.12);
-            font-weight: 800;
-        }
-
+        .sidebar-nav a.active { background: rgba(255, 255, 255, 0.12); font-weight: 800; }
         .sidebar-nav .logout-link {
             margin-top: auto;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 16px;
             color: rgba(255, 255, 255, 0.6);
         }
-
         .sidebar-nav .logout-link:hover {
             background: rgba(229, 17, 72, 0.15);
             color: #ff6b8a;
@@ -166,7 +139,6 @@
             min-height: 100vh;
             animation: fadeInContent 0.5s ease-out;
         }
-
         @keyframes fadeInContent {
             from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
@@ -180,7 +152,6 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-
         .page-header h1 {
             font-family: var(--font-titulos);
             font-weight: 800;
@@ -188,7 +159,7 @@
             color: var(--azul-oscuro);
         }
 
-        /* Botón crear curso premium */
+        /* Botón premium */
         .btn-create-premium {
             background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
             border: none;
@@ -205,12 +176,48 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(16, 87, 136, 0.3);
         }
-
         .btn-create-premium:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(22, 43, 71, 0.35);
             filter: brightness(1.05);
         }
+
+        /* Barra de búsqueda */
+        .top-bar {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            padding: 14px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .search-wrap { position: relative; flex: 1; min-width: 200px; }
+        .search-wrap i {
+            position: absolute; left: 12px; top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8; font-size: .9rem; pointer-events: none;
+        }
+        #buscador {
+            width: 100%;
+            padding: 9px 14px 9px 36px;
+            border: 1.5px solid var(--gris);
+            border-radius: 10px;
+            font-size: .875rem;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #1e293b;
+            background: #f8fafd;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        #buscador:focus {
+            border-color: var(--azul-medio);
+            background: var(--blanco);
+            box-shadow: 0 0 0 3px rgba(16,87,136,.1);
+        }
+        #buscador::placeholder { color: #b0bec5; }
 
         /* Botones de acciones de tabla */
         .btn {
@@ -229,21 +236,16 @@
             gap: 6px;
             white-space: nowrap;
         }
-
         .acciones .btn {
             background: var(--gris);
             color: var(--azul-oscuro);
         }
-        .acciones .btn i {
-            color: var(--azul-medio);
-        }
+        .acciones .btn i { color: var(--azul-medio); }
         .acciones .btn:hover {
             background: var(--azul-medio);
             color: var(--blanco);
         }
-        .acciones .btn:hover i {
-            color: var(--blanco);
-        }
+        .acciones .btn:hover i { color: var(--blanco); }
 
         /* Tabla */
         .tabla-container {
@@ -252,18 +254,8 @@
             overflow-x: auto;
             box-shadow: var(--shadow-sm);
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 600px;
-        }
-
-        thead {
-            background: var(--azul-oscuro);
-            color: var(--blanco);
-        }
-
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        thead { background: var(--azul-oscuro); color: var(--blanco); }
         th {
             padding: 16px 18px;
             text-align: left;
@@ -272,7 +264,6 @@
             font-size: 0.85rem;
             text-transform: uppercase;
         }
-
         td {
             padding: 14px 18px;
             border-bottom: 1px solid var(--gris);
@@ -280,8 +271,7 @@
             font-size: 0.95rem;
             color: #334155;
         }
-
-        /* ===== MEJORA TIPOGRAFÍA DESCRIPCIÓN ===== */
+        /* Descripción truncada */
         td.desc-cell {
             font-family: 'Nunito Sans', sans-serif;
             font-weight: 400;
@@ -289,12 +279,6 @@
             letter-spacing: -0.01em;
             color: #1e293b;
         }
-
-        .desc-cell span, 
-        .desc-cell .ver-mas-link {
-            font-family: inherit;
-        }
-
         .ver-mas-link {
             color: var(--azul-medio);
             cursor: pointer;
@@ -303,13 +287,9 @@
             margin-left: 4px;
             transition: color 0.2s;
         }
-        .ver-mas-link:hover {
-            color: var(--rojo-acento);
-        }
+        .ver-mas-link:hover { color: var(--rojo-acento); }
 
-        tbody tr:hover td {
-            background: #f8fafc;
-        }
+        tbody tr:hover td { background: #f8fafc; }
 
         .acciones {
             display: grid;
@@ -317,147 +297,97 @@
             gap: 8px;
         }
         @media (min-width: 1201px) {
-            .acciones {
-                grid-template-columns: repeat(4, auto);
-            }
+            .acciones { grid-template-columns: repeat(4, auto); }
         }
 
         .img-curso {
-            width: 110px;
-            height: 70px;
+            width: 110px; height: 70px;
             object-fit: cover;
             border-radius: 12px;
             border: 1px solid var(--gris);
         }
 
         .sin-registros {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
-            font-style: italic;
+            text-align: center; padding: 40px; color: #64748b; font-style: italic;
         }
 
         /* ============================================
-           MODAL PREMIUM (crear/editar curso)
+           MODALES (unificados)
            ============================================ */
-        .modal-editar-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(15, 15, 26, 0.65);
             backdrop-filter: blur(10px);
             display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
+            align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
             animation: fadeIn 0.25s ease;
         }
-
-        .modal-editar-content {
+        .modal-content {
             background: #ffffff;
             border-radius: 20px;
-            width: 100%;
-            max-width: 580px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.28);
-            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 100%; max-width: 580px; max-height: 90vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 32px 80px rgba(0,0,0,.28);
+            animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
             overflow: hidden;
         }
-
-        .modal-editar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
             padding: 24px 28px 20px;
             background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
             flex-shrink: 0;
         }
-
-        .modal-editar-header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .modal-editar-icon {
-            width: 44px;
-            height: 44px;
+        .modal-header-left { display: flex; align-items: center; gap: 14px; }
+        .modal-icon {
+            width: 44px; height: 44px;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-            flex-shrink: 0;
+            background: rgba(255,255,255,.15);
+            border: 1px solid rgba(255,255,255,.2);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
         }
-
-        .modal-editar-titulo {
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            margin: 0 0 2px 0;
-            line-height: 1.2;
+        .modal-titulo {
+            font-size: 18px; font-weight: 700; color: white;
+            margin: 0 0 2px; line-height: 1.2;
         }
-
-        .modal-editar-subtitulo {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.65);
-            margin: 0;
+        .modal-subtitulo {
+            font-size: 12px; color: rgba(255,255,255,.65); margin: 0;
         }
-
-        .modal-editar-close {
-            width: 36px;
-            height: 36px;
+        .modal-close {
+            width: 36px; height: 36px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255,255,255,.2);
+            background: rgba(255,255,255,.1);
+            color: rgba(255,255,255,.8);
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s;
         }
-
-        .modal-editar-close:hover {
-            background: rgba(239, 68, 68, 0.3);
-            border-color: rgba(239, 68, 68, 0.5);
+        .modal-close:hover {
+            background: rgba(239,68,68,.3);
+            border-color: rgba(239,68,68,.5);
             color: white;
         }
-
-        .modal-editar-body {
+        .modal-body {
             padding: 24px 28px;
-            overflow-y: auto;
-            flex: 1;
+            overflow-y: auto; flex: 1;
+        }
+        .modal-footer {
+            display: flex; gap: 12px;
+            padding: 18px 28px 24px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0; background: #fafbfc;
         }
 
-        /* Layout de dos columnas */
-        .form-row-2cols {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-full-width {
-            margin-bottom: 20px;
-        }
-
-        .editar-label {
+        .form-group { margin-bottom: 20px; }
+        .form-label {
             display: block;
-            font-size: 12px;
-            font-weight: 700;
-            color: #374151;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 12px; font-weight: 700;
+            color: #374151; margin-bottom: 6px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-
-        .editar-input, .editar-textarea, select.editar-input {
+        .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 12px 14px;
             border: 2px solid #e5e7eb;
@@ -466,259 +396,139 @@
             font-family: 'Segoe UI', system-ui, sans-serif;
             color: #1e293b;
             background: #f9fafb;
-            transition: all 0.2s ease;
-            outline: none;
+            transition: all .2s ease; outline: none;
         }
-
-        .editar-input:focus, .editar-textarea:focus, select.editar-input:focus {
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
             border-color: var(--azul-medio);
             background: white;
-            box-shadow: 0 0 0 3px rgba(16, 87, 136, 0.1);
+            box-shadow: 0 0 0 3px rgba(16,87,136,.1);
         }
-
-        .editar-textarea {
-            resize: vertical;
-            min-height: 120px;
+        .form-textarea { resize: vertical; min-height: 120px; }
+        .btn-cancel {
+            flex: 1; padding: 12px 20px;
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            background: white; color: #64748b;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-
-        .modal-editar-footer {
-            display: flex;
-            gap: 12px;
-            padding: 18px 28px 24px;
-            border-top: 1px solid #f1f5f9;
-            flex-shrink: 0;
-            background: #fafbfc;
+        .btn-cancel:hover {
+            background: #fef2f2; border-color: #fecaca; color: #ef4444;
         }
-
-        .editar-btn-cancelar {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: white;
-            color: #64748b;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .editar-btn-cancelar:hover {
-            background: #fef2f2;
-            border-color: #fecaca;
-            color: #ef4444;
-        }
-
-        .editar-btn-guardar {
-            flex: 2;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 12px;
+        .btn-save {
+            flex: 2; padding: 12px 20px;
+            border: none; border-radius: 12px;
             background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
-            color: white;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.25s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 14px rgba(16, 87, 136, 0.35);
+            color: white; font-size: 14px; font-weight: 700;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(16,87,136,.35);
         }
-
-        .editar-btn-guardar:hover {
+        .btn-save:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(16, 87, 136, 0.45);
+            box-shadow: 0 6px 20px rgba(16,87,136,.45);
             filter: brightness(1.05);
         }
 
-        /* Modal de confirmación y éxito */
+        /* Modal de confirmación */
         .confirm-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
             z-index: 2100;
         }
-        .confirm-modal .confirm-content {
-            background: white;
-            padding: 35px 30px;
+        .confirm-content {
+            background: white; padding: 35px 30px;
             border-radius: 28px;
-            max-width: 450px;
-            width: 90%;
+            max-width: 450px; width: 90%;
             text-align: center;
-            animation: zoomIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+            animation: zoomIn .25s cubic-bezier(.34,1.2,.64,1);
         }
         @keyframes zoomIn {
-            from { opacity: 0; transform: scale(0.9); }
+            from { opacity: 0; transform: scale(.9); }
             to { opacity: 1; transform: scale(1); }
         }
-        .confirm-modal .confirm-content i {
-            font-size: 3.5rem;
-            color: var(--azul-medio);
-            margin-bottom: 10px;
-        }
-        .confirm-modal .confirm-content p {
-            margin: 20px 0;
-            font-size: 1.2rem;
-            color: var(--azul-oscuro);
-            font-weight: 600;
-        }
-        .confirm-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 15px;
-        }
-        .confirm-buttons .btn {
-            min-width: 120px;
-        }
+        .confirm-content i { font-size: 3.5rem; color: var(--azul-medio); margin-bottom: 10px; }
+        .confirm-content p { margin: 20px 0; font-size: 1.2rem; color: var(--azul-oscuro); font-weight: 600; }
+        .confirm-buttons { display: flex; gap: 20px; justify-content: center; margin-top: 15px; }
+        .confirm-buttons .btn { min-width: 120px; }
 
+        /* Modal de éxito */
         .success-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2200;
-            transition: opacity 0.5s ease;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 2200; transition: opacity 0.5s ease;
         }
-        .success-modal .success-content {
-            background: white;
-            padding: 35px 30px;
+        .success-content {
+            background: white; padding: 35px 30px;
             border-radius: 28px;
-            max-width: 450px;
-            width: 90%;
+            max-width: 450px; width: 90%;
             text-align: center;
-            animation: zoomIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+            animation: zoomIn .25s cubic-bezier(.34,1.2,.64,1);
         }
-        .success-modal .success-content i {
-            font-size: 3.5rem;
-            color: var(--azul-medio);
-            margin-bottom: 10px;
-        }
-        .success-modal .success-content p {
-            margin: 20px 0;
-            font-size: 1.2rem;
-            color: var(--azul-oscuro);
-            font-weight: 600;
-        }
-        .success-modal.fade-out {
-            opacity: 0;
-        }
+        .success-content i { font-size: 3.5rem; color: var(--azul-medio); margin-bottom: 10px; }
+        .success-content p { margin: 20px 0; font-size: 1.2rem; color: var(--azul-oscuro); font-weight: 600; }
+        .success-modal.fade-out { opacity: 0; }
 
-        .confirm-buttons .btn {
-            min-width: 120px;
-            transition: all 0.3s ease;
-            background: var(--gris);
-            color: var(--azul-oscuro);
-            border: 2px solid var(--gris);
-            border-radius: 12px;
-            font-weight: 600;
-            padding: 10px 24px;
-        }
-        .confirm-buttons .btn:hover {
-            background: var(--azul-medio);
-            color: white;
-            border-color: var(--azul-medio);
-        }
-
-        /* ===== MODAL DESCRIPCIÓN MEJORADO ===== */
+        /* Modal de descripción completa */
         .descripcion-modal-content {
             background: white;
             border-radius: 28px;
-            max-width: 600px;
-            width: 90%;
-            text-align: left;
-            position: relative;
+            max-width: 600px; width: 90%;
+            text-align: left; position: relative;
             padding: 30px 32px 32px 32px;
             box-shadow: var(--shadow-lg);
-            animation: zoomIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+            animation: zoomIn .25s cubic-bezier(.34,1.2,.64,1);
         }
-
         .descripcion-close-btn {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            width: 36px;
-            height: 36px;
+            position: absolute; top: 18px; right: 18px;
+            width: 36px; height: 36px;
             border-radius: 12px;
             background: #f1f5f9;
             border: 1px solid #e2e8f0;
             color: #475569;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            font-size: 18px;
-            z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease; font-size: 18px; z-index: 10;
         }
         .descripcion-close-btn:hover {
-            background: #fee2e2;
-            border-color: #fecaca;
-            color: #ef4444;
+            background: #fee2e2; border-color: #fecaca; color: #ef4444;
             transform: scale(1.05);
         }
-
         .descripcion-modal-content h3 {
             margin: 0 0 20px 0;
             font-family: var(--font-titulos);
-            font-weight: 800;
-            font-size: 1.5rem;
-            color: var(--azul-oscuro);
+            font-weight: 800; font-size: 1.5rem; color: var(--azul-oscuro);
             padding-right: 40px;
         }
-
         .descripcion-text {
             font-family: 'Nunito Sans', sans-serif;
-            font-weight: 400;
-            line-height: 1.7;
-            letter-spacing: -0.01em;
-            color: #1e293b;
-            font-size: 1rem;
-            white-space: pre-wrap;
-            margin-top: 8px;
+            font-weight: 400; line-height: 1.7; letter-spacing: -0.01em;
+            color: #1e293b; font-size: 1rem; white-space: pre-wrap; margin-top: 8px;
         }
 
-        /* Partículas decorativas */
-        .bg-particles {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 350px;
-            height: 350px;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.04;
-        }
-        .bg-particle {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--azul-medio);
-            animation: floatParticle 8s infinite ease-in-out;
-        }
-        .bg-particle:nth-child(1) { width: 60px; height: 60px; top: 10%; right: 20%; animation-delay: 0s; }
-        .bg-particle:nth-child(2) { width: 40px; height: 40px; top: 50%; right: 5%; animation-delay: 2s; }
-        .bg-particle:nth-child(3) { width: 80px; height: 80px; top: 70%; right: 30%; animation-delay: 4s; }
-        .bg-particle:nth-child(4) { width: 30px; height: 30px; top: 30%; right: 50%; animation-delay: 1s; }
-
+        /* Partículas */
+        .bg-particles { position: fixed; top: 0; right: 0; width: 350px; height: 350px; pointer-events: none; z-index: 0; opacity: .04; }
+        .bg-particle  { position: absolute; border-radius: 50%; background: var(--azul-medio); animation: floatParticle 8s infinite ease-in-out; }
+        .bg-particle:nth-child(1) { width:60px; height:60px; top:10%; right:20%; animation-delay:0s; }
+        .bg-particle:nth-child(2) { width:40px; height:40px; top:50%; right:5%;  animation-delay:2s; }
+        .bg-particle:nth-child(3) { width:80px; height:80px; top:70%; right:30%; animation-delay:4s; }
+        .bg-particle:nth-child(4) { width:30px; height:30px; top:30%; right:50%; animation-delay:1s; }
         @keyframes floatParticle {
-            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
-            25% { transform: translateY(-40px) translateX(20px) scale(1.3); }
-            50% { transform: translateY(-10px) translateX(-15px) scale(0.8); }
-            75% { transform: translateY(-50px) translateX(10px) scale(1.2); }
+            0%,100% { transform: translateY(0) translateX(0) scale(1); }
+            25%     { transform: translateY(-40px) translateX(20px) scale(1.3); }
+            50%     { transform: translateY(-10px) translateX(-15px) scale(.8); }
+            75%     { transform: translateY(-50px) translateX(10px) scale(1.2); }
         }
+
+        @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+        /* Fila sin resultados */
+        #fila-sin-resultados { display: none; }
+        #fila-sin-resultados td { text-align: center; padding: 40px; color: #94a3b8; font-style: italic; }
+        #fila-sin-resultados i { font-size: 2rem; display: block; margin-bottom: 8px; color: #cbd5e0; }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -727,28 +537,18 @@
             .sidebar-nav a { justify-content: center; padding: 14px; gap: 0; }
             .sidebar-nav a i { font-size: 1.3rem; }
             .main-content { margin-left: var(--sidebar-collapsed); padding: 20px 16px; }
-            .sidebar-brand { padding: 16px 8px 8px 8px; }
+            .sidebar-brand { padding: 16px 8px 8px; }
             .logo-wrapper img { max-height: 58px; }
             .page-header { flex-direction: column; align-items: stretch; }
             .btn-create-premium { justify-content: center; }
-            .form-row-2cols { grid-template-columns: 1fr; gap: 15px; }
+            .acciones { grid-template-columns: 1fr 1fr; }
             .descripcion-modal-content { padding: 24px 20px 28px; }
             .descripcion-close-btn { top: 12px; right: 12px; width: 32px; height: 32px; }
         }
         @media (max-width: 480px) {
             .sidebar { width: 56px; }
             .main-content { margin-left: 56px; padding: 14px 10px; }
-            .sidebar-brand { padding: 12px 4px 6px 4px; }
             .logo-wrapper img { max-height: 46px; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -764,14 +564,17 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="logo-wrapper" title="Dashboard">
-                <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca">
+                <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo de la marca">
             </div>
         </div>
-
         <nav class="sidebar-nav">
             <a href="{% url 'panel_admin' %}">
                 <i class="fa-solid fa-gauge-high"></i>
                 <span>Panel de Administración</span>
+            </a>
+            <a href="{% url 'gestionar_usuarios' %}">
+                <i class="fa-solid fa-users"></i>
+                <span>Gestionar Usuarios</span>
             </a>
             <a href="{% url 'gestionar_cursos' %}" class="active">
                 <i class="fa-solid fa-chalkboard-user"></i>
@@ -781,12 +584,14 @@
                 <i class="fa-solid fa-pen-to-square"></i>
                 <span>Administrar Noticias</span>
             </a>
-
-             <a href="{% url 'subir_archivo' %}" >
-                    <i class="fa-solid fa-file"></i>
-                    <span>Subir Archivo</span>
-                </a>
-                
+            <a href="{% url 'estadisticas_cursos' %}">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Reporte Cursos</span>
+            </a>
+            <a href="{% url 'subir_archivo' %}">
+                <i class="fa-solid fa-file"></i>
+                <span>Subir Archivo</span>
+            </a>
             <a href="{% url 'logout' %}" class="logout-link">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Cerrar Sesión</span>
@@ -802,6 +607,17 @@
             </button>
         </div>
 
+        <!-- BARRA DE BÚSQUEDA -->
+        <div class="top-bar">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="buscador" type="text"
+                       placeholder="Buscar curso por título…"
+                       oninput="filtrarCursos(this.value)"
+                       autocomplete="off">
+            </div>
+        </div>
+
         <div class="tabla-container">
             <table>
                 <thead>
@@ -813,10 +629,11 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody-cursos">
                     {% for curso in cursos %}
                     <tr data-id="{{ curso.id_curso }}"
-                        data-titulo="{{ curso.titulo }}"
+                        data-titulo="{{ curso.titulo|lower }}"
+                        data-titulo-real="{{ curso.titulo }}"
                         data-descripcion="{{ curso.descripcion }}"
                         data-estado="{{ curso.estado }}"
                         data-imagen="{% for c in curso.contenidos.all %}{% if c.tipo_con == 'imagen' %}{{ c.url_recurso }}{% endif %}{% endfor %}">
@@ -840,21 +657,21 @@
                         <td>{{ curso.estado }}</td>
                         <td>
                             <div class="acciones">
-                                <button class="btn btn-edit" onclick="editarCurso(this)">
+                                <button class="btn" onclick="editarCurso(this)">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
-                                <a href="{% url 'eliminar_curso' curso.id_curso %}" class="btn btn-delete" data-confirm="true">
+                                <button class="btn btn-danger" onclick="confirmarEliminar(this)">
                                     <i class="fas fa-trash-alt"></i> Eliminar
-                                </a>
-                                <a href="{% url 'agregar_contenido' curso.id_curso %}" class="btn btn-content">
+                                </button>
+                                <a href="{% url 'agregar_contenido' curso.id_curso %}" class="btn">
                                     <i class="fas fa-folder-plus"></i> Contenido
                                 </a>
                                 {% if curso.quiz %}
-                                    <a href="{% url 'gestion_quiz' curso.id_curso %}" class="btn btn-quiz">
+                                    <a href="{% url 'gestion_quiz' curso.id_curso %}" class="btn">
                                         <i class="fas fa-chart-bar"></i> Ver Quiz
                                     </a>
                                 {% else %}
-                                    <a href="{% url 'crear_quiz' curso.id_curso %}" class="btn btn-quiz">
+                                    <a href="{% url 'crear_quiz' curso.id_curso %}" class="btn">
                                         <i class="fas fa-plus-circle"></i> Crear Quiz
                                     </a>
                                 {% endif %}
@@ -868,73 +685,80 @@
                         </td>
                     </tr>
                     {% endfor %}
+                    <!-- Fila de "sin resultados" -->
+                    <tr id="fila-sin-resultados">
+                        <td colspan="5">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            No se encontraron cursos con ese nombre.
+                        </td>
+                    </tr>
                 </tbody>
-            </div>
+            </table>
         </div>
     </main>
 
-    <!-- MODAL PREMIUM PARA CREAR/EDITAR CURSO -->
-    <div id="modalCurso" class="modal-editar-overlay">
-        <div class="modal-editar-content">
-            <div class="modal-editar-header">
-                <div class="modal-editar-header-left">
-                    <div class="modal-editar-icon"><i class="fas fa-plus-circle"></i></div>
+    <!-- MODAL PARA CREAR/EDITAR CURSO -->
+    <div id="modalCurso" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-icon"><i class="fas fa-plus-circle"></i></div>
                     <div>
-                        <h3 class="modal-editar-titulo" id="modalTitle">Crear Curso</h3>
-                        <p class="modal-editar-subtitulo" id="modalSubtitle">Completa los campos y guarda el curso</p>
+                        <h3 class="modal-titulo" id="modalTitle">Crear Curso</h3>
+                        <p class="modal-subtitulo" id="modalSubtitle">Completa los campos y guarda el curso</p>
                     </div>
                 </div>
-                <button class="modal-editar-close" onclick="cerrarModalCurso()">
+                <button class="modal-close" onclick="cerrarModalCurso()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-editar-body">
+            <div class="modal-body">
                 <form method="POST" id="cursoForm">
                     {% csrf_token %}
-                    <div class="form-row-2cols">
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div>
-                            <label class="editar-label">Estado</label>
+                            <label class="form-label">Estado</label>
                             {{ form.estado }}
                         </div>
                         <div>
-                            <label class="editar-label">Título</label>
+                            <label class="form-label">Título</label>
                             {{ form.titulo }}
                         </div>
                     </div>
-                    <div class="form-full-width">
-                        <label class="editar-label">Descripción</label>
+                    <div class="form-group">
+                        <label class="form-label">Descripción</label>
                         {{ form.descripcion }}
                     </div>
-                    <div class="form-full-width">
-                        <label class="editar-label">URL Imagen (SharePoint/OneDrive)</label>
-                        <input type="text" name="imagen_url" class="editar-input" placeholder="Pega la URL de imagen" id="id_imagen_url">
+                    <div class="form-group">
+                        <label class="form-label">URL Imagen (SharePoint/OneDrive)</label>
+                        <input type="text" name="imagen_url" class="form-input" placeholder="Pega la URL de imagen" id="id_imagen_url">
                     </div>
                 </form>
             </div>
-            <div class="modal-editar-footer">
-                <button class="editar-btn-cancelar" onclick="cerrarModalCurso()">
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="cerrarModalCurso()">
                     <i class="fas fa-times"></i> Cancelar
                 </button>
-                <button class="editar-btn-guardar" id="guardarCursoBtn">
+                <button class="btn-save" id="guardarCursoBtn">
                     <i class="fas fa-save"></i> Guardar Curso
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de confirmación -->
+    <!-- Modal de confirmación genérico -->
     <div id="confirmModal" class="confirm-modal">
         <div class="confirm-content">
             <i class="fas fa-question-circle"></i>
-            <p id="confirmMessage">¿Aceptas guardar los cambios del curso?</p>
+            <p id="confirmMessage">¿Estás seguro?</p>
             <div class="confirm-buttons">
-                <button class="btn btn-primary" id="confirmYes">Sí, aceptar</button>
-                <button class="btn btn-secondary" id="confirmNo">Cancelar</button>
+                <button class="btn" id="confirmYes">Sí, aceptar</button>
+                <button class="btn" id="confirmNo">Cancelar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de éxito -->
+    <!-- Modal de éxito genérico -->
     <div id="successModal" class="success-modal">
         <div class="success-content">
             <i class="fas fa-check-circle"></i>
@@ -942,7 +766,7 @@
         </div>
     </div>
 
-    <!-- MODAL DESCRIPCIÓN COMPLETO (MEJORADO) -->
+    <!-- MODAL DESCRIPCIÓN COMPLETO -->
     <div id="descripcionModal" class="confirm-modal" style="z-index: 2300;">
         <div class="descripcion-modal-content">
             <button class="descripcion-close-btn" onclick="document.getElementById('descripcionModal').style.display='none'">
@@ -953,26 +777,35 @@
         </div>
     </div>
 
+    <!-- Formulario oculto para eliminación -->
+    <form id="deleteForm" method="post" action="{% url 'eliminar_curso' 0 %}" style="display: none;">
+        {% csrf_token %}
+    </form>
+
     <script>
         // Elementos DOM
-        const modalCurso = document.getElementById('modalCurso');
-        const cursoForm = document.getElementById('cursoForm');
-        const modalTitleSpan = document.getElementById('modalTitle');
+        const modalCurso        = document.getElementById('modalCurso');
+        const cursoForm         = document.getElementById('cursoForm');
+        const modalTitleSpan    = document.getElementById('modalTitle');
         const modalSubtitleSpan = document.getElementById('modalSubtitle');
-        const btnCrearCurso = document.getElementById('btnCrearCurso');
-        const guardarCursoBtn = document.getElementById('guardarCursoBtn');
-        const confirmModal = document.getElementById('confirmModal');
-        const confirmMessage = document.getElementById('confirmMessage');
-        const successModal = document.getElementById('successModal');
-        const successMessageSpan = document.getElementById('successMessage');
-        const descripcionModal = document.getElementById('descripcionModal');
+        const btnCrearCurso     = document.getElementById('btnCrearCurso');
+        const guardarCursoBtn   = document.getElementById('guardarCursoBtn');
+        const confirmModal      = document.getElementById('confirmModal');
+        const confirmMessage    = document.getElementById('confirmMessage');
+        const successModal      = document.getElementById('successModal');
+        const successMessageSpan= document.getElementById('successMessage');
+        const descripcionModal  = document.getElementById('descripcionModal');
         const fullDescripcionText = document.getElementById('fullDescripcionText');
+        const tbodyCursos       = document.getElementById('tbody-cursos');
+        const filaSinResultados = document.getElementById('fila-sin-resultados');
+        const deleteForm        = document.getElementById('deleteForm');
+
         let confirmCallback = null;
         let isEditMode = false;
 
-        // Función para mostrar mensaje de éxito (modal azul con fade)
+        // ---- Funciones de utilidad ----
         function showSuccess(message) {
-            successMessageSpan.innerText = message;
+            successMessageSpan.textContent = message;
             successModal.style.display = 'flex';
             successModal.classList.remove('fade-out');
             setTimeout(() => {
@@ -984,28 +817,32 @@
         }
 
         function showConfirm(message, onConfirm) {
-            confirmMessage.innerText = message;
+            confirmMessage.textContent = message;
             confirmModal.style.display = 'flex';
             confirmCallback = onConfirm;
         }
 
-        document.getElementById('confirmYes').onclick = () => {
-            confirmModal.style.display = 'none';
-            if (confirmCallback) confirmCallback();
-            confirmCallback = null;
-        };
-        document.getElementById('confirmNo').onclick = () => {
-            confirmModal.style.display = 'none';
-            confirmCallback = null;
-        };
+        // ---- Filtro de búsqueda ----
+        function filtrarCursos(termino) {
+            const q = termino.toLowerCase().trim();
+            const filas = tbodyCursos.querySelectorAll('tr[data-titulo]');
+            let visibles = 0;
+            filas.forEach(fila => {
+                const titulo = fila.dataset.titulo || '';
+                const match = titulo.includes(q);
+                fila.style.display = match ? '' : 'none';
+                if (match) visibles++;
+            });
+            filaSinResultados.style.display = (visibles === 0 && filas.length > 0) ? 'table-row' : 'none';
+        }
 
-        // Abrir modal para crear
+        // ---- Modales ----
         function abrirModalCrear() {
             cursoForm.reset();
             cursoForm.action = "{% url 'gestionar_cursos' %}";
-            modalTitleSpan.innerText = 'Crear Curso';
-            modalSubtitleSpan.innerText = 'Completa los campos y guarda el curso';
-            document.querySelector('.modal-editar-icon i').className = 'fas fa-plus-circle';
+            modalTitleSpan.textContent = 'Crear Curso';
+            modalSubtitleSpan.textContent = 'Completa los campos y guarda el curso';
+            document.querySelector('.modal-icon i').className = 'fas fa-plus-circle';
             document.getElementById('id_imagen_url').value = '';
             isEditMode = false;
             modalCurso.style.display = 'flex';
@@ -1016,18 +853,18 @@
             const estadoField = document.getElementById('id_estado');
             const tituloField = document.getElementById('id_titulo');
             const descripcionField = document.getElementById('id_descripcion');
-            if (estadoField) estadoField.classList.add('editar-input');
-            if (tituloField) tituloField.classList.add('editar-input');
-            if (descripcionField) descripcionField.classList.add('editar-textarea');
+            if (estadoField) estadoField.className = 'form-select';
+            if (tituloField) tituloField.className = 'form-input';
+            if (descripcionField) descripcionField.className = 'form-textarea';
         }
 
         function editarCurso(btn) {
             const row = btn.closest('tr');
-            const idCurso = row.getAttribute('data-id');
-            const titulo = row.getAttribute('data-titulo');
-            const descripcion = row.getAttribute('data-descripcion');
-            const estado = row.getAttribute('data-estado');
-            const imagenUrl = row.getAttribute('data-imagen') || '';
+            const idCurso = row.dataset.id;
+            const titulo = row.dataset.tituloReal || row.querySelector('td:nth-child(2)').textContent.trim();
+            const descripcion = row.dataset.descripcion;
+            const estado = row.dataset.estado;
+            const imagenUrl = row.dataset.imagen || '';
 
             document.getElementById('id_estado').value = estado;
             document.getElementById('id_titulo').value = titulo;
@@ -1035,9 +872,9 @@
             document.getElementById('id_imagen_url').value = imagenUrl;
 
             cursoForm.action = "{% url 'editar_curso' 0 %}".replace('0', idCurso);
-            modalTitleSpan.innerText = 'Editar Curso';
-            modalSubtitleSpan.innerText = 'Modifica los campos y guarda los cambios';
-            document.querySelector('.modal-editar-icon i').className = 'fas fa-edit';
+            modalTitleSpan.textContent = 'Editar Curso';
+            modalSubtitleSpan.textContent = 'Modifica los campos y guarda los cambios';
+            document.querySelector('.modal-icon i').className = 'fas fa-edit';
             isEditMode = true;
             modalCurso.style.display = 'flex';
             aplicarClasesInputs();
@@ -1048,6 +885,17 @@
             isEditMode = false;
         }
 
+        function confirmarEliminar(btn) {
+            const row = btn.closest('tr');
+            const idCurso = row.dataset.id;
+            const titulo = row.dataset.tituloReal || row.querySelector('td:nth-child(2)').textContent.trim();
+            showConfirm(`¿Estás seguro de eliminar el curso "${titulo}"? Esta acción no se puede deshacer.`, () => {
+                deleteForm.action = "{% url 'eliminar_curso' 0 %}".replace('0', idCurso);
+                deleteForm.submit();
+            });
+        }
+
+        // ---- Eventos ----
         btnCrearCurso.addEventListener('click', abrirModalCrear);
 
         guardarCursoBtn.addEventListener('click', (e) => {
@@ -1061,14 +909,14 @@
             }
         });
 
-        document.querySelectorAll('.btn-delete[data-confirm="true"]').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const url = link.getAttribute('href');
-                showConfirm('¿Estás seguro de que quieres eliminar este curso? Esta acción no se puede deshacer.', () => {
-                    window.location.href = url;
-                });
-            });
+        document.getElementById('confirmYes').addEventListener('click', () => {
+            confirmModal.style.display = 'none';
+            if (confirmCallback) confirmCallback();
+            confirmCallback = null;
+        });
+        document.getElementById('confirmNo').addEventListener('click', () => {
+            confirmModal.style.display = 'none';
+            confirmCallback = null;
         });
 
         window.onclick = function(event) {
@@ -1078,31 +926,21 @@
             if (event.target == descripcionModal) descripcionModal.style.display = 'none';
         };
 
-        {% if messages %}
-            {% for message in messages %}
-                showSuccess('{{ message }}');
-            {% endfor %}
-        {% endif %}
-
-        // Procesar descripciones: truncar a 200 caracteres y añadir "... Ver más" como enlace
+        // Procesar descripciones (truncar y añadir "Ver más")
         function procesarDescripciones() {
             const maxChars = 150;
             document.querySelectorAll('.desc-cell').forEach(cell => {
                 let fullText = cell.textContent.trim();
-                // Limpiar si ya tiene enlace previo
                 if (cell.getAttribute('data-full-text')) {
                     fullText = cell.getAttribute('data-full-text');
                 } else {
                     cell.setAttribute('data-full-text', fullText);
                 }
-                
                 if (fullText.length > maxChars) {
                     const truncated = fullText.substring(0, maxChars);
-                    cell.innerHTML = ''; 
-                    
+                    cell.innerHTML = '';
                     const spanTexto = document.createElement('span');
                     spanTexto.textContent = truncated + '... ';
-                    
                     const enlaceVerMas = document.createElement('span');
                     enlaceVerMas.textContent = 'Ver más';
                     enlaceVerMas.className = 'ver-mas-link';
@@ -1111,16 +949,15 @@
                         fullDescripcionText.textContent = fullText;
                         descripcionModal.style.display = 'flex';
                     });
-                    
                     cell.appendChild(spanTexto);
                     cell.appendChild(enlaceVerMas);
                 }
             });
         }
 
-        // Animación de entrada de filas y activar truncado
+        // Animación de entrada y mensajes de Django
         document.addEventListener('DOMContentLoaded', () => {
-            const rows = document.querySelectorAll('tbody tr');
+            const rows = document.querySelectorAll('#tbody-cursos tr[data-titulo]');
             rows.forEach((row, index) => {
                 row.style.opacity = '0';
                 row.style.transform = 'translateY(10px)';
@@ -1136,7 +973,14 @@
             }
 
             procesarDescripciones();
+
+            {% if messages %}
+                {% for message in messages %}
+                    showSuccess('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
         });
     </script>
+
 </body>
 </html>

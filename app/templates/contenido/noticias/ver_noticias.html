@@ -532,6 +532,10 @@
                     <i class="fa-solid fa-gauge-high"></i>
                     <span>Panel de Administración</span>
                 </a>
+                <a href="{% url 'gestionar_usuarios' %}">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Gestionar Usuarios</span>
+                </a>
                 <a href="{% url 'gestionar_cursos' %}">
                     <i class="fa-solid fa-chalkboard-user"></i>
                     <span>Gestionar Cursos</span>
@@ -539,6 +543,11 @@
                 <a href="{% url 'administrar_noticias' %}" class="active">
                     <i class="fa-solid fa-pen-to-square"></i>
                     <span>Volver a Admin Noticias</span>
+                </a>
+
+                <a href="{% url 'estadisticas_cursos' %}">
+                    <i class="fa-solid fa-chart-column"></i>
+                    <span>Reporte Cursos</span>
                 </a>
 
                 <a href="{% url 'subir_archivo' %}" >

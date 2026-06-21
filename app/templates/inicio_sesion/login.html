@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión · RRHH</title>
+    <title>Iniciar Sesión</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -23,6 +23,9 @@
             --radius-sm:    10px;
             --shadow:       0 20px 48px rgba(22,43,71,.16), 0 8px 20px rgba(22,43,71,.1);
             --shadow-sm:    0 4px 16px rgba(22,43,71,.1), 0 2px 6px rgba(22,43,71,.06);
+            --success-bg:   #e0f2e9;
+            --success-border:#86d0b1;
+            --success-text:  #0a5c3e;
         }
 
         * {
@@ -239,10 +242,8 @@
             height: 18px;
         }
 
-        .error-message {
-            background: #fce8ee;
-            border: 1px solid #fca5a5;
-            color: #7f1d2e;
+        /* Mensajes de error y éxito */
+        .error-message, .success-message {
             padding: 12px 16px;
             border-radius: var(--radius-sm);
             font-size: 0.85rem;
@@ -251,13 +252,28 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 20px;
+        }
+        .error-message {
+            background: #fce8ee;
+            border: 1px solid #fca5a5;
+            color: #7f1d2e;
             animation: shake 0.4s ease;
         }
-        .error-message svg {
+        .success-message {
+            background: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-text);
+        }
+        .error-message svg, .success-message svg {
             width: 18px;
             height: 18px;
             flex-shrink: 0;
+        }
+        .error-message svg {
             fill: #e51148;
+        }
+        .success-message svg {
+            fill: #0a5c3e;
         }
 
         @keyframes shake {
@@ -276,6 +292,15 @@
             font-weight: 600;
         }
 
+        .link-recuperar {
+            color: #6c757d;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .link-recuperar:hover {
+            color: #dc3545;
+        }
+
         @media (max-width: 480px) {
             .login-card {
                 padding: 28px 20px 24px;
@@ -291,22 +316,31 @@
             <!-- Logo -->
             <div class="logo-area">
                 <img src="{% static 'img/logo_fondo_blanco.png' %}" alt="Logo RRHH" class="logo-img">
-                <div class="logo-sub">Universidad S&P </div>
+                <div class="logo-sub">Universidad S&P</div>
             </div>
 
-            <!-- Mensajes de error desde Django messages -->
+            <!-- Mensajes de Django (error y éxito) -->
             {% if messages %}
                 {% for message in messages %}
-                    <div class="error-message">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                        </svg>
-                        {{ message }}
-                    </div>
+                    {% if message.tags == 'success' %}
+                        <div class="success-message">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div class="error-message">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                            {{ message }}
+                        </div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
 
-            <!-- Formulario -->
+            <!-- Formulario de inicio de sesión -->
             <form method="POST">
                 {% csrf_token %}
 
@@ -346,6 +380,12 @@
                 </button>
             </form>
 
+            <div style="text-align:center; margin-top:15px;">
+                <a href="{% url 'solicitar_recuperacion' %}" class="link-recuperar">
+                    ¿Olvidaste tu contraseña?
+                </a>
+            </div>
+            
             <div class="footer-note">
                 UNIVERSIDAD CORPORATIVA S&P
             </div>

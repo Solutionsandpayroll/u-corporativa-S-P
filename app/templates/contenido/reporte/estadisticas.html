@@ -1,0 +1,1056 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas de Cursos</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Calibri:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --azul-oscuro:       #162b47;
+            --azul-medio:        #105788;
+            --rojo-acento:       #e51148;
+            --blanco:            #ffffff;
+            --gris:              #e0e5e5;
+            --negro:             #000000;
+            --sidebar-width:     250px;
+            --sidebar-collapsed: 70px;
+            --transition-speed:  0.3s;
+            --card-radius:       16px;
+            --shadow-sm:         0 2px 8px  rgba(22,43,71,.08);
+            --shadow-md:         0 6px 20px rgba(22,43,71,.12);
+            --shadow-lg:         0 12px 32px rgba(22,43,71,.18);
+            --font-titulos:      'Nunito Sans', sans-serif;
+            --font-destacados:   'Calibri', 'Trebuchet MS', sans-serif;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f6f8;
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 1000;
+            transition: width var(--transition-speed) cubic-bezier(.4,0,.2,1);
+            box-shadow: 4px 0 24px rgba(22,43,71,.25);
+            overflow: hidden;
+        }
+        .sidebar-brand {
+            display: flex;
+            justify-content: center;
+            padding: 20px 16px 12px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            margin-bottom: 8px;
+        }
+        .logo-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform .3s ease, filter .3s ease;
+            cursor: pointer;
+        }
+        .logo-wrapper:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 0 12px rgba(229,17,72,.4));
+        }
+        .logo-wrapper img {
+            width: 100%; height: auto; max-height: 78px;
+            object-fit: contain; display: block;
+        }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 8px 12px;
+            gap: 4px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: rgba(255,255,255,.8);
+            padding: 12px 14px;
+            border-radius: 10px;
+            transition: all .25s ease;
+            white-space: nowrap;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: .95rem;
+        }
+        .sidebar-nav a i { font-size: 1.2rem; width: 22px; text-align: center; }
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,.08);
+            color: var(--blanco);
+            transform: translateX(4px);
+            box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+        .sidebar-nav a.active { background: rgba(255,255,255,.12); font-weight: 800; }
+        .sidebar-nav .logout-link {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,.1);
+            padding-top: 16px;
+            color: rgba(255,255,255,.6);
+        }
+        .sidebar-nav .logout-link:hover {
+            background: rgba(229,17,72,.15);
+            color: #ff6b8a;
+            box-shadow: inset 3px 0 0 var(--rojo-acento);
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px 36px;
+            transition: margin-left var(--transition-speed) ease;
+            min-height: 100vh;
+            animation: fadeInContent .5s ease-out;
+        }
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .page-header h1 {
+            font-family: var(--font-titulos);
+            font-weight: 800;
+            font-size: 2rem;
+            color: var(--azul-oscuro);
+        }
+
+        .top-bar {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            padding: 14px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .search-wrap { position: relative; flex: 1; min-width: 200px; }
+        .search-wrap i {
+            position: absolute; left: 12px; top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8; font-size: .9rem; pointer-events: none;
+        }
+        #buscador {
+            width: 100%;
+            padding: 9px 14px 9px 36px;
+            border: 1.5px solid var(--gris);
+            border-radius: 10px;
+            font-size: .875rem;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #1e293b;
+            background: #f8fafd;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        #buscador:focus {
+            border-color: var(--azul-medio);
+            background: var(--blanco);
+            box-shadow: 0 0 0 3px rgba(16,87,136,.1);
+        }
+        #buscador::placeholder { color: #b0bec5; }
+
+        .periodo-label {
+            font-size: .875rem;
+            color: #64748b;
+            white-space: nowrap;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+        }
+        .periodo-label strong { color: var(--azul-oscuro); }
+
+        .btn-create-premium {
+            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
+            border: none;
+            padding: 11px 22px;
+            border-radius: 40px;
+            color: white;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: .875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all .3s ease;
+            box-shadow: 0 4px 12px rgba(16,87,136,.3);
+            white-space: nowrap;
+        }
+        .btn-create-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22,43,71,.35);
+            filter: brightness(1.05);
+        }
+
+        /* TABLA */
+        .tabla-container {
+            background: var(--blanco);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .tabla-overflow { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 680px; }
+
+        /* ── THEAD: una sola fila, todo en azul oscuro, texto blanco ── */
+        thead { background: var(--azul-oscuro); }
+
+        thead tr th {
+            padding: 16px 18px;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--blanco);
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 2px solid rgba(255,255,255,.12);
+        }
+
+        /* La columna "Curso" se alinea a la izquierda */
+        thead tr th.th-curso { text-align: left; }
+
+        /* Fila principal */
+        tbody tr.fila-principal {
+            border-bottom: 1px solid var(--gris);
+            cursor: pointer;
+            transition: background .15s ease;
+        }
+        tbody tr.fila-principal:hover td { background: #f8fafc; }
+        tbody tr.fila-principal:active td { background: #EBF3FB; }
+
+        tbody tr.fila-detalle {
+            display: none;
+            background: #f4f8fd;
+            border-bottom: 1px solid #dde3ea;
+        }
+        tbody tr.fila-detalle.abierta {
+            display: table-row;
+            animation: slideDown .22s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        tr.fila-oculta { display: none !important; }
+
+        #fila-sin-resultados { display: none; }
+        #fila-sin-resultados td {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+            font-style: italic;
+            font-size: .9rem;
+        }
+        #fila-sin-resultados i { font-size: 2rem; display: block; margin-bottom: 8px; color: #cbd5e0; }
+
+        td {
+            padding: 14px 18px;
+            vertical-align: middle;
+            font-size: .9rem;
+            color: #334155;
+            text-align: center;
+        }
+        td.td-name { text-align: left; font-family: var(--font-titulos); font-weight: 700; color: #1e293b; }
+        td.td-date { color: #64748b; font-size: .82rem; text-align: center; }
+
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px; height: 20px;
+            border-radius: 6px;
+            border: 1.5px solid #c3d9ef;
+            color: var(--azul-medio);
+            font-size: .65rem;
+            margin-right: 8px;
+            transition: transform .2s ease, background .2s ease;
+            user-select: none;
+        }
+        tr.abierta-principal .toggle-icon {
+            transform: rotate(90deg);
+            background: #EBF3FB;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 12px;
+            border-radius: 99px;
+            font-size: .75rem;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+        }
+        .badge-blue   { background: #dbeafe; color: #1e40af; }
+        .badge-green  { background: #d1fae5; color: #065f46; }
+        .badge-orange { background: #ffedd5; color: #9a3412; }
+        .badge-red    { background: #fee2e2; color: #991b1b; }
+        .badge-yes    { background: #d1fae5; color: #065f46; }
+        .badge-no     { background: #fee2e2; color: #991b1b; }
+        .badge-sm     { padding: 2px 9px; font-size: .72rem; }
+
+        /* HISTORIAL EXPANDIDO */
+        .hist-wrap { padding: 16px 18px 18px 48px; }
+        .hist-titulo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-destacados);
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--azul-medio);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 12px;
+        }
+        .hist-cards { display: flex; gap: 10px; flex-wrap: wrap; }
+        .hist-card {
+            background: var(--blanco);
+            border: 1.5px solid var(--gris);
+            border-radius: 12px;
+            padding: 12px 16px;
+            min-width: 136px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .hist-card:hover {
+            border-color: var(--azul-medio);
+            box-shadow: var(--shadow-sm);
+        }
+        .hist-card-mes {
+            font-family: var(--font-destacados);
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--azul-medio);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            border-bottom: 1px solid #EBF3FB;
+            padding-bottom: 7px;
+        }
+        .hist-stat { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .hist-stat .lbl { font-size: .69rem; color: #94a3b8; }
+        .hist-sin-datos { font-size: .875rem; color: #94a3b8; font-style: italic; }
+
+        /* MODAL EXCEL */
+        .modal-editar-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15,15,26,.65);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 2000;
+            padding: 40px 20px;
+            animation: fadeIn .25s ease;
+        }
+        .modal-editar-overlay.active { display: flex; }
+        .modal-editar-content {
+            background: var(--blanco);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 32px 80px rgba(0,0,0,.28);
+            animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
+            overflow: hidden;
+        }
+        .modal-editar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 26px 18px;
+            background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
+            flex-shrink: 0;
+        }
+        .modal-editar-header-left { display: flex; align-items: center; gap: 14px; }
+        .modal-editar-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.15);
+            border: 1px solid rgba(255,255,255,.2);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+        .modal-editar-titulo { font-size: 17px; font-weight: 700; color: white; margin: 0 0 2px; line-height: 1.2; }
+        .modal-editar-subtitulo { font-size: 12px; color: rgba(255,255,255,.65); margin: 0; }
+        .modal-editar-close {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.2);
+            background: rgba(255,255,255,.1);
+            color: rgba(255,255,255,.8);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .modal-editar-close:hover {
+            background: rgba(239,68,68,.3);
+            border-color: rgba(239,68,68,.5);
+            color: white;
+        }
+        .modal-editar-body { padding: 22px 26px; overflow-y: auto; flex: 1; }
+        .field-label {
+            display: block;
+            font-size: .72rem;
+            font-weight: 700;
+            font-family: var(--font-destacados);
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 8px;
+        }
+        .period-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+        .pbtn {
+            padding: 10px 8px;
+            border: 1.5px solid var(--gris);
+            border-radius: 10px;
+            background: var(--blanco);
+            color: #64748b;
+            font-family: var(--font-destacados);
+            font-size: .8rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            line-height: 1.4;
+            transition: all .2s;
+        }
+        .pbtn:hover { background: #f0f4f8; border-color: #b0bec5; }
+        .pbtn.sel   { border-color: var(--azul-medio); background: #EBF3FB; color: var(--azul-oscuro); }
+        .pd {
+            display: none;
+            background: #f8fafd;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            border: 1px solid #e2e8f0;
+        }
+        .pd.show { display: block; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .fgrp { display: flex; flex-direction: column; gap: 4px; }
+        .fgrp label { font-size: .72rem; font-weight: 700; font-family: var(--font-destacados); color: #374151; text-transform: uppercase; letter-spacing: .5px; }
+        select, input[type=number], input[type=date] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: .875rem;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #1e293b;
+            background: var(--blanco);
+            outline: none;
+            transition: all .2s;
+        }
+        select:focus, input:focus { border-color: var(--azul-medio); box-shadow: 0 0 0 3px rgba(16,87,136,.1); }
+        .range-hint { font-size: .72rem; color: #94a3b8; margin-top: 6px; }
+        .sep { height: 1px; background: var(--gris); margin: 16px 0; }
+        .expand-row {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; user-select: none;
+            font-size: .8rem; color: var(--azul-medio);
+            font-family: var(--font-destacados); font-weight: 700;
+            margin-top: 10px;
+        }
+        .expand-row .earrow { transition: transform .2s; font-size: .65rem; }
+        .expand-row.open .earrow { transform: rotate(90deg); }
+        .month-expand { display: none; margin-top: 8px; }
+        .month-expand.open { display: block; }
+        .month-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 5px; margin-top: 6px; }
+        .mbtn {
+            padding: 7px 2px;
+            border: 1.5px solid var(--gris);
+            border-radius: 8px;
+            background: var(--blanco);
+            color: #64748b;
+            font-family: var(--font-destacados);
+            font-size: .75rem; font-weight: 700;
+            cursor: pointer; text-align: center;
+            transition: all .15s;
+        }
+        .mbtn:hover { background: #f0f4f8; }
+        .mbtn.msel  { border-color: var(--azul-medio); background: #EBF3FB; color: var(--azul-oscuro); }
+        .checkbox-list {
+            max-height: 190px;
+            overflow-y: auto;
+            border: 1.5px solid var(--gris);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--blanco);
+        }
+        .checkbox-list label {
+            display: flex; align-items: center; gap: 8px;
+            font-size: .875rem; cursor: pointer; color: #334155;
+        }
+        .checkbox-list input[type=checkbox] { accent-color: var(--azul-oscuro); width: 15px; height: 15px; }
+        .select-all-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .link-btn {
+            background: none; border: none;
+            color: var(--azul-medio);
+            font-family: var(--font-destacados);
+            font-size: .78rem; font-weight: 700;
+            cursor: pointer; text-decoration: underline; padding: 0;
+        }
+        .link-btn:hover { color: var(--azul-oscuro); }
+        .modal-editar-footer {
+            display: flex; gap: 12px;
+            padding: 16px 26px 22px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+            background: #fafbfc;
+        }
+        .editar-btn-cancelar {
+            flex: 1; padding: 12px 20px;
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            background: white; color: #64748b;
+            font-family: var(--font-destacados);
+            font-size: .875rem; font-weight: 700;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .editar-btn-cancelar:hover { background: #fef2f2; border-color: #fecaca; color: #ef4444; }
+        .editar-btn-guardar {
+            flex: 2; padding: 12px 20px;
+            border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
+            color: white;
+            font-family: var(--font-destacados);
+            font-size: .875rem; font-weight: 700;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(16,87,136,.35);
+        }
+        .editar-btn-guardar:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,87,136,.45); filter: brightness(1.05); }
+
+        /* PARTÍCULAS */
+        .bg-particles { position: fixed; top: 0; right: 0; width: 350px; height: 350px; pointer-events: none; z-index: 0; opacity: .04; }
+        .bg-particle  { position: absolute; border-radius: 50%; background: var(--azul-medio); animation: floatParticle 8s infinite ease-in-out; }
+        .bg-particle:nth-child(1) { width:60px; height:60px; top:10%; right:20%; animation-delay:0s; }
+        .bg-particle:nth-child(2) { width:40px; height:40px; top:50%; right:5%;  animation-delay:2s; }
+        .bg-particle:nth-child(3) { width:80px; height:80px; top:70%; right:30%; animation-delay:4s; }
+        .bg-particle:nth-child(4) { width:30px; height:30px; top:30%; right:50%; animation-delay:1s; }
+        @keyframes floatParticle {
+            0%,100% { transform: translateY(0) translateX(0) scale(1); }
+            25%      { transform: translateY(-40px) translateX(20px) scale(1.3); }
+            50%      { transform: translateY(-10px) translateX(-15px) scale(.8); }
+            75%      { transform: translateY(-50px) translateX(10px) scale(1.2); }
+        }
+
+        @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar { width: var(--sidebar-collapsed); }
+            .sidebar-nav a span { display: none; }
+            .sidebar-nav a { justify-content: center; padding: 14px; gap: 0; }
+            .sidebar-nav a i { font-size: 1.3rem; }
+            .sidebar-brand { padding: 16px 8px 8px; }
+            .logo-wrapper img { max-height: 58px; }
+            .main-content { margin-left: var(--sidebar-collapsed); padding: 20px 16px; }
+            .page-header { flex-direction: column; align-items: stretch; }
+            .btn-create-premium { justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .sidebar { width: 56px; }
+            .main-content { margin-left: 56px; padding: 14px 10px; }
+            .logo-wrapper img { max-height: 46px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles" aria-hidden="true">
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-wrapper" title="Dashboard">
+                <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo de la marca">
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'panel_admin' %}">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Panel de Administración</span>
+            </a>
+            <a href="{% url 'gestionar_usuarios' %}">
+                <i class="fa-solid fa-users"></i>
+                <span>Gestionar Usuarios</span>
+            </a>
+            <a href="{% url 'gestionar_cursos' %}">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>Gestionar Cursos</span>
+            </a>
+            <a href="{% url 'administrar_noticias' %}">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Administrar Noticias</span>
+            </a>
+            <a href="{% url 'estadisticas_cursos' %}" class="active">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Reporte Cursos</span>
+            </a>
+            <a href="{% url 'subir_archivo' %}">
+                <i class="fa-solid fa-file"></i>
+                <span>Subir Archivo</span>
+            </a>
+            <a href="{% url 'logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+
+        <div class="page-header">
+            <h1>Estadísticas de Cursos</h1>
+        </div>
+
+        <div class="top-bar">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="buscador" type="text"
+                       placeholder="Buscar curso por nombre…"
+                       oninput="filtrarCursos(this.value)"
+                       autocomplete="off">
+            </div>
+            <span class="periodo-label">
+                Mostrando: <strong>{{ meta.mes_label }}</strong>
+            </span>
+            <button class="btn-create-premium" onclick="abrirModal()">
+                <i class="fa-solid fa-download"></i> Descargar Excel
+            </button>
+        </div>
+
+        <div class="tabla-container">
+            <div class="tabla-overflow">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="th-curso"  style="width:230px; text-align:left;">Curso</th>
+                            <th style="width:100px;">Creado</th>
+                            <th>Total<br>Completados</th>
+                            <th>Completados<br>este mes</th>
+                            <th>En<br>Progreso</th>
+                            <th>Pendientes</th>
+                            <th style="width:75px;">Quiz</th>
+                            <th style="width:40px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-cursos">
+
+                    {% for item in datos %}
+                        <tr class="fila-principal"
+                            data-nombre="{{ item.curso.titulo|lower }}"
+                            onclick="toggleDetalle({{ forloop.counter }}, this)">
+                            <td class="td-name">
+                                <span class="toggle-icon">&#9658;</span>{{ item.curso.titulo }}
+                            </td>
+                            <td class="td-date">{{ item.curso.fecha_public|date:"d/m/Y" }}</td>
+                            <td><span class="badge badge-blue">{{ item.mes_actual.total_completados }}</span></td>
+                            <td><span class="badge badge-green">{{ item.mes_actual.completados_mes }}</span></td>
+                            <td><span class="badge badge-orange">{{ item.mes_actual.en_progreso }}</span></td>
+                            <td>
+                                {% if item.mes_actual.pendientes > 0 %}
+                                    <span class="badge badge-red">{{ item.mes_actual.pendientes }}</span>
+                                {% else %}
+                                    <span class="badge badge-green">0</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge {% if item.tiene_quiz %}badge-yes{% else %}badge-no{% endif %}">
+                                    {% if item.tiene_quiz %}Sí{% else %}No{% endif %}
+                                </span>
+                            </td>
+                            <td style="color:var(--azul-medio); font-size:.8rem;">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </td>
+                        </tr>
+
+                        <tr class="fila-detalle" id="detalle-{{ forloop.counter }}">
+                            <td colspan="8" style="padding:0;">
+                                <div class="hist-wrap">
+                                    <div class="hist-titulo">
+                                        <i class="fa-regular fa-calendar"></i>
+                                        Historial por mes
+                                    </div>
+                                    {% if item.meses_hist %}
+                                    <div class="hist-cards">
+                                        {% for mes in item.meses_hist %}
+                                        <div class="hist-card">
+                                            <div class="hist-card-mes">{{ mes.label }}</div>
+                                            <div class="hist-stat">
+                                                <span class="lbl">Total completados</span>
+                                                <span class="badge badge-blue badge-sm">{{ mes.total_completados }}</span>
+                                            </div>
+                                            <div class="hist-stat">
+                                                <span class="lbl">Completados ese mes</span>
+                                                <span class="badge badge-green badge-sm">{{ mes.completados_mes }}</span>
+                                            </div>
+                                            <div class="hist-stat">
+                                                <span class="lbl">En progreso</span>
+                                                <span class="badge badge-orange badge-sm">{{ mes.en_progreso }}</span>
+                                            </div>
+                                            <div class="hist-stat">
+                                                <span class="lbl">Pendientes</span>
+                                                {% if mes.pendientes > 0 %}
+                                                    <span class="badge badge-red badge-sm">{{ mes.pendientes }}</span>
+                                                {% else %}
+                                                    <span class="badge badge-green badge-sm">0</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <p class="hist-sin-datos">Este curso no tiene meses anteriores registrados.</p>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align:center; padding:40px; color:#64748b; font-style:italic;">
+                                <i class="fa-solid fa-inbox" style="font-size:2rem; display:block; margin-bottom:8px; color:#cbd5e0;"></i>
+                                No hay cursos registrados.
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                        <tr id="fila-sin-resultados">
+                            <td colspan="8">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                No se encontraron cursos con ese nombre.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL DESCARGAR EXCEL -->
+    <div class="modal-editar-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+        <div class="modal-editar-content">
+            <div class="modal-editar-header">
+                <div class="modal-editar-header-left">
+                    <div class="modal-editar-icon">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </div>
+                    <div>
+                        <h3 class="modal-editar-titulo">Descargar Excel</h3>
+                        <p class="modal-editar-subtitulo">Configura el período y los cursos a incluir</p>
+                    </div>
+                </div>
+                <button class="modal-editar-close" onclick="cerrarModal()" title="Cerrar">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-editar-body">
+                <form method="post" action="{% url 'descargar_excel' %}" id="form-excel">
+                    {% csrf_token %}
+
+                    <span class="field-label">Período del reporte</span>
+                    <div class="period-grid">
+                        <button type="button" class="pbtn sel" data-p="6m"     onclick="selP(this)">Últimos<br>6 meses</button>
+                        <button type="button" class="pbtn"     data-p="year"   onclick="selP(this)">Año<br>completo</button>
+                        <button type="button" class="pbtn"     data-p="custom" onclick="selP(this)">Rango<br>personalizado</button>
+                    </div>
+                    <input type="hidden" id="tipo_periodo"   name="tipo_periodo"   value="6m">
+                    <input type="hidden" id="mes_especifico" name="mes_especifico" value="">
+
+                    <div class="pd show" id="pd-6m">
+                        <div class="row2">
+                            <div class="fgrp">
+                                <label>Mes final</label>
+                                <select id="sel-6m-mes" name="month_6m">
+                                    {% for op in opciones_meses %}
+                                    <option value="{{ op.value|slice:'5:' }}">{{ op.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="fgrp">
+                                <label>Año</label>
+                                <input type="number" id="sel-6m-year" name="year_6m"
+                                       value="{{ hoy.year }}" min="2020" max="2099">
+                            </div>
+                        </div>
+                        <p class="range-hint" id="hint-6m"></p>
+                        <div class="expand-row" id="expand-mes-row" onclick="toggleMeses()">
+                            <span class="earrow">&#9658;</span>
+                            <span>Escoger mes específico dentro del rango</span>
+                        </div>
+                        <div class="month-expand" id="month-expand">
+                            <p style="font-size:.72rem; color:#94a3b8; margin-bottom:4px;">
+                                Elige un mes puntual — sin selección usa el rango completo
+                            </p>
+                            <div class="month-grid" id="month-grid"></div>
+                        </div>
+                    </div>
+
+                    <div class="pd" id="pd-year">
+                        <div class="fgrp" style="max-width:140px;">
+                            <label>Año</label>
+                            <input type="number" name="year_full"
+                                   value="{{ hoy.year }}" min="2020" max="2099">
+                        </div>
+                        <p class="range-hint">Abarcará del 1 de enero al 31 de diciembre</p>
+                    </div>
+
+                    <div class="pd" id="pd-custom">
+                        <div class="row2">
+                            <div class="fgrp">
+                                <label>Desde</label>
+                                <input type="date" id="date-from" name="fecha_inicio">
+                            </div>
+                            <div class="fgrp">
+                                <label>Hasta</label>
+                                <input type="date" id="date-to" name="fecha_fin">
+                            </div>
+                        </div>
+                        <p class="range-hint" id="hint-custom">Selecciona ambas fechas</p>
+                    </div>
+
+                    <div class="sep"></div>
+
+                    <span class="field-label">Cursos a incluir</span>
+                    <div class="select-all-row">
+                        <button type="button" class="link-btn" onclick="seleccionarTodos(true)">Seleccionar todos</button>
+                        <button type="button" class="link-btn" onclick="seleccionarTodos(false)">Deseleccionar todos</button>
+                    </div>
+                    <div class="checkbox-list" id="lista-cursos">
+                        {% for item in datos %}
+                        <label>
+                            <input type="checkbox" name="cursos" value="{{ item.curso.id_curso }}" checked>
+                            {{ item.curso.titulo }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-editar-footer">
+                <button type="button" class="editar-btn-cancelar" onclick="cerrarModal()">
+                    <i class="fa-solid fa-times"></i> Cancelar
+                </button>
+                <button type="submit" form="form-excel" class="editar-btn-guardar">
+                    <i class="fa-solid fa-download"></i> Generar Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MESES_FULL  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                             'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        const MESES_CORTO = ['Ene','Feb','Mar','Abr','May','Jun',
+                             'Jul','Ago','Sep','Oct','Nov','Dic'];
+        let selectedMonth = null;
+
+        function filtrarCursos(q) {
+            q = q.toLowerCase().trim();
+            var filas = document.querySelectorAll('#tbody-cursos tr.fila-principal');
+            var visibles = 0;
+            filas.forEach(function(fila) {
+                var nombre = fila.dataset.nombre || '';
+                var match  = nombre.includes(q);
+                fila.classList.toggle('fila-oculta', !match);
+                var det = fila.nextElementSibling;
+                if (det && det.classList.contains('fila-detalle')) {
+                    if (!match) {
+                        det.classList.remove('abierta');
+                        fila.classList.remove('abierta-principal');
+                    }
+                    det.classList.toggle('fila-oculta', !match);
+                }
+                if (match) visibles++;
+            });
+            document.getElementById('fila-sin-resultados').style.display =
+                visibles === 0 ? 'table-row' : 'none';
+        }
+
+        function toggleDetalle(id, filaEl) {
+            var det  = document.getElementById('detalle-' + id);
+            var open = det.classList.contains('abierta');
+            det.classList.toggle('abierta', !open);
+            filaEl.classList.toggle('abierta-principal', !open);
+        }
+
+        function abrirModal() {
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+        function cerrarModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            selectedMonth = null;
+            document.getElementById('mes_especifico').value = '';
+        }
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('modal-overlay')) cerrarModal();
+        }
+
+        function selP(btn) {
+            document.querySelectorAll('.pbtn').forEach(function(b) { b.classList.remove('sel'); });
+            btn.classList.add('sel');
+            var p = btn.dataset.p;
+            document.getElementById('tipo_periodo').value = p;
+            ['6m','year','custom'].forEach(function(x) {
+                document.getElementById('pd-' + x).classList.toggle('show', x === p);
+            });
+            if (p !== '6m') {
+                document.getElementById('month-expand').classList.remove('open');
+                document.getElementById('expand-mes-row').classList.remove('open');
+                selectedMonth = null;
+                document.getElementById('mes_especifico').value = '';
+            }
+        }
+
+        function updateHint6m() {
+            var mes = parseInt(document.getElementById('sel-6m-mes').value);
+            var yr  = parseInt(document.getElementById('sel-6m-year').value);
+            var m0  = mes - 5, y0 = yr;
+            if (m0 <= 0) { m0 += 12; y0--; }
+            document.getElementById('hint-6m').textContent =
+                'Abarcará: ' + MESES_FULL[m0-1] + ' ' + y0 + ' — ' + MESES_FULL[mes-1] + ' ' + yr;
+            if (document.getElementById('month-expand').classList.contains('open')) buildMonthGrid();
+        }
+
+        function toggleMeses() {
+            var me      = document.getElementById('month-expand');
+            var er      = document.getElementById('expand-mes-row');
+            var opening = !me.classList.contains('open');
+            me.classList.toggle('open', opening);
+            er.classList.toggle('open', opening);
+            if (opening) buildMonthGrid();
+        }
+
+        function buildMonthGrid() {
+            var mes  = parseInt(document.getElementById('sel-6m-mes').value);
+            var grid = document.getElementById('month-grid');
+            grid.innerHTML = '';
+            for (var i = 5; i >= 0; i--) {
+                var m = mes - i;
+                if (m <= 0) m += 12;
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'mbtn' + (selectedMonth === m ? ' msel' : '');
+                btn.textContent = MESES_CORTO[m - 1];
+                btn.dataset.m = m;
+                (function(b, month) {
+                    b.onclick = function() { pickMonth(b, month); };
+                })(btn, m);
+                grid.appendChild(btn);
+            }
+        }
+
+        function pickMonth(btn, m) {
+            document.querySelectorAll('.mbtn').forEach(function(b) { b.classList.remove('msel'); });
+            if (selectedMonth === m) {
+                selectedMonth = null;
+                document.getElementById('mes_especifico').value = '';
+            } else {
+                btn.classList.add('msel');
+                selectedMonth = m;
+                document.getElementById('mes_especifico').value = m;
+            }
+        }
+
+        function updateHintCustom() {
+            var f = document.getElementById('date-from').value;
+            var t = document.getElementById('date-to').value;
+            var h = document.getElementById('hint-custom');
+            if (f && t) {
+                var df   = new Date(f + 'T00:00:00');
+                var dt   = new Date(t + 'T00:00:00');
+                if (df > dt) { h.textContent = 'La fecha inicio debe ser anterior'; return; }
+                var diff = Math.round((dt - df) / 864e5);
+                h.textContent = diff + ' día' + (diff !== 1 ? 's' : '') +
+                                ' seleccionado' + (diff !== 1 ? 's' : '');
+            } else {
+                h.textContent = 'Selecciona ambas fechas';
+            }
+        }
+
+        function seleccionarTodos(checked) {
+            document.querySelectorAll('#lista-cursos input[type="checkbox"]')
+                    .forEach(function(cb) { cb.checked = checked; });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var rows = document.querySelectorAll('#tbody-cursos tr.fila-principal');
+            rows.forEach(function(row, index) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(10px)';
+                row.style.transition = 'opacity .4s ease ' + (index * .05) + 's, transform .4s ease ' + (index * .05) + 's';
+                setTimeout(function() {
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, 100 + index * 50);
+            });
+        });
+
+        document.getElementById('sel-6m-mes').addEventListener('change', updateHint6m);
+        document.getElementById('sel-6m-year').addEventListener('input',  updateHint6m);
+        document.getElementById('date-from').addEventListener('change', updateHintCustom);
+        document.getElementById('date-to').addEventListener('change',   updateHintCustom);
+        updateHint6m();
+    </script>
+
+</body>
+</html>
