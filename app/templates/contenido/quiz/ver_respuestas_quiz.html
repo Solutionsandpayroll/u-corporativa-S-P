@@ -809,22 +809,68 @@
                     {% if respuesta.pregunta.tipo_respuesta == 'archivo' and respuesta.archivo_subido_url %}
                         {% if respuesta.es_media %}
                             {% if respuesta.tipo_archivo == 'imagen' %}
-                                <div class="media-container"><img src="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}" alt="Imagen"></div>
+                                <!-- Imagen: previsualización directa -->
+                                <div class="media-container">
+                                    <img src="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}"
+                                         alt="Imagen enviada"
+                                         onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'padding:16px;text-align:center;color:#64748b\'><i class=\'fas fa-image\'></i><p>No se pudo cargar la imagen</p></div>';">
+                                </div>
                             {% elif respuesta.tipo_archivo == 'video' %}
-                                <div class="media-container"><video controls src="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}"></video></div>
+                                <!-- Video: reproductor nativo -->
+                                <div class="media-container">
+                                    <video controls style="width:100%; border-radius:12px; display:block;">
+                                        <source src="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}">
+                                        Tu navegador no soporta la reproducción de video.
+                                    </video>
+                                </div>
                             {% endif %}
+                        {% elif respuesta.es_sharepoint %}
+                            <!-- SharePoint/OneDrive: iframe visor embebido -->
+                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px; background:#f8fafc; margin:15px 0;">
+                                <iframe src="{{ respuesta.url_visualizacion }}"
+                                        frameborder="0"
+                                        scrolling="no"
+                                        allowfullscreen
+                                        style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:12px;">
+                                </iframe>
+                            </div>
+                            <!-- Botones de acción adicionales debajo del iframe -->
+                            <div class="archivo-acciones" style="margin-top:8px;">
+                                <a href="{{ respuesta.url_visualizacion }}"
+                                   target="_blank" rel="noopener noreferrer"
+                                   class="archivo-btn archivo-btn-abrir">
+                                    <i class="fas fa-external-link-alt"></i> Abrir en SharePoint
+                                </a>
+                                {% if respuesta.url_descarga %}
+                                <a href="{{ respuesta.url_descarga }}"
+                                   class="archivo-btn archivo-btn-descargar" download>
+                                    <i class="fas fa-download"></i> Descargar
+                                </a>
+                                {% endif %}
+                            </div>
                         {% else %}
-                            <!-- Documento: tarjeta con botones mejorados -->
-                            <div class="archivo-card" data-url="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}">
-                                <div class="archivo-icon {% if respuesta.tipo_archivo == 'pdf' %}pdf{% elif respuesta.tipo_archivo == 'word' %}word{% elif respuesta.tipo_archivo == 'excel' %}excel{% else %}default{% endif %}">
-                                    {% if respuesta.tipo_archivo == 'pdf' %}<i class="fas fa-file-pdf"></i>
-                                    {% elif respuesta.tipo_archivo == 'word' %}<i class="fas fa-file-word"></i>
-                                    {% elif respuesta.tipo_archivo == 'excel' %}<i class="fas fa-file-excel"></i>
-                                    {% else %}<i class="fas fa-file"></i>{% endif %}
+                            <!-- Documento genérico: tarjeta con botones -->
+                            <div class="archivo-card">
+                                <div class="archivo-icon
+                                    {% if respuesta.tipo_archivo == 'pdf' %}pdf
+                                    {% elif respuesta.tipo_archivo == 'word' %}word
+                                    {% elif respuesta.tipo_archivo == 'excel' %}excel
+                                    {% else %}default{% endif %}">
+                                    {% if respuesta.tipo_archivo == 'pdf' %}
+                                        <i class="fas fa-file-pdf"></i>
+                                    {% elif respuesta.tipo_archivo == 'word' %}
+                                        <i class="fas fa-file-word"></i>
+                                    {% elif respuesta.tipo_archivo == 'excel' %}
+                                        <i class="fas fa-file-excel"></i>
+                                    {% elif respuesta.tipo_archivo == 'powerpoint' %}
+                                        <i class="fas fa-file-powerpoint"></i>
+                                    {% else %}
+                                        <i class="fas fa-file"></i>
+                                    {% endif %}
                                 </div>
                                 <div class="archivo-info">
-                                    <div class="archivo-nombre">{{ respuesta.nombre_archivo|default:'Archivo subido' }}</div>
-                                    <small>{{ respuesta.tipo_archivo|upper }}</small>
+                                    <div class="archivo-nombre">{{ respuesta.nombre_archivo|default:'Archivo enviado' }}</div>
+                                    <small style="color:#64748b;">{{ respuesta.tipo_archivo|upper }}</small>
                                 </div>
                                 <div class="archivo-acciones">
                                     <a href="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}"
@@ -898,41 +944,11 @@
         });
 
         // ================================================================
-        // 2. CORRECCIÓN DE URLs DE SHAREPOINT PARA DOCUMENTOS
-        //    (Misma lógica que en Código 1, adaptada a clases del Código 2)
+        // 2. URLs de SharePoint ya resueltas por el backend — no se necesita
+        //    transformación en cliente para .archivo-card en esta vista.
         // ================================================================
-        document.querySelectorAll('.archivo-card').forEach(card => {
-            const abrirBtn = card.querySelector('.archivo-btn-abrir');
-            const descargarBtn = card.querySelector('.archivo-btn-descargar');
-            if (!abrirBtn) return;
-
-            let url = abrirBtn.getAttribute('href');
-            if (url && (url.includes('sharepoint.com') || url.includes('embed.aspx'))) {
-                // Si la URL ya contiene 'Doc.aspx' o 'embed.aspx' con un action, la dejamos como está
-                if (url.includes('Doc.aspx') || url.includes('embed.aspx')) {
-                    // No modificar, ya es un visor
-                    return;
-                }
-                // Intentar transformar si tiene un UniqueId/sourcedoc
-                const uniqueIdMatch = url.match(/UniqueId=([a-f0-9\-]{36})/i) ||
-                                     url.match(/sourcedoc=([a-f0-9\-]{36})/i) ||
-                                     url.match(/%7B([a-f0-9\-]{36})%7D/i);
-                if (uniqueIdMatch) {
-                    const uniqueId = uniqueIdMatch[1];
-                    const baseMatch = url.match(/(https?:\/\/[^\/]+\/[^\/]+\/[^\/]+)/);
-                    if (baseMatch) {
-                        const baseSP = baseMatch[1];
-                        const viewerUrl = `${baseSP}/_layouts/15/Doc.aspx?sourcedoc=%7B${uniqueId}%7D&action=default`;
-                        abrirBtn.setAttribute('href', viewerUrl);
-
-                        if (descargarBtn) {
-                            const downloadUrl = `${baseSP}/_layouts/15/download.aspx?UniqueId=${uniqueId}`;
-                            descargarBtn.setAttribute('href', downloadUrl);
-                        }
-                    }
-                }
-            }
-        });
+        // (bloque eliminado — el backend prepara_archivo_sharepoint() ya
+        //  entrega url_visualizacion y url_descarga correctas)
 
         // ================================================================
         // 3. ANIMACIÓN DE ENTRADA PARA TARJETAS ESTADÍSTICAS (igual que antes)
