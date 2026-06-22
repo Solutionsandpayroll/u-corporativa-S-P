@@ -16,14 +16,13 @@ def limpiar_iframe(url_iframe):
     if not url_iframe:
         return ''
 
-    # Buscar src en iframe
-    match = re.search(r'src="([^"]+)"', url_iframe)
+    # Buscar src en iframe — soporta comillas dobles y simples
+    match = re.search(r'src=["\'](.*?)["\']', url_iframe, re.IGNORECASE)
     if match:
         return match.group(1).strip()
 
     # Si no es iframe, retornar como URL
     return url_iframe.strip()
-
 
 def extraer_titulo_iframe(url_iframe):
     """Extrae el valor del atributo title desde un iframe HTML."""
@@ -58,12 +57,34 @@ def extraer_unique_id_sharepoint(url_iframe):
 
 
 def extraer_base_sharepoint(url_iframe):
-    """Extrae la base del sitio de SharePoint."""
+    """
+    Extrae la base del sitio de SharePoint.
+    Busca /personal/USUARIO o /sites/SITIO en cualquier posición de la URL,
+    para cubrir formatos como /:w:/r/personal/... además del directo /personal/...
+    """
     if not url_iframe:
         return ''
 
     url_limpia = limpiar_iframe(url_iframe)
-    match = re.search(r'(https?://[^/]+/[^/]+/[^/]+)', url_limpia, re.IGNORECASE)
+
+    # /personal/USUARIO en cualquier posición
+    match = re.search(
+        r'(https?://[^/]+)/(?:[^/]+/)*personal/([^/\?#&]+)',
+        url_limpia, re.IGNORECASE
+    )
+    if match:
+        return f"{match.group(1)}/personal/{match.group(2)}"
+
+    # /sites/SITIO en cualquier posición
+    match = re.search(
+        r'(https?://[^/]+)/(?:[^/]+/)*sites/([^/\?#&]+)',
+        url_limpia, re.IGNORECASE
+    )
+    if match:
+        return f"{match.group(1)}/sites/{match.group(2)}"
+
+    # Fallback: primeros 3 segmentos (comportamiento anterior)
+    match = re.search(r'(https?://[^/]+/[^/]+/[^/\?#&]+)', url_limpia)
     return match.group(1) if match else ''
 
 
