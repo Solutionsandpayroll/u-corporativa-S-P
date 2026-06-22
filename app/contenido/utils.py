@@ -5,6 +5,7 @@ from datetime import date
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from .models import *
 
 
 
@@ -412,7 +413,7 @@ def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
 
         # Llamada corregida: get_stats_rango solo necesita el quiz y las fechas
         if quiz:
-            stats = get_stats_rango(quiz, fecha_inicio, fecha_fin)
+            stats = get_stats_rango(curso, quiz, fecha_inicio, fecha_fin)
         else:
             stats = {
                 'total_empleados': 0,
