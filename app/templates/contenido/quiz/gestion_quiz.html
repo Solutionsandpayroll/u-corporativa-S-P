@@ -463,6 +463,92 @@
             gap: 10px;
         }
 
+        /* ========== FILTROS (nuevo) ========== */
+        .filtros-quiz {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .filtro-grupo {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .filtro-busqueda i {
+            position: absolute;
+            left: 14px;
+            color: #6b7d8e;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .filtro-busqueda input {
+            padding: 10px 14px 10px 38px;
+            border: 1px solid var(--gris);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: var(--azul-oscuro);
+            min-width: 240px;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .filtro-busqueda input:focus {
+            outline: none;
+            border-color: var(--azul-medio);
+            box-shadow: 0 0 0 3px rgba(16, 87, 136, 0.12);
+        }
+
+        #filtroEstado {
+            padding: 10px 14px;
+            border: 1px solid var(--gris);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            color: var(--azul-oscuro);
+            background: var(--blanco);
+            cursor: pointer;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        #filtroEstado:focus {
+            outline: none;
+            border-color: var(--azul-medio);
+            box-shadow: 0 0 0 3px rgba(16, 87, 136, 0.12);
+        }
+
+        .filtro-contador {
+            color: #6b7d8e;
+            font-size: 0.85rem;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            margin-left: auto;
+        }
+
+        table tbody tr.fila-oculta {
+            display: none;
+        }
+
+        @media (max-width: 576px) {
+            .filtros-quiz {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filtro-busqueda input {
+                min-width: 0;
+                width: 100%;
+            }
+            .filtro-contador {
+                margin-left: 0;
+                text-align: right;
+            }
+        }
+
         table {
             margin: 0;
             width: 100%;
@@ -845,6 +931,30 @@
                 <i class="fas fa-chart-bar"></i> Progreso de Empleados
             </h3>
 
+            <!-- Filtros de búsqueda (NUEVO) -->
+            <div class="filtros-quiz">
+                <div class="filtro-grupo filtro-busqueda">
+                    <i class="fas fa-search"></i>
+                    <input
+                        type="text"
+                        id="filtroNombre"
+                        placeholder="Buscar empleado..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="filtro-grupo">
+                    <select id="filtroEstado">
+                        <option value="todos">Todos los estados</option>
+                        <option value="completado">Completado</option>
+                        <option value="en-progreso">En Progreso</option>
+                        <option value="no-iniciado">No Iniciado</option>
+                    </select>
+                </div>
+
+                <span id="filtroContador" class="filtro-contador"></span>
+            </div>
+
             <table class="table">
                 <thead>
                     <tr>
@@ -857,7 +967,10 @@
                 </thead>
                 <tbody>
                     {% for stat in estadisticas %}
-                    <tr>
+                    <tr
+                        data-nombre="{{ stat.usuario|lower }}"
+                        data-estado="{% if stat.completado %}completado{% elif stat.respondidas > 0 %}en-progreso{% else %}no-iniciado{% endif %}"
+                    >
                         <td>
                             <i class="fas fa-user-circle"></i> {{ stat.usuario }}
                         </td>
@@ -952,6 +1065,39 @@
                     card.style.transform = 'translateY(0)';
                 }, 150 + index * 100);
             });
+
+            // === FILTRO POR NOMBRE Y ESTADO (NUEVO) ===
+            const inputNombre = document.getElementById('filtroNombre');
+            const selectEstado = document.getElementById('filtroEstado');
+            const contador = document.getElementById('filtroContador');
+            const filas = document.querySelectorAll('table tbody tr');
+
+            function aplicarFiltros() {
+                const textoNombre = (inputNombre?.value || '').trim().toLowerCase();
+                const estadoElegido = selectEstado?.value || 'todos';
+                let visibles = 0;
+
+                filas.forEach(fila => {
+                    const nombre = fila.dataset.nombre || '';
+                    const estado = fila.dataset.estado || '';
+
+                    const coincideNombre = nombre.includes(textoNombre);
+                    const coincideEstado = estadoElegido === 'todos' || estado === estadoElegido;
+
+                    const mostrar = coincideNombre && coincideEstado;
+                    fila.classList.toggle('fila-oculta', !mostrar);
+                    if (mostrar) visibles++;
+                });
+
+                if (contador) {
+                    contador.textContent = `${visibles} de ${filas.length} empleados`;
+                }
+            }
+
+            if (inputNombre) inputNombre.addEventListener('input', aplicarFiltros);
+            if (selectEstado) selectEstado.addEventListener('change', aplicarFiltros);
+
+            aplicarFiltros(); // inicializa el contador al cargar
         });
     </script>
 </body>
