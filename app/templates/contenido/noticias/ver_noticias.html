@@ -600,10 +600,14 @@
 
                         {% if contenido.tipo_con == 'video' and contenido.url_recurso %}
                             <div class="media-container">
-                                <video controls>
-                                    <source src="{{ contenido.url_recurso }}">
-                                    Tu navegador no soporta videos.
-                                </video>
+                                {% if 'youtube.com' in contenido.url_recurso or 'youtu.be' in contenido.url_recurso or 'vimeo.com' in contenido.url_recurso or 'embed.aspx' in contenido.url_recurso %}
+                                    <iframe src="{{ contenido.url_recurso }}" frameborder="0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+                                {% else %}
+                                    <video controls preload="metadata">
+                                        <source src="{{ contenido.url_recurso }}" type="video/mp4">
+                                        Tu navegador no soporta videos.
+                                    </video>
+                                {% endif %}
                             </div>
                         {% endif %}
 
