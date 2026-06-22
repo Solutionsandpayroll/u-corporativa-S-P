@@ -361,13 +361,6 @@ class Contenido(models.Model):
     TIPO_CHOICES = [
         ('video', 'Video'),
         ('imagen', 'Imagen'),
-        ('pdf', 'Documento PDF'),
-        ('word', 'Documento Word'),
-        ('excel', 'Hoja de Excel'),
-        ('powerpoint', 'Presentación PowerPoint'),
-        ('sharepoint', 'SharePoint/OneDrive'),
-        ('url', 'Enlace Externo'),
-        ('otro', 'Otro'),
     ]
 
     tipo_con = models.CharField(max_length=50, choices=TIPO_CHOICES, default='otro')
