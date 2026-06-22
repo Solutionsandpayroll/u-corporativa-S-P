@@ -940,7 +940,16 @@ def responder_pregunta(request):
         progreso.respondida = True
         progreso.es_correcta = es_correcta
         progreso.respuesta_texto = respuesta if pregunta.tipo_respuesta != 'archivo' else ''
-        progreso.archivo_subido_url = archivo_url_raw if pregunta.tipo_respuesta == 'archivo' else ''
+        
+        # MODIFICACIÓN: guardar prefijo tipo_archivo_seleccionado si existe
+        if pregunta.tipo_respuesta == 'archivo':
+            if tipo_archivo_seleccionado:
+                progreso.archivo_subido_url = f"{tipo_archivo_seleccionado}|||{archivo_url_raw}"
+            else:
+                progreso.archivo_subido_url = archivo_url_raw
+        else:
+            progreso.archivo_subido_url = ''
+        
         progreso.fecha_respuesta = timezone.now()
         progreso.save()
         
@@ -1054,14 +1063,31 @@ def ver_respuestas_quiz(request, id_curso, usuario_id):
         
         # Si la pregunta tiene archivo, procesarlo
         if pregunta.tipo_respuesta == 'archivo' and respuesta.archivo_subido_url:
-            archivo_datos = preparar_archivo_sharepoint(respuesta.archivo_subido_url)
-            url_archivo = archivo_datos['url_limpia']
-            tipo_archivo = detectar_tipo_archivo_contenido(url_archivo)
+            raw = respuesta.archivo_subido_url
             
+            # Separar prefijo de tipo si existe (formato: "imagen_video|||<iframe>")
+            if '|||' in raw:
+                tipo_seleccionado, iframe_raw = raw.split('|||', 1)
+            else:
+                tipo_seleccionado, iframe_raw = '', raw
+
+            archivo_datos = preparar_archivo_sharepoint(iframe_raw)
+            url_archivo = archivo_datos['url_limpia']
+            nombre_archivo = archivo_datos['nombre']
+
+            # El tipo seleccionado por el empleado es la fuente más confiable
+            if tipo_seleccionado == 'imagen_video':
+                tipo_archivo = 'imagen_video'   # ← iframe de imagen O video de SharePoint
+            elif tipo_seleccionado == 'documento':
+                tipo_archivo = 'sharepoint'
+            else:
+                # Registros antiguos sin prefijo: detectar automáticamente
+                tipo_archivo = detectar_tipo_archivo_contenido(url_archivo)
+
             datos_respuesta['archivo_subido_url'] = url_archivo
-            datos_respuesta['nombre_archivo'] = archivo_datos['nombre']
+            datos_respuesta['nombre_archivo'] = nombre_archivo
             datos_respuesta['tipo_archivo'] = tipo_archivo
-            datos_respuesta['es_media'] = tipo_archivo in ['imagen', 'video']
+            datos_respuesta['es_media'] = tipo_archivo == 'imagen_video'
             datos_respuesta['es_sharepoint'] = archivo_datos['es_sharepoint']
             datos_respuesta['url_visualizacion'] = archivo_datos['url_visualizacion']
             datos_respuesta['url_descarga'] = archivo_datos['url_descarga']

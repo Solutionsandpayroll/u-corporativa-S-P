@@ -805,44 +805,32 @@
                             <p style="margin: 8px 0 0 0; white-space: pre-wrap;">{{ respuesta.respuesta_texto }}</p>
                         </div>
                     {% endif %}
-                    <!-- Archivo / Media -->
+
+                    <!-- Archivo / Media (NUEVA LÓGICA) -->
                     {% if respuesta.pregunta.tipo_respuesta == 'archivo' and respuesta.archivo_subido_url %}
-                        {% if respuesta.es_media %}
-                            {% if respuesta.tipo_archivo == 'imagen' %}
-                                <!-- Imagen: previsualización directa -->
-                                <div class="media-container">
-                                    <img src="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}"
-                                         alt="Imagen enviada"
-                                         onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'padding:16px;text-align:center;color:#64748b\'><i class=\'fas fa-image\'></i><p>No se pudo cargar la imagen</p></div>';">
-                                </div>
-                            {% elif respuesta.tipo_archivo == 'video' %}
-                                <!-- Video: reproductor nativo -->
-                                <div class="media-container">
-                                    <video controls style="width:100%; border-radius:12px; display:block;">
-                                        <source src="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}">
-                                        Tu navegador no soporta la reproducción de video.
-                                    </video>
-                                </div>
-                            {% endif %}
+                        {% if respuesta.tipo_archivo == 'imagen_video' %}
+                            <!-- Imagen o video de SharePoint: iframe embebido en proporción 16:9 -->
+                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px; background:#f8fafc; margin:15px 0;">
+                                <iframe src="{{ respuesta.url_visualizacion }}"
+                                        frameborder="0"
+                                        scrolling="no"
+                                        allowfullscreen
+                                        style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:12px;">
+                                </iframe>
+                            </div>
                         {% elif respuesta.es_sharepoint %}
-                            <!-- SharePoint: tarjeta con enlace al visor web (Doc.aspx), nunca iframe directo -->
-                            <div class="archivo-card" id="sp-card-{{ forloop.counter }}">
+                            <!-- Documento SharePoint: tarjeta con botón Doc.aspx -->
+                            <div class="archivo-card">
                                 <div class="archivo-icon
                                     {% if respuesta.tipo_archivo == 'pdf' %}pdf
                                     {% elif respuesta.tipo_archivo == 'word' %}word
                                     {% elif respuesta.tipo_archivo == 'excel' %}excel
                                     {% else %}default{% endif %}">
-                                    {% if respuesta.tipo_archivo == 'pdf' %}
-                                        <i class="fas fa-file-pdf"></i>
-                                    {% elif respuesta.tipo_archivo == 'word' %}
-                                        <i class="fas fa-file-word"></i>
-                                    {% elif respuesta.tipo_archivo == 'excel' %}
-                                        <i class="fas fa-file-excel"></i>
-                                    {% elif respuesta.tipo_archivo == 'powerpoint' %}
-                                        <i class="fas fa-file-powerpoint"></i>
-                                    {% else %}
-                                        <i class="fas fa-file"></i>
-                                    {% endif %}
+                                    {% if respuesta.tipo_archivo == 'pdf' %}<i class="fas fa-file-pdf"></i>
+                                    {% elif respuesta.tipo_archivo == 'word' %}<i class="fas fa-file-word"></i>
+                                    {% elif respuesta.tipo_archivo == 'excel' %}<i class="fas fa-file-excel"></i>
+                                    {% elif respuesta.tipo_archivo == 'powerpoint' %}<i class="fas fa-file-powerpoint"></i>
+                                    {% else %}<i class="fas fa-file"></i>{% endif %}
                                 </div>
                                 <div class="archivo-info">
                                     <div class="archivo-nombre">{{ respuesta.nombre_archivo|default:'Archivo de SharePoint' }}</div>
@@ -863,24 +851,10 @@
                                 </div>
                             </div>
                         {% else %}
-                            <!-- Documento genérico: tarjeta con botones -->
+                            <!-- Documento genérico (URL directa sin SharePoint) -->
                             <div class="archivo-card">
-                                <div class="archivo-icon
-                                    {% if respuesta.tipo_archivo == 'pdf' %}pdf
-                                    {% elif respuesta.tipo_archivo == 'word' %}word
-                                    {% elif respuesta.tipo_archivo == 'excel' %}excel
-                                    {% else %}default{% endif %}">
-                                    {% if respuesta.tipo_archivo == 'pdf' %}
-                                        <i class="fas fa-file-pdf"></i>
-                                    {% elif respuesta.tipo_archivo == 'word' %}
-                                        <i class="fas fa-file-word"></i>
-                                    {% elif respuesta.tipo_archivo == 'excel' %}
-                                        <i class="fas fa-file-excel"></i>
-                                    {% elif respuesta.tipo_archivo == 'powerpoint' %}
-                                        <i class="fas fa-file-powerpoint"></i>
-                                    {% else %}
-                                        <i class="fas fa-file"></i>
-                                    {% endif %}
+                                <div class="archivo-icon default">
+                                    <i class="fas fa-file"></i>
                                 </div>
                                 <div class="archivo-info">
                                     <div class="archivo-nombre">{{ respuesta.nombre_archivo|default:'Archivo enviado' }}</div>
