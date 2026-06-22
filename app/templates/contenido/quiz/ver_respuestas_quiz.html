@@ -809,14 +809,22 @@
                     <!-- Archivo / Media (NUEVA LÓGICA) -->
                     {% if respuesta.pregunta.tipo_respuesta == 'archivo' and respuesta.archivo_subido_url %}
                         {% if respuesta.tipo_archivo == 'imagen_video' %}
-                            <!-- Imagen o video de SharePoint: iframe embebido en proporción 16:9 -->
+                            <!-- Imagen o video de SharePoint: usar embed.aspx (url_limpia), NO Doc.aspx -->
                             <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px; background:#f8fafc; margin:15px 0;">
-                                <iframe src="{{ respuesta.url_visualizacion }}"
+                                <iframe src="{{ respuesta.archivo_subido_url }}"
                                         frameborder="0"
                                         scrolling="no"
                                         allowfullscreen
                                         style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:12px;">
                                 </iframe>
+                            </div>
+                            <div style="margin-top:8px;">
+                                <a href="{{ respuesta.url_visualizacion }}"
+                                   target="_blank" rel="noopener noreferrer"
+                                   class="archivo-btn archivo-btn-abrir"
+                                   style="font-size:11px; padding:6px 12px;">
+                                    <i class="fas fa-external-link-alt"></i> Abrir en SharePoint
+                                </a>
                             </div>
                         {% elif respuesta.es_sharepoint %}
                             <!-- Documento SharePoint: tarjeta con botón Doc.aspx -->
