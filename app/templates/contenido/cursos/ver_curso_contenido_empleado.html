@@ -336,74 +336,65 @@
                     </div>
 
                     {% if not is_admin and quiz_data %}
-                    <!-- Tarjeta del cuestionario (solo empleados) -->
-                    <div class="card-quiz-premium" id="quiz-card">
-                        <div class="quiz-info-left">
-                            <div class="quiz-header">
-                                <div>
-                                    <h4 class="quiz-titulo">{{ quiz_data.titulo|default:"Cuestionario del curso" }}</h4>
-                                    <span class="quiz-subtitulo">Evaluá tus conocimientos</span>
-                                </div>
-                            </div>
-                            {% if quiz_data.descripcion %}
-                                <p class="quiz-descripcion">{{ quiz_data.descripcion }}</p>
-                            {% endif %}
-                            <div class="quiz-estadisticas">
-                                <div class="estadistica-item">
-                                    <i class="fas fa-question-circle"></i>
-                                    <span>{{ quiz_data.total }} preguntas</span>
-                                </div>
-                                <div class="estadistica-item">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>{{ quiz_data.respondidas }} respondidas</span>
-                                </div>
-                                {% if quiz_data.completado %}
-                                <div class="estadistica-item completado">
-                                    <i class="fas fa-trophy"></i>
-                                    <span>¡Completado!</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="quiz-barra-progreso">
-                                <div class="barra-relleno" style="width: {{ quiz_data.porcentaje }}%"></div>
-                            </div>
-                            <form method="post" action="{% url 'resolver_quiz' id_curso=curso.id_curso %}">
-                                {% csrf_token %}
-                                {% for pregunta in quiz_data.preguntas %}
-                                <div class="quiz-pregunta">
-                                    <p class="pregunta-texto">
-                                        <span class="pregunta-numero">{{ forloop.counter }}</span>
-                                        {{ pregunta.texto }}
-                                    </p>
-                                    <div class="opciones-container">
-                                        {% for opcion in pregunta.opciones %}
-                                        <label class="opcion-label">
-                                            <input type="radio" name="pregunta_{{ pregunta.id }}" value="{{ opcion.id }}" required>
-                                            <span class="opcion-circulo"></span>
-                                            <span class="opcion-texto">{{ opcion.texto }}</span>
-                                        </label>
-                                        {% endfor %}
+                        <div class="card-quiz-premium" id="quiz-card">
+                            <div class="quiz-info-left">
+                                <div class="quiz-header">
+                                    <div>
+                                        <h4 class="quiz-titulo">{{ quiz_data.titulo|default:"Cuestionario del curso" }}</h4>
+                                        <span class="quiz-subtitulo">Evaluá tus conocimientos</span>
                                     </div>
                                 </div>
-                                {% endfor %}
-                                <button type="submit" class="btn-quiz-submit">
-                                    <i class="fas fa-paper-plane"></i>
-                                    <span>Realizar Cuestionario</span>
-                                </button>
-                            </form>
+                                {% if quiz_data.descripcion %}
+                                    <p class="quiz-descripcion">{{ quiz_data.descripcion }}</p>
+                                {% endif %}
+                                <div class="quiz-estadisticas">
+                                    <div class="estadistica-item">
+                                        <i class="fas fa-question-circle"></i>
+                                        <span>{{ quiz_data.total }} preguntas</span>
+                                    </div>
+                                    <div class="estadistica-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>{{ quiz_data.respondidas }} respondidas</span>
+                                    </div>
+                                    {% if quiz_data.completado %}
+                                    <div class="estadistica-item completado">
+                                        <i class="fas fa-trophy"></i>
+                                        <span>¡Completado!</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="quiz-barra-progreso">
+                                    <div class="barra-relleno" style="width: {{ quiz_data.porcentaje }}%"></div>
+                                </div>
+
+                                {% if tiene_acceso_quiz %}
+                                    <a href="{% url 'resolver_quiz' id_curso=curso.id_curso %}"
+                                    class="btn-quiz-submit"
+                                    style="text-decoration: none; display: flex; margin-top: 12px;">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>Realizar Cuestionario</span>
+                                    </a>
+                                    {% else %}
+                                    <button type="button" class="btn-quiz-submit" onclick="mostrarAlertaSinAcceso()"
+                                            style="margin-top: 12px; background: #94a3b8; cursor: pointer;">
+                                        <i class="fas fa-lock"></i>
+                                        <span>Realizar Cuestionario</span>
+                                    </button>
+                                    {% endif %}
+
+                            </div>
+                            <div class="quiz-progress-ring">
+                                <svg class="progress-ring" width="80" height="80" viewBox="0 0 80 80">
+                                    <circle class="progress-ring-bg" cx="40" cy="40" r="34"></circle>
+                                    <circle class="progress-ring-fill" cx="40" cy="40" r="34"
+                                            stroke-dasharray="213.6"
+                                            stroke-dashoffset="213.6"
+                                            data-porcentaje="{{ quiz_data.porcentaje }}"></circle>
+                                </svg>
+                                <span class="quiz-porcentaje-texto">{{ quiz_data.porcentaje }}%</span>
+                            </div>
                         </div>
-                        <div class="quiz-progress-ring">
-                            <svg class="progress-ring" width="80" height="80" viewBox="0 0 80 80">
-                                <circle class="progress-ring-bg" cx="40" cy="40" r="34"></circle>
-                                <circle class="progress-ring-fill" cx="40" cy="40" r="34"
-                                        stroke-dasharray="213.6"
-                                        stroke-dashoffset="213.6"
-                                        data-porcentaje="{{ quiz_data.porcentaje }}"></circle>
-                            </svg>
-                            <span class="quiz-porcentaje-texto">{{ quiz_data.porcentaje }}%</span>
-                        </div>
-                    </div>
-                    {% endif %}
+                        {% endif %}
 
                     {% for bloque in bloques_lateral %}
                         {% if is_admin %}
@@ -855,6 +846,23 @@
         </defs>
     </svg>
 
+    <div id="modal-sin-acceso" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); z-index:2000; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:20px; padding:40px 35px; max-width:420px; width:90%; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.25); animation: slideUp 0.3s ease;">
+            <div style="width:64px; height:64px; border-radius:50%; background:#fff3cd; display:flex; align-items:center; justify-content:center; margin:0 auto 18px;">
+                <i class="fas fa-lock" style="font-size:1.8rem; color:#d97706;"></i>
+            </div>
+            <h3 style="font-size:1.15rem; font-weight:800; color:#162b47; margin-bottom:10px;">Cuestionario no asignado</h3>
+            <p style="font-size:0.88rem; color:#475569; line-height:1.6; margin-bottom:24px;">
+                Este cuestionario no te ha sido asignado.<br>
+                Si crees que es un error, comunícate con un <strong>administrador</strong> para que pueda habilitarlo.
+            </p>
+            <button onclick="cerrarAlertaSinAcceso()"
+                    style="background:#162b47; color:white; border:none; border-radius:12px; padding:11px 28px; font-size:0.9rem; font-weight:700; cursor:pointer; font-family:'Nunito Sans',sans-serif; transition:all 0.2s;">
+                Entendido
+            </button>
+        </div>
+    </div>
+
     <script src="{% static 'js/contenido-dashboard.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -870,6 +878,18 @@
                     ringFill.style.strokeDashoffset = offset;
                 }, 300);
             }
+        });
+
+        function mostrarAlertaSinAcceso() {
+            const m = document.getElementById('modal-sin-acceso');
+            m.style.display = 'flex';
+        }
+        function cerrarAlertaSinAcceso() {
+            document.getElementById('modal-sin-acceso').style.display = 'none';
+        }
+        // Cerrar al hacer clic fuera
+        document.getElementById('modal-sin-acceso').addEventListener('click', function(e) {
+            if (e.target === this) cerrarAlertaSinAcceso();
         });
     </script>
 </body>

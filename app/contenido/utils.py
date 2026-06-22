@@ -146,21 +146,24 @@ def generar_id_unico(prefijo=''):
 # FUNCIONALIDAD DE GENERAR REPORTE DE LOS CURSOS COMPLETADOS POR MESES
 #=========================================================
 
-def get_stats_mes(quiz, year, month):
-    from .models import ProgresoUsuario
-    from inicio_sesion.models import Usuario  # ajusta según tu app
+def get_stats_mes(curso, quiz, year, month):
+    from .models import ProgresoUsuario, AsignacionCurso
 
-    # Total de empleados activos en el sistema
-    total_empleados = Usuario.objects.filter(rol='2', estado='Activo').count()
-    # (si tu campo/valor es distinto, ajústalo, ej: activo=True, tipo='2', etc.)
+    # Solo los empleados asignados a ESTE curso
+    total_empleados = AsignacionCurso.objects.filter(curso=curso).count()
+    usuarios_asignados_ids = AsignacionCurso.objects.filter(
+        curso=curso
+    ).values_list('usuario_id', flat=True)
 
     total_completados = ProgresoUsuario.objects.filter(
         quiz=quiz,
+        usuario_id__in=usuarios_asignados_ids,
         quiz_completado=True
     ).values('usuario').distinct().count()
 
     completados_mes = ProgresoUsuario.objects.filter(
         quiz=quiz,
+        usuario_id__in=usuarios_asignados_ids,
         quiz_completado=True,
         fecha_respuesta__year=year,
         fecha_respuesta__month=month
@@ -168,6 +171,7 @@ def get_stats_mes(quiz, year, month):
 
     en_progreso = ProgresoUsuario.objects.filter(
         quiz=quiz,
+        usuario_id__in=usuarios_asignados_ids,
         respondida=True,
         quiz_completado=False
     ).values('usuario').distinct().count()
@@ -183,19 +187,23 @@ def get_stats_mes(quiz, year, month):
     }
 
 
-def get_stats_rango(quiz, fecha_inicio, fecha_fin):
-    from .models import ProgresoUsuario
-    from inicio_sesion.models import Usuario
+def get_stats_rango(curso, quiz, fecha_inicio, fecha_fin):
+    from .models import ProgresoUsuario, AsignacionCurso
 
-    total_empleados = Usuario.objects.filter(rol='2', estado='Activo').count()
+    total_empleados = AsignacionCurso.objects.filter(curso=curso).count()
+    usuarios_asignados_ids = AsignacionCurso.objects.filter(
+        curso=curso
+    ).values_list('usuario_id', flat=True)
 
     total_completados = ProgresoUsuario.objects.filter(
         quiz=quiz,
+        usuario_id__in=usuarios_asignados_ids,
         quiz_completado=True
     ).values('usuario').distinct().count()
 
     completados_rango = ProgresoUsuario.objects.filter(
         quiz=quiz,
+        usuario_id__in=usuarios_asignados_ids,
         quiz_completado=True,
         fecha_respuesta__date__gte=fecha_inicio,
         fecha_respuesta__date__lte=fecha_fin
@@ -203,6 +211,7 @@ def get_stats_rango(quiz, fecha_inicio, fecha_fin):
 
     en_progreso = ProgresoUsuario.objects.filter(
         quiz=quiz,
+        usuario_id__in=usuarios_asignados_ids,
         respondida=True,
         quiz_completado=False
     ).values('usuario').distinct().count()
@@ -232,7 +241,6 @@ def get_meses_historicos(curso, quiz):
     mes_actual_year  = hoy.year
     mes_actual_month = hoy.month
 
-    # Cuántos meses tiene el curso de vida
     if curso.fecha_public:
         delta_meses = (
             (hoy.year - curso.fecha_public.year) * 12
@@ -241,11 +249,10 @@ def get_meses_historicos(curso, quiz):
     else:
         delta_meses = 0
 
-    # Tomamos hasta 6 meses anteriores al mes actual
     n_meses = min(delta_meses, 6)
 
     historico = []
-    for i in range(1, n_meses + 1):      # i=1 → mes anterior, i=2 → hace 2 meses…
+    for i in range(1, n_meses + 1):
         m = mes_actual_month - i
         y = mes_actual_year
         while m <= 0:
@@ -253,7 +260,7 @@ def get_meses_historicos(curso, quiz):
             y -= 1
 
         if quiz:
-            stats = get_stats_mes(quiz, y, m)
+            stats = get_stats_mes(curso, quiz, y, m)
         else:
             stats = {
                 'total_completados': 0,
@@ -264,13 +271,13 @@ def get_meses_historicos(curso, quiz):
             }
 
         historico.append({
-        'label': f"{MESES_ES[m-1]} {y}",  # ← español
-        'month': m,
-        'year':  y,
-        **stats,
-    })
+            'label': f"{MESES_ES[m-1]} {y}",
+            'month': m,
+            'year':  y,
+            **stats,
+        })
 
-    return historico 
+    return historico
 
 def get_cursos_stats(year=None, month=None):
     from .models import Curso
@@ -286,7 +293,7 @@ def get_cursos_stats(year=None, month=None):
         quiz = getattr(curso, 'quiz', None)
 
         if quiz:
-            stats_actual  = get_stats_mes(quiz, year, month)
+            stats_actual  = get_stats_mes(curso, quiz, year, month)
             meses_hist    = get_meses_historicos(curso, quiz)
         else:
             stats_actual = {
@@ -302,7 +309,7 @@ def get_cursos_stats(year=None, month=None):
             'curso':        curso,
             'tiene_quiz':   quiz is not None,
             'mes_actual': {
-                'label': f"{MESES_ES[month-1]} {year}",   # ← Mes en español
+                'label': f"{MESES_ES[month-1]} {year}",
                 **stats_actual,
             },
             'meses_hist':   meses_hist,
@@ -311,19 +318,20 @@ def get_cursos_stats(year=None, month=None):
     return resultado, {
         'year':      year,
         'month':     month,
-        'mes_label': f"{MESES_ES[month-1]} {year}",       # ← Mes en español
+        'mes_label': f"{MESES_ES[month-1]} {year}",
     }
 
 
-def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
-    from .models import Curso
 
+
+def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
     label_rango = f"{fecha_inicio.strftime('%d/%m/%Y')} — {fecha_fin.strftime('%d/%m/%Y')}"
 
     wb = Workbook()
     ws = wb.active
     ws.title = "Estadísticas Cursos"
 
+    # --- Estilos ---
     fill_titulo    = PatternFill("solid", fgColor="1F4E79")
     fill_header    = PatternFill("solid", fgColor="1F4E79")
     fill_subheader = PatternFill("solid", fgColor="2E75B6")
@@ -342,7 +350,7 @@ def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
     thin      = Side(style="thin", color="BFBFBF")
     border    = Border(left=thin, right=thin, top=thin, bottom=thin)
 
-    # Fila 1: Título
+    # --- Filas de título y encabezado ---
     ws.row_dimensions[1].height = 28
     ws.merge_cells("A1:H1")
     c = ws["A1"]
@@ -350,7 +358,6 @@ def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
         f"Reporte de Cursos — {label_rango}", font_titulo, fill_titulo, al_center
     )
 
-    # Fila 2: Subtítulo
     ws.row_dimensions[2].height = 18
     ws.merge_cells("A2:H2")
     c = ws["A2"]
@@ -358,14 +365,13 @@ def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
         f"Generado el {date.today().strftime('%d/%m/%Y')}", font_sub_it, fill_titulo, al_center
     )
 
-    # Fila 3: Encabezados de grupo  (A=Curso, B=Creado, C-G=stats, H=Quiz)
     ws.row_dimensions[3].height = 22
     ws.row_dimensions[4].height = 22
 
     grupos = [
         (1, 1, "Curso"),
         (2, 2, "Creado"),
-        (3, 7, label_rango),   # 5 columnas de stats
+        (3, 7, label_rango),
         (8, 8, "Estado"),
     ]
     for col_ini, col_fin, texto in grupos:
@@ -379,7 +385,6 @@ def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
                 end_row=3,   end_column=col_fin
             )
 
-    # Fila 4: Sub-encabezados
     sub_textos = [
         "Nombre del Curso",        # A
         "Fecha Creación",          # B
@@ -396,14 +401,16 @@ def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
             texto, font_subheader, fill_subheader, al_center, border
         )
 
-    # Datos
+    # --- Datos (bucle integrado) ---
     cursos = Curso.objects.filter(id_curso__in=cursos_ids).prefetch_related('quiz')
 
     for i, curso in enumerate(cursos):
         row  = 5 + i
         fill = fill_alt if i % 2 == 0 else fill_blanco
+
         quiz = getattr(curso, 'quiz', None)
 
+        # Llamada corregida: get_stats_rango solo necesita el quiz y las fechas
         if quiz:
             stats = get_stats_rango(quiz, fecha_inicio, fecha_fin)
         else:
@@ -437,10 +444,12 @@ def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
                 c.font      = font_body
                 c.alignment = al_left if col_idx == 1 else al_center
 
+    # --- Ajustar anchos ---
     anchos = [35, 16, 16, 18, 22, 14, 14, 12]
     for idx, w in enumerate(anchos, start=1):
         ws.column_dimensions[get_column_letter(idx)].width = w
 
+    # --- Salida ---
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)

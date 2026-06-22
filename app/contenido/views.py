@@ -657,16 +657,16 @@ def eliminar_contenido_ajax(request, id):
 @login_requerido
 @solo_admin
 def crear_quiz(request, id_curso):
-    """Vista para crear/editar un quiz."""
+    """Vista para crear/editar un quiz, incluyendo asignación de usuarios al curso."""
     curso = get_object_or_404(Curso, id_curso=id_curso)
     quiz = curso.quiz if hasattr(curso, 'quiz') else None
-    
+
     if request.method == 'POST':
         data = json.loads(request.body)
-        
+
         if not data.get('titulo'):
             return JsonResponse({'success': False, 'error': 'El título es requerido'}, status=400)
-        
+
         if quiz:
             quiz.titulo = data.get('titulo')
             quiz.descripcion = data.get('descripcion', '')
@@ -677,19 +677,44 @@ def crear_quiz(request, id_curso):
                 descripcion=data.get('descripcion', ''),
                 curso=curso
             )
-        
+
+        # --- Asignación de usuarios al curso ---
+        usuarios_ids = data.get('usuarios_asignados', [])
+        if isinstance(usuarios_ids, list):
+            usuarios_ids_validos = [int(uid) for uid in usuarios_ids if str(uid).isdigit()]
+
+            AsignacionCurso.objects.filter(curso=curso).exclude(
+                usuario_id__in=usuarios_ids_validos
+            ).delete()
+
+            existentes = set(
+                AsignacionCurso.objects.filter(curso=curso).values_list('usuario_id', flat=True)
+            )
+            nuevas = [
+                AsignacionCurso(usuario_id=uid, curso=curso)
+                for uid in usuarios_ids_validos if uid not in existentes
+            ]
+            if nuevas:
+                AsignacionCurso.objects.bulk_create(nuevas)
+
         return JsonResponse({
             'success': True,
             'quiz_id': quiz.id,
             'mensaje': 'Quiz creado/actualizado exitosamente'
         })
-    
+
+    usuarios_asignados_ids = list(
+        AsignacionCurso.objects.filter(curso=curso).values_list('usuario_id', flat=True)
+    )
+
     context = {
         'curso': curso,
         'quiz': quiz,
-        'preguntas': quiz.preguntas.all().order_by('orden') if quiz else []
+        'preguntas': quiz.preguntas.all().order_by('orden') if quiz else [],
+        'usuarios': Usuario.objects.all().order_by('nombre_completo'),
+        'usuarios_asignados_ids': usuarios_asignados_ids,
     }
-    
+
     return render(request, 'contenido/quiz/crear_quiz.html', context)
 
 
@@ -780,14 +805,22 @@ def eliminar_pregunta(request, pregunta_id):
 def resolver_quiz(request, id_curso):
     """Vista para que el empleado resuelva el quiz."""
     curso = get_object_or_404(Curso, id_curso=id_curso)
-    quiz = get_object_or_404(Quiz, curso=curso)
     usuario_id = request.session.get('id_usuario')
 
-    # Obtener preguntas ACTUALES del quiz (fuente de verdad)
+    tiene_acceso = AsignacionCurso.objects.filter(
+        curso=curso,
+        usuario_id=usuario_id
+    ).exists()
+
+    if not tiene_acceso:
+        messages.error(request, 'No tienes asignado este curso, por lo que no puedes realizar el cuestionario.')
+        return redirect('ver_curso_empleado', id_curso=id_curso)
+
+    quiz = get_object_or_404(Quiz, curso=curso)
+
     preguntas = quiz.preguntas.all().order_by('orden')
     total = preguntas.count()
 
-    # Limpiar progreso huérfano (de preguntas que ya no existen)
     ProgresoUsuario.objects.filter(
         usuario_id=usuario_id,
         quiz=quiz
@@ -795,7 +828,6 @@ def resolver_quiz(request, id_curso):
         pregunta_id__in=preguntas.values_list('id', flat=True)
     ).delete()
 
-    # Crear progreso para preguntas nuevas que aún no tienen registro
     existentes_ids = set(
         ProgresoUsuario.objects.filter(
             usuario_id=usuario_id, quiz=quiz
@@ -808,13 +840,11 @@ def resolver_quiz(request, id_curso):
     if nuevos:
         ProgresoUsuario.objects.bulk_create(nuevos)
 
-    # Recalcular el estado real de "completado" contra el total ACTUAL
     correctas = ProgresoUsuario.objects.filter(
         usuario_id=usuario_id, quiz=quiz, es_correcta=True
     ).count()
     completado_real = total > 0 and correctas == total
 
-    # Sincronizar el flag quiz_completado con la realidad
     ProgresoUsuario.objects.filter(
         usuario_id=usuario_id, quiz=quiz
     ).update(quiz_completado=completado_real)
@@ -837,7 +867,6 @@ def resolver_quiz(request, id_curso):
             archivo.url_visualizacion = archivo_datos['url_visualizacion']
             archivo.url_descarga = archivo_datos['url_descarga']
 
-    # Construir progreso para el template
     progreso_usuario = {}
     for prog in ProgresoUsuario.objects.filter(usuario_id=usuario_id, quiz=quiz):
         progreso_usuario[prog.pregunta_id] = {
@@ -1007,11 +1036,13 @@ def gestion_quiz(request, id_curso):
     """Vista para gestionar el quiz de un curso (admin)."""
     curso = get_object_or_404(Curso, id_curso=id_curso)
     quiz = curso.quiz if hasattr(curso, 'quiz') else None
-    
+
     if quiz:
         total_preguntas = quiz.preguntas.count()
-        usuarios = Usuario.objects.all()
-        
+        usuarios = Usuario.objects.filter(
+            asignaciones__curso=curso
+        ).distinct()
+
         estadisticas = []
         for usuario in usuarios:
             respondidas = ProgresoUsuario.objects.filter(
@@ -1024,7 +1055,7 @@ def gestion_quiz(request, id_curso):
                 quiz=quiz,
                 es_correcta=True
             ).count() == total_preguntas
-            
+
             estadisticas.append({
                 'usuario': usuario.nombre_completo,
                 'usuario_id': usuario.id_usuario,
@@ -1035,13 +1066,13 @@ def gestion_quiz(request, id_curso):
             })
     else:
         estadisticas = []
-    
+
     context = {
         'curso': curso,
         'quiz': quiz,
         'estadisticas': estadisticas
     }
-    
+
     return render(request, 'contenido/quiz/gestion_quiz.html', context)
 
 
@@ -1236,6 +1267,9 @@ def ver_curso_empleado(request, id_curso):
         
         quiz_data = {
             'quiz': quiz,
+            'titulo': quiz.titulo,
+            'descripcion': quiz.descripcion,
+            'preguntas': quiz.preguntas.all().order_by('orden'),
             'total': total_preguntas,
             'respondidas': respondidas,
             'correctas': correctas,
@@ -1245,6 +1279,12 @@ def ver_curso_empleado(request, id_curso):
     
     # Verificar si el usuario es admin (acceso a edición)
     es_admin = request.session.get('rol') == 'admin' or request.session.get('es_admin', False)
+
+    # Verificar si el empleado está asignado a este curso
+    tiene_acceso_quiz = AsignacionCurso.objects.filter(
+        curso=curso,
+        usuario_id=usuario_id
+    ).exists()
     
     context = {
         'curso': curso,
@@ -1253,7 +1293,8 @@ def ver_curso_empleado(request, id_curso):
         'quiz_data': quiz_data,
         'nombre': request.session.get('nombre'),
         'is_admin': es_admin,
-        'readonly': not es_admin  # Pasar readonly a los templates
+        'readonly': not es_admin,
+        'tiene_acceso_quiz': tiene_acceso_quiz,
     }
     
     return render(request, 'contenido/cursos/ver_curso_contenido_empleado.html', context)

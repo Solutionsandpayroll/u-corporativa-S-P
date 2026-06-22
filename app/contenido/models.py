@@ -516,3 +516,25 @@ class Contenido(models.Model):
         if not self.tipo_con or self.tipo_con == 'otro':
             self.tipo_con = self.detectar_tipo()
         super().save(*args, **kwargs)
+
+
+class AsignacionCurso(models.Model):
+    """Relaciona qué usuarios deben completar qué cursos."""
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='asignaciones'
+    )
+    curso = models.ForeignKey(
+        'Curso',
+        on_delete=models.CASCADE,
+        related_name='asignaciones'
+    )
+    fecha_asignacion = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = 'asignacion_curso'
+        unique_together = ('usuario', 'curso')
+
+    def __str__(self):
+        return f"{self.usuario.nombre_completo} → {self.curso.titulo}"

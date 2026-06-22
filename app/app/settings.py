@@ -22,8 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY")
 
+#SECRET_KEY = os.environ.get("SECRET_KEY")
+
+SECRET_KEY = "django-insecure-n984k(e_yzds6=n_x($hyk&*s$_%3hd2_b^hf!m)6j3m)xje8b"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -77,21 +79,21 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+#DATABASES = {
+#    'default': dj_database_url.config(
+#        default=os.getenv("DATABASE_URL"),
+#        conn_max_age=600,
+#        ssl_require=True
+#    )
+#}
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
+    'default': dj_database_url.parse(
+        "postgresql://neondb_owner:npg_XxSAk2lpy8ut@ep-plain-unit-aqa0q5cu-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
         conn_max_age=600,
         ssl_require=True
     )
 }
-
-#DATABASES = {
-    #'default': dj_database_url.parse(
-    #    "",
-   #     conn_max_age=600,
-  #      ssl_require=True
- #   )
-#}
 
 
 

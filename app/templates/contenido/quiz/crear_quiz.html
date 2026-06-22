@@ -155,14 +155,13 @@
             flex: 1; margin-left: var(--sidebar-width);
             padding: 32px 36px; transition: margin-left var(--transition-speed);
             min-height: 100vh; animation: fadeInContent 0.5s ease-out;
-            background: #f5f6f8; /* Fondo unificado con el Código 2 */
+            background: #f5f6f8;
         }
         @keyframes fadeInContent {
             from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Botón volver */
         .back-link {
             display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
             color: var(--azul-oscuro); font-family: var(--font-destacados); font-weight: 700;
@@ -177,7 +176,6 @@
         .back-link i { font-size: 1rem; transition: transform 0.25s; }
         .back-link:hover i { transform: translateX(-3px); }
 
-        /* Header */
         .quiz-header {
             background: var(--blanco); border-radius: var(--card-radius); padding: 20px;
             box-shadow: var(--shadow-sm); margin-bottom: 20px;
@@ -193,7 +191,6 @@
             font-size: 1.6rem; margin-bottom: 5px; letter-spacing: -0.4px;
         }
 
-        /* Panel de información */
         .quiz-info-panel {
             background: var(--blanco); border-radius: var(--card-radius); padding: 18px;
             box-shadow: var(--shadow-sm); margin-bottom: 20px;
@@ -210,7 +207,6 @@
             border-color: var(--azul-oscuro); box-shadow: 0 0 0 0.2rem rgba(22,43,71,0.15);
         }
 
-        /* Botones */
         .btn-primary-custom {
             display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
             background: var(--azul-oscuro); color: var(--blanco); border: none; border-radius: 10px;
@@ -236,7 +232,6 @@
         }
         .btn-secondary-custom:hover { background: #5a6268; transform: translateY(-2px); }
 
-        /* Lista de preguntas (accordion) */
         .preguntas-container {
             background: var(--blanco); border-radius: var(--card-radius); padding: 25px;
             box-shadow: var(--shadow-sm);
@@ -279,7 +274,6 @@
             display: block;
         }
 
-        /* Estilos de archivo (dashboard lateral) */
         .adjunto-card {
             display: flex; align-items: center; padding: 12px; background: #f8fafc;
             border-radius: 8px; margin-bottom: 8px; transition: background 0.2s;
@@ -318,7 +312,6 @@
             width: 100%; max-height: 250px; object-fit: contain; display: block;
         }
 
-        /* Visor de iframe (para imágenes de SharePoint) */
         .iframe-apoyo-container {
             position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
             border-radius: 8px; margin: 10px 0; background: #f8fafc;
@@ -328,7 +321,6 @@
             border: none; border-radius: 8px;
         }
 
-        /* Opciones de pregunta */
         .opcion-item {
             display: flex; align-items: center; padding: 8px 12px; background: #f5f5f5;
             border-radius: 6px; margin-bottom: 8px; font-size: 14px;
@@ -345,7 +337,7 @@
             font-size: 0.9rem;
         }
 
-        /* ========== MODALES PREMIUM (copiados del Código 2) ========== */
+        /* ========== MODALES PREMIUM ========== */
         .modal-editar-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -542,7 +534,6 @@
             filter: brightness(1.05);
         }
 
-        /* Modal de confirmación y éxito */
         .confirm-modal {
             position: fixed;
             inset: 0;
@@ -622,7 +613,7 @@
         }
         .success-modal .success-content i {
             font-size: 3.5rem;
-            color: var(--azul-medio);  /* Icono azul para éxito */
+            color: var(--azul-medio);
             margin-bottom: 10px;
         }
         .success-modal .success-content p {
@@ -635,7 +626,6 @@
             opacity: 0;
         }
 
-        /* Tipos de pregunta (selector de botones) */
         .tipo-pregunta-selector {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -663,7 +653,6 @@
             border-color: var(--azul-oscuro);
         }
 
-        /* Opciones dinámicas dentro del modal */
         .opciones-input {
             background: #f8fbff;
             border-radius: 8px;
@@ -686,7 +675,6 @@
             gap: 8px;
             white-space: nowrap;
         }
-        /* Botón agregar opción: fondo azul */
         .btn-agregar-opcion {
             background: var(--azul-medio);
             color: white;
@@ -701,7 +689,6 @@
         .btn-agregar-opcion:hover {
             background: #0a4168;
         }
-        /* Botón eliminar opción: solo el icono rojo, sin fondo cuadrado */
         .btn-eliminar-opcion {
             background: transparent;
             color: var(--danger-color);
@@ -728,7 +715,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .sidebar { width: var(--sidebar-collapsed); }
             .sidebar-nav a span { display: none; }
@@ -750,7 +736,6 @@
 </head>
 <body>
 
-    <!-- Partículas decorativas (misma animación del Código 1) -->
     <div class="bg-particles" aria-hidden="true">
         <div class="bg-particle"></div>
         <div class="bg-particle"></div>
@@ -758,7 +743,6 @@
         <div class="bg-particle"></div>
     </div>
 
-    <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="logo-wrapper" title="Dashboard">
@@ -773,21 +757,18 @@
             </a>
             <a href="{% url 'gestionar_cursos' %}" class="active"><i class="fa-solid fa-chalkboard-user"></i><span>Gestionar Cursos</span></a>
             <a href="{% url 'administrar_noticias' %}"><i class="fa-solid fa-pen-to-square"></i><span>Administrar Noticias</span></a>
-
             <a href="{% url 'estadisticas_cursos' %}">
                 <i class="fa-solid fa-chart-column"></i>
                 <span>Reporte Cursos</span>
             </a>
-
             <a href="{% url 'subir_archivo' %}" >
-                    <i class="fa-solid fa-file"></i>
-                    <span>Subir Archivo</span>
-                </a>
+                <i class="fa-solid fa-file"></i>
+                <span>Subir Archivo</span>
+            </a>
             <a href="{% url 'logout' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar Sesión</span></a>
         </nav>
     </aside>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content">
         {% csrf_token %}
 
@@ -795,7 +776,6 @@
             <i class="fas fa-arrow-left"></i> Volver a Gestionar Cursos
         </a>
 
-        <!-- Header -->
         <div class="quiz-header">
             <div class="course-name"><i class="fas fa-book"></i> {{ curso.titulo }}</div>
             <h1>{% if quiz %}Editar Quiz{% else %}Crear Quiz{% endif %}</h1>
@@ -803,7 +783,6 @@
         </div>
 
         {% if quiz %}
-        <!-- Información del Quiz -->
         <div class="quiz-info-panel" style="margin-top: 20px;">
             <div class="row g-3">
                 <div class="col-md-8">
@@ -830,6 +809,10 @@
                           placeholder="Describe el propósito de este quiz...">{{ quiz.descripcion }}</textarea>
             </div>
             <div class="text-end mt-3">
+                <button class="btn-secondary-custom" onclick="abrirModalAsignacion();" type="button">
+                    <i class="fas fa-users"></i> Asignar Usuarios
+                    <span id="contador-asignados" class="badge bg-light text-dark ms-1">{{ usuarios_asignados_ids|length }}</span>
+                </button>
                 <button class="btn-primary-custom" onclick="guardarQuiz();">
                     <i class="fas fa-save"></i> Actualizar Quiz
                 </button>
@@ -838,10 +821,8 @@
         {% endif %}
 
         {% if quiz %}
-        <!-- Sección de Preguntas -->
         <div class="preguntas-container" style="margin-top: 20px;">
         {% else %}
-        <!-- Sección de Preguntas -->
         <div class="preguntas-container">
         {% endif %}
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -853,7 +834,6 @@
                 </button>
             </div>
 
-            <!-- Lista de preguntas existentes (accordion) -->
             <div class="accordion" id="accordionPreguntas">
                 {% if preguntas %}
                     {% for pregunta in preguntas %}
@@ -962,7 +942,6 @@
         </div>
     </main>
 
-    <!-- MODAL PREMIUM PARA CREAR PREGUNTA (diseño igual al de curso) -->
     <div id="modalPregunta" class="modal-editar-overlay">
         <div class="modal-editar-content">
             <div class="modal-editar-header">
@@ -978,7 +957,6 @@
                 </button>
             </div>
             <div class="modal-editar-body">
-                <!-- Tipo de pregunta -->
                 <div class="form-full-width">
                     <label class="editar-label">Tipo de Pregunta</label>
                     <div class="tipo-pregunta-selector">
@@ -990,31 +968,26 @@
                     </div>
                 </div>
 
-                <!-- Pregunta (texto) -->
                 <div class="form-full-width">
                     <label class="editar-label">Pregunta</label>
                     <textarea class="editar-textarea" id="nuevo-pregunta-texto" rows="2" placeholder="Escribe la pregunta aquí..."></textarea>
                 </div>
 
-                <!-- Descripción -->
                 <div class="form-full-width">
                     <label class="editar-label">Descripción (Opcional)</label>
                     <textarea class="editar-textarea" id="nuevo-pregunta-descripcion" rows="2" placeholder="Proporciona contexto adicional..."></textarea>
                 </div>
 
-                <!-- Imagen de apoyo -->
                 <div class="form-full-width">
                     <label class="editar-label"><i class="fas fa-image"></i> Imagen de Apoyo (URL o iframe SharePoint)</label>
                     <textarea class="editar-textarea" id="nuevo-pregunta-imagen" rows="2" placeholder="Pega aquí una URL de imagen, código iframe de SharePoint..."></textarea>
                 </div>
 
-                <!-- Archivo de apoyo -->
                 <div class="form-full-width">
                     <label class="editar-label"><i class="fas fa-file"></i> Archivo de Apoyo (Link iframe SharePoint)</label>
                     <textarea class="editar-textarea" id="nuevo-pregunta-archivo" rows="2" placeholder="Pega aquí el código iframe de SharePoint/OneDrive..."></textarea>
                 </div>
 
-                <!-- Contenedor de opciones -->
                 <div id="opciones-container" class="opciones-input" style="display: block;">
                     <label class="editar-label mb-2">Opciones de Respuesta</label>
                     <div id="opciones-list"></div>
@@ -1023,13 +996,11 @@
                     </button>
                 </div>
 
-                <!-- Pista -->
                 <div class="form-full-width">
                     <label class="editar-label">Pista (Opcional)</label>
                     <textarea class="editar-textarea" id="nuevo-pregunta-pista" rows="2" placeholder="Pista para el estudiante..."></textarea>
                 </div>
 
-                <!-- Explicación -->
                 <div class="form-full-width">
                     <label class="editar-label">Explicación (Se muestra al fallar)</label>
                     <textarea class="editar-textarea" id="nuevo-pregunta-explicacion" rows="2" placeholder="Explicación de la respuesta correcta..."></textarea>
@@ -1046,7 +1017,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmación (eliminar pregunta) -->
     <div id="confirmModal" class="confirm-modal">
         <div class="confirm-content">
             <i class="fas fa-question-circle"></i>
@@ -1058,11 +1028,68 @@
         </div>
     </div>
 
-    <!-- Modal de Éxito / Error -->
     <div id="successModal" class="success-modal">
         <div class="success-content">
             <i id="successIcon" class="fas fa-check-circle"></i>
             <p id="successMessage">Operación exitosa</p>
+        </div>
+    </div>
+
+    <div id="modalAsignacion" class="modal-editar-overlay">
+        <div class="modal-editar-content" style="max-width: 520px;">
+            <div class="modal-editar-header">
+                <div class="modal-editar-header-left">
+                    <div class="modal-editar-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <h3 class="modal-editar-titulo">Asignar Usuarios</h3>
+                        <p class="modal-editar-subtitulo">Selecciona quiénes deben hacer este curso</p>
+                    </div>
+                </div>
+                <button class="modal-editar-close" onclick="cerrarModalAsignacion()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-editar-body">
+                <div class="form-full-width">
+                    <input type="text" class="editar-input" id="buscador-usuarios"
+                           placeholder="Buscar usuario por nombre...">
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span style="font-size: 12px; color: #64748b; font-weight: 600;">
+                        <span id="contador-visible">{{ usuarios|length }}</span> usuario(s)
+                    </span>
+                    <div>
+                        <button type="button" class="btn-agregar-opcion" style="padding: 4px 10px; font-size: 12px;" onclick="seleccionarTodosUsuarios(true)">
+                            Seleccionar todos
+                        </button>
+                        <button type="button" class="btn-agregar-opcion" style="padding: 4px 10px; font-size: 12px; background:#6c757d;" onclick="seleccionarTodosUsuarios(false)">
+                            Deseleccionar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="lista-usuarios-asignacion" style="max-height: 320px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px;">
+                    {% for usuario in usuarios %}
+                    <label class="opcion-item" style="cursor: pointer; display: flex; gap: 10px;" data-nombre="{{ usuario.nombre_completo|lower }}">
+                        <input type="checkbox" class="usuario-checkbox" value="{{ usuario.id_usuario }}"
+                               {% if usuario.id_usuario in usuarios_asignados_ids %}checked{% endif %}>
+                        <span>{{ usuario.nombre_completo }}</span>
+                        <span class="text-muted" style="margin-left:auto; font-size:11px;">{{ usuario.get_rol_display }}</span>
+                    </label>
+                    {% empty %}
+                    <p class="text-muted text-center py-3">No hay usuarios registrados.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-editar-footer">
+                <button class="editar-btn-cancelar" onclick="cerrarModalAsignacion()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="editar-btn-guardar" onclick="guardarAsignacionUsuarios()">
+                    <i class="fas fa-check"></i> Confirmar Selección
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1082,6 +1109,7 @@
         const successModal = document.getElementById('successModal');
         const successMessageSpan = document.getElementById('successMessage');
         const successIcon = document.getElementById('successIcon');
+        const modalAsignacion = document.getElementById('modalAsignacion');
 
         function getCsrfToken() {
             return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
@@ -1380,6 +1408,10 @@
             });
         }
 
+        function getUsuariosSeleccionados() {
+            return Array.from(document.querySelectorAll('.usuario-checkbox:checked')).map(cb => cb.value);
+        }
+
         function guardarQuiz() {
             const titulo = $('#quiz-titulo').val().trim();
             if (!titulo) {
@@ -1395,7 +1427,8 @@
                 data: JSON.stringify({
                     titulo: titulo,
                     descripcion: $('#quiz-descripcion').val() || descripcionPorDefectoQuiz,
-                    activo: $('#quiz-activo').val() === '1'
+                    activo: $('#quiz-activo').val() === '1',
+                    usuarios_asignados: getUsuariosSeleccionados()
                 }),
                 success: function(resp) {
                     if (resp.success) {
@@ -1414,6 +1447,44 @@
         function toggleAccordion(header) {
             const item = header.parentElement;
             item.classList.toggle('active');
+        }
+
+        function abrirModalAsignacion() {
+            modalAsignacion.style.display = 'flex';
+            document.getElementById('buscador-usuarios').value = '';
+            filtrarUsuarios('');
+        }
+
+        function cerrarModalAsignacion() {
+            modalAsignacion.style.display = 'none';
+        }
+
+        function filtrarUsuarios(texto) {
+            const filtro = texto.trim().toLowerCase();
+            let visibles = 0;
+            document.querySelectorAll('#lista-usuarios-asignacion label.opcion-item').forEach(label => {
+                const coincide = label.dataset.nombre.includes(filtro);
+                label.style.display = coincide ? 'flex' : 'none';
+                if (coincide) visibles++;
+            });
+            const contador = document.getElementById('contador-visible');
+            if (contador) contador.textContent = visibles;
+        }
+
+        function seleccionarTodosUsuarios(valor) {
+            document.querySelectorAll('#lista-usuarios-asignacion label.opcion-item').forEach(label => {
+                if (label.style.display !== 'none') {
+                    const checkbox = label.querySelector('.usuario-checkbox');
+                    if (checkbox) checkbox.checked = valor;
+                }
+            });
+        }
+
+        function guardarAsignacionUsuarios() {
+            const seleccionados = getUsuariosSeleccionados();
+            document.getElementById('contador-asignados').textContent = seleccionados.length;
+            cerrarModalAsignacion();
+            mostrarAlerta('Listo', 'Selección actualizada. No olvides hacer clic en "Actualizar Quiz" para guardar.', 'success');
         }
 
         $(document).ready(function() {
@@ -1441,6 +1512,7 @@
                 if (event.target === modalPregunta) cerrarModalPregunta();
                 if (event.target === confirmModal) confirmModal.style.display = 'none';
                 if (event.target === successModal) successModal.style.display = 'none';
+                if (event.target === modalAsignacion) cerrarModalAsignacion();
             };
 
             document.querySelectorAll('.adjunto-card').forEach(card => {
@@ -1467,6 +1539,13 @@
                     }
                 }
             });
+
+            const buscador = document.getElementById('buscador-usuarios');
+            if (buscador) {
+                buscador.addEventListener('input', function() {
+                    filtrarUsuarios(this.value);
+                });
+            }
         });
     </script>
 </body>
