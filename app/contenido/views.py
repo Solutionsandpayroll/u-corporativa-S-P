@@ -756,8 +756,22 @@ def guardar_pregunta_quiz(request, id_curso):
 def eliminar_pregunta(request, pregunta_id):
     """Elimina una pregunta del quiz."""
     pregunta = get_object_or_404(Pregunta, id=pregunta_id)
-    pregunta.delete()
-    
+    quiz = pregunta.quiz
+    pregunta.delete()  # cascada borra ProgresoUsuario huérfanos
+
+    # Recalcular completado para todos los usuarios que tenían este quiz
+    total_actual = quiz.preguntas.count()
+    usuarios_con_progreso = ProgresoUsuario.objects.filter(quiz=quiz).values_list('usuario_id', flat=True).distinct()
+
+    for usuario_id in usuarios_con_progreso:
+        correctas = ProgresoUsuario.objects.filter(
+            usuario_id=usuario_id, quiz=quiz, es_correcta=True
+        ).count()
+        completado_real = total_actual > 0 and correctas == total_actual
+        ProgresoUsuario.objects.filter(
+            usuario_id=usuario_id, quiz=quiz
+        ).update(quiz_completado=completado_real)
+
     return JsonResponse({'success': True, 'mensaje': 'Pregunta eliminada'})
 
 
@@ -768,15 +782,44 @@ def resolver_quiz(request, id_curso):
     curso = get_object_or_404(Curso, id_curso=id_curso)
     quiz = get_object_or_404(Quiz, curso=curso)
     usuario_id = request.session.get('id_usuario')
-    
-    # Verificar si ya completó el quiz
-    progreso_completado = ProgresoUsuario.objects.filter(
+
+    # Obtener preguntas ACTUALES del quiz (fuente de verdad)
+    preguntas = quiz.preguntas.all().order_by('orden')
+    total = preguntas.count()
+
+    # Limpiar progreso huérfano (de preguntas que ya no existen)
+    ProgresoUsuario.objects.filter(
         usuario_id=usuario_id,
-        quiz=quiz,
-        quiz_completado=True
-    ).exists()
-    
-    if progreso_completado:
+        quiz=quiz
+    ).exclude(
+        pregunta_id__in=preguntas.values_list('id', flat=True)
+    ).delete()
+
+    # Crear progreso para preguntas nuevas que aún no tienen registro
+    existentes_ids = set(
+        ProgresoUsuario.objects.filter(
+            usuario_id=usuario_id, quiz=quiz
+        ).values_list('pregunta_id', flat=True)
+    )
+    nuevos = [
+        ProgresoUsuario(usuario_id=usuario_id, quiz=quiz, pregunta=p)
+        for p in preguntas if p.id not in existentes_ids
+    ]
+    if nuevos:
+        ProgresoUsuario.objects.bulk_create(nuevos)
+
+    # Recalcular el estado real de "completado" contra el total ACTUAL
+    correctas = ProgresoUsuario.objects.filter(
+        usuario_id=usuario_id, quiz=quiz, es_correcta=True
+    ).count()
+    completado_real = total > 0 and correctas == total
+
+    # Sincronizar el flag quiz_completado con la realidad
+    ProgresoUsuario.objects.filter(
+        usuario_id=usuario_id, quiz=quiz
+    ).update(quiz_completado=completado_real)
+
+    if completado_real:
         context = {
             'curso': curso,
             'quiz': quiz,
@@ -784,9 +827,6 @@ def resolver_quiz(request, id_curso):
             'mensaje': 'Ya has completado este quiz. No puedes intentarlo de nuevo.'
         }
         return render(request, 'contenido/quiz/resolver_quiz.html', context)
-    
-    # Obtener preguntas del quiz
-    preguntas = quiz.preguntas.all().order_by('orden')
 
     for pregunta in preguntas:
         archivo = pregunta.archivo_apoyo
@@ -796,41 +836,19 @@ def resolver_quiz(request, id_curso):
             archivo.nombre = archivo.nombre or archivo_datos['nombre']
             archivo.url_visualizacion = archivo_datos['url_visualizacion']
             archivo.url_descarga = archivo_datos['url_descarga']
-    
-    # Obtener progreso del usuario
+
+    # Construir progreso para el template
     progreso_usuario = {}
-    for pregunta in preguntas:
-        try:
-            prog = ProgresoUsuario.objects.get(
-                usuario_id=usuario_id,
-                quiz=quiz,
-                pregunta=pregunta
-            )
-            progreso_usuario[pregunta.id] = {
-                'respondida': prog.respondida,
-                'es_correcta': prog.es_correcta,
-                'intentos_fallidos': prog.intentos_fallidos,
-                'respuesta': prog.respuesta_texto or prog.archivo_subido_url or ''
-            }
-        except ProgresoUsuario.DoesNotExist:
-            # Crear registro inicial
-            ProgresoUsuario.objects.create(
-                usuario_id=usuario_id,
-                quiz=quiz,
-                pregunta=pregunta
-            )
-            progreso_usuario[pregunta.id] = {
-                'respondida': False,
-                'es_correcta': False,
-                'intentos_fallidos': 0,
-                'respuesta': ''
-            }
-    
-    # Calcular estadísticas
-    total = preguntas.count()
+    for prog in ProgresoUsuario.objects.filter(usuario_id=usuario_id, quiz=quiz):
+        progreso_usuario[prog.pregunta_id] = {
+            'respondida': prog.respondida,
+            'es_correcta': prog.es_correcta,
+            'intentos_fallidos': prog.intentos_fallidos,
+            'respuesta': prog.respuesta_texto or prog.archivo_subido_url or ''
+        }
+
     respondidas = sum(1 for p in progreso_usuario.values() if p['respondida'])
-    correctas = sum(1 for p in progreso_usuario.values() if p['es_correcta'])
-    
+
     context = {
         'curso': curso,
         'quiz': quiz,
@@ -840,9 +858,9 @@ def resolver_quiz(request, id_curso):
         'respondidas': respondidas,
         'correctas': correctas,
         'porcentaje': (respondidas * 100) // total if total > 0 else 0,
-        'completado': correctas == total
+        'completado': completado_real
     }
-    
+
     return render(request, 'contenido/quiz/resolver_quiz.html', context)
 
 @login_requerido
