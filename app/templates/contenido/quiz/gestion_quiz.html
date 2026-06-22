@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Respuestas - {{ usuario.nombre_completo }}</title>
+    <title>Gestión de Quiz - {{ curso.titulo }}</title>
 
+    <!-- Tipografías -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Calibri:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -29,13 +32,18 @@
             --shadow-lg: 0 12px 32px rgba(22, 43, 71, 0.18);
             --font-titulos: 'Nunito Sans', sans-serif;
             --font-destacados: 'Calibri', 'Trebuchet MS', sans-serif;
+
+            /* Colores de apoyo para quiz */
             --success-color: #198754;
             --danger-color: #dc3545;
             --warning-color: #ffc107;
-            --info-color: #0dcaf0;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             display: flex;
@@ -45,7 +53,7 @@
             overflow-x: hidden;
         }
 
-        /* ========== SIDEBAR ========== */
+        /* ========== SIDEBAR (EXACTAMENTE IGUAL AL CÓDIGO 2) ========== */
         .sidebar {
             width: var(--sidebar-width);
             min-height: 100vh;
@@ -55,7 +63,9 @@
             flex-direction: column;
             padding: 0;
             position: fixed;
-            top: 0; left: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            bottom: 0;
             z-index: 1000;
             transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1), box-shadow var(--transition-speed) ease;
             box-shadow: 4px 0 24px rgba(22, 43, 71, 0.25);
@@ -78,13 +88,19 @@
             transition: transform 0.3s ease, filter 0.3s ease;
             cursor: pointer;
         }
+
         .logo-wrapper:hover {
             transform: scale(1.03);
             filter: drop-shadow(0 0 12px rgba(229, 17, 72, 0.4));
         }
+
         .logo-wrapper img {
-            width: 100%; height: auto; max-height: 78px;
-            object-fit: contain; display: block; background: transparent;
+            width: 100%;
+            height: auto;
+            max-height: 78px;
+            object-fit: contain;
+            display: block;
+            background: transparent;
         }
 
         .sidebar-nav {
@@ -96,6 +112,7 @@
             overflow-y: auto;
             overflow-x: hidden;
         }
+
         .sidebar-nav a {
             display: flex;
             align-items: center;
@@ -111,6 +128,7 @@
             font-size: 0.95rem;
             letter-spacing: 0.2px;
         }
+
         .sidebar-nav a i {
             font-size: 1.2rem;
             width: 22px;
@@ -118,6 +136,7 @@
             min-width: 22px;
             transition: transform 0.3s ease, color 0.3s ease;
         }
+
         .sidebar-nav a:hover,
         .sidebar-nav a.active {
             background: rgba(255, 255, 255, 0.08);
@@ -125,38 +144,52 @@
             transform: translateX(4px);
             box-shadow: inset 3px 0 0 var(--rojo-acento);
         }
+
         .sidebar-nav a.active {
             background: rgba(255, 255, 255, 0.12);
             font-weight: 800;
         }
+
         .sidebar-nav a:hover i,
         .sidebar-nav a.active i {
             transform: scale(1.15);
             color: var(--blanco);
         }
+
         .sidebar-nav a:active {
             transform: scale(0.97);
             transition: transform 0.1s ease;
         }
+
         .sidebar-nav .logout-link {
             margin-top: auto;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 16px;
             color: rgba(255, 255, 255, 0.6);
         }
+
         .sidebar-nav .logout-link:hover {
             background: rgba(229, 17, 72, 0.15);
             color: #ff6b8a;
             box-shadow: inset 3px 0 0 var(--rojo-acento);
         }
+
         .sidebar-nav .logout-link:hover i {
             color: #ff6b8a;
             animation: pulseLogout 0.6s ease-in-out;
         }
+
         @keyframes pulseLogout {
-            0%, 100% { transform: scale(1); }
-            30% { transform: scale(1.3) translateX(3px); }
-            60% { transform: scale(0.9); }
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            30% {
+                transform: scale(1.3) translateX(3px);
+            }
+            60% {
+                transform: scale(0.9);
+            }
         }
 
         /* ========== MAIN CONTENT ========== */
@@ -168,9 +201,16 @@
             min-height: 100vh;
             animation: fadeInContent 0.5s ease-out;
         }
+
         @keyframes fadeInContent {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Botón volver */
@@ -190,17 +230,25 @@
             box-shadow: 0 2px 6px rgba(22, 43, 71, 0.08);
             transition: all 0.25s;
         }
+
         .back-link:hover {
             background: var(--azul-oscuro);
             color: var(--blanco);
             box-shadow: 0 4px 12px rgba(22, 43, 71, 0.15);
             transform: translateX(-2px);
         }
-        .back-link i { font-size: 1rem; transition: transform 0.25s; }
-        .back-link:hover i { transform: translateX(-3px); }
 
-        /* Header */
-        .response-header {
+        .back-link i {
+            font-size: 1rem;
+            transition: transform 0.25s;
+        }
+
+        .back-link:hover i {
+            transform: translateX(-3px);
+        }
+
+        /* ========== QUIZ HEADER ========== */
+        .quiz-header {
             background: var(--blanco);
             border-radius: var(--card-radius);
             padding: 30px;
@@ -209,8 +257,22 @@
             border-left: 5px solid var(--azul-oscuro);
             transition: box-shadow 0.3s ease;
         }
-        .response-header:hover { box-shadow: var(--shadow-md); }
-        .response-header h1 {
+
+        .quiz-header:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .course-name {
+            color: #6b7d8e;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .quiz-header h1 {
             color: var(--azul-oscuro);
             font-family: var(--font-titulos);
             font-weight: 800;
@@ -218,15 +280,97 @@
             margin-bottom: 10px;
             letter-spacing: -0.4px;
         }
-        .response-header p { color: #5a6b7a; margin-bottom: 5px; font-size: 0.95rem; }
 
-        /* Stats Grid */
+        .quiz-header .text-muted {
+            color: #5a6b7a !important;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ========== BOTONES ========== */
+        .btn-primary-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 22px;
+            background: var(--azul-oscuro);
+            color: var(--blanco);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-primary-custom::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--rojo-acento);
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.35s;
+            border-radius: 10px;
+        }
+
+        .btn-primary-custom:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .btn-primary-custom:hover {
+            box-shadow: 0 6px 20px rgba(229, 17, 72, 0.35);
+            transform: translateY(-2px);
+            color: var(--blanco);
+            text-decoration: none;
+        }
+
+        .btn-primary-custom:active {
+            transform: scale(0.95);
+        }
+
+        /* Botón info (ver detalles) */
+        .btn-info-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #0a3a60 0%, var(--azul-oscuro) 100%);
+            color: var(--blanco);
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 6px 16px rgba(22, 43, 71, 0.18);
+            cursor: pointer;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-info-custom:hover {
+            background: linear-gradient(135deg, #082f4b 0%, #071f35 100%);
+            color: var(--blanco);
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(7, 31, 53, 0.28);
+        }
+
+        /* ========== STATS GRID (4 COLUMNAS EN UNA LÍNEA) ========== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
             margin-bottom: 30px;
         }
+
         .stat-card {
             background: var(--blanco);
             border-radius: var(--card-radius);
@@ -240,654 +384,575 @@
             flex-direction: column;
             justify-content: center;
         }
+
         .stat-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 3px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
             background: linear-gradient(90deg, var(--azul-oscuro) 0%, var(--azul-medio) 50%, var(--rojo-acento) 100%);
             transform: scaleX(0);
             transform-origin: left;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: var(--card-radius) var(--card-radius) 0 0;
         }
-        .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
-        .stat-card:hover::before { transform: scaleX(1); }
-        .stat-card .stat-icon { font-size: 18px; color: var(--azul-oscuro); margin-bottom: 8px; transition: transform 0.3s ease; }
-        .stat-card:hover .stat-icon { transform: scale(1.1); }
-        .stat-card .stat-label { color: #6b7d8e; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; font-family: var(--font-destacados); font-weight: 700; margin-bottom: 4px; }
-        .stat-card .stat-value { font-size: 28px; font-weight: 800; color: var(--azul-oscuro); font-family: var(--font-titulos); line-height: 1.2; margin: 4px 0 0 0; }
 
-        /* Barra de progreso */
-        .progress-container {
-            background: var(--blanco);
-            border-radius: var(--card-radius);
-            padding: 20px 25px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow-sm);
-        }
-        .progress-mini { height: 10px; border-radius: 5px; background: #e0e5e5; overflow: hidden; margin: 10px 0; }
-        .progress-mini .progress-bar { border-radius: 5px; transition: width 0.5s ease; background: var(--azul-medio); }
-        .estado-badge {
-            font-family: var(--font-destacados);
-            font-weight: 700;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 30px;
-            background: #f0f2f5;
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-3px);
         }
 
-        /* ========== BÚSQUEDA Y FILTROS (NUEVO) ========== */
-        .search-filter-bar {
-            background: var(--blanco);
-            border-radius: var(--card-radius);
-            padding: 18px 22px;
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-            transition: box-shadow 0.3s ease;
+        .stat-card:hover::before {
+            transform: scaleX(1);
         }
-        .search-filter-bar:focus-within { box-shadow: var(--shadow-md); }
-        .search-wrap { flex: 1; min-width: 200px; position: relative; }
-        .search-wrap i {
-            position: absolute;
-            left: 12px; top: 50%;
-            transform: translateY(-50%);
-            color: #9aa6b5;
-            font-size: 1rem;
-            pointer-events: none;
-        }
-        #buscar-pregunta {
-            width: 100%;
-            padding: 10px 14px 10px 38px;
-            border: 1.5px solid #e0e5e5;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-family: var(--font-destacados);
+
+        .stat-card .stat-icon {
+            font-size: 18px;
             color: var(--azul-oscuro);
-            background: #f8fafc;
-            outline: none;
-            transition: border-color 0.25s, box-shadow 0.25s;
+            margin-bottom: 8px;
+            transition: transform 0.3s ease;
         }
-        #buscar-pregunta:focus {
-            border-color: var(--azul-medio);
-            box-shadow: 0 0 0 3px rgba(16, 87, 136, 0.12);
-            background: var(--blanco);
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
         }
-        #buscar-pregunta::placeholder { color: #b0bec5; }
-        .filtros-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
-        .filtro-pill {
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-size: 0.82rem;
+
+        .stat-card .stat-label {
+            color: #6b7d8e;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
             font-family: var(--font-destacados);
             font-weight: 700;
-            border: 1.5px solid #e0e5e5;
-            background: #f5f6f8;
-            color: #5a6b7a;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            margin-bottom: 4px;
         }
-        .filtro-pill:hover { border-color: var(--azul-oscuro); color: var(--azul-oscuro); transform: translateY(-1px); }
-        .filtro-pill.activo-todos    { background: var(--azul-oscuro); color: var(--blanco); border-color: var(--azul-oscuro); }
-        .filtro-pill.activo-no-iniciado { background: #e9ecef; color: #495057; border-color: #adb5bd; }
-        .filtro-pill.activo-progreso { background: #fff3cd; color: #856404; border-color: #ffc107; }
-        .filtro-pill.activo-completado { background: #d4edda; color: #198754; border-color: #198754; }
-        .no-resultados-filtro {
-            text-align: center;
-            padding: 40px 20px;
-            color: #9aa6b5;
-            display: none;
-        }
-        .no-resultados-filtro i { font-size: 40px; margin-bottom: 12px; color: #cbd5e1; display: block; }
 
-        /* Contenedor de respuestas */
-        .respuestas-container {
+        .stat-card .stat-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--azul-oscuro);
+            font-family: var(--font-titulos);
+            line-height: 1.2;
+            margin: 4px 0 0 0;
+        }
+
+        /* ========== TABLA ========== */
+        .table-container {
             background: var(--blanco);
             border-radius: var(--card-radius);
             padding: 25px;
             box-shadow: var(--shadow-sm);
+            overflow-x: auto;
             transition: box-shadow 0.3s ease;
         }
-        .respuestas-container:hover { box-shadow: var(--shadow-md); }
-        .respuestas-container h3 {
+
+        .table-container:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .table-container h3 {
             color: var(--azul-oscuro);
             font-family: var(--font-titulos);
             font-weight: 800;
             font-size: 1.3rem;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        /* Pregunta Card */
-        .pregunta-card {
-            border: 1px solid #eef2f6;
-            border-radius: 14px;
-            padding: 22px;
-            margin-bottom: 24px;
-            background: #fafcff;
-            transition: all 0.3s ease;
+        table {
+            margin: 0;
+            width: 100%;
+            border-collapse: collapse;
         }
-        .pregunta-card:hover { box-shadow: var(--shadow-sm); border-color: var(--azul-medio); }
-        .pregunta-header { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 16px; }
-        .pregunta-numero {
-            background: var(--azul-oscuro);
-            color: white;
-            width: 40px; height: 40px;
-            border-radius: 10px;
-            display: flex;
+
+        table th {
+            background: #f8fbff;
+            color: var(--azul-oscuro);
+            font-weight: 700;
+            border: none;
+            border-bottom: 2px solid var(--azul-oscuro);
+            padding: 15px;
+            font-family: var(--font-destacados);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+            color: #2c3e50;
+        }
+
+        table tbody tr {
+            transition: background 0.25s ease;
+        }
+
+        table tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .progress-mini {
+            height: 10px;
+            border-radius: 5px;
+            background: #e0e5e5;
+            overflow: hidden;
+        }
+
+        .progress-mini .progress-bar {
+            border-radius: 5px;
+            transition: width 0.5s ease;
+            background: var(--azul-medio);
+        }
+
+        /* Badges */
+        .badge-custom {
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: var(--font-destacados);
+            letter-spacing: 0.2px;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-family: var(--font-titulos);
-            flex-shrink: 0;
+            gap: 4px;
         }
-        .pregunta-info { flex: 1; }
-        .pregunta-titulo { font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; font-family: var(--font-destacados); }
-        .pregunta-tipo { display: inline-block; background: #e0f2fe; color: #0c6b8f; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: var(--font-destacados); }
-        .respuesta-badge { padding: 5px 12px; border-radius: 30px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; }
-        .badge-correcta   { background: #d4edda; color: var(--success-color); }
-        .badge-incorrecta { background: #f8d7da; color: var(--danger-color); }
-        .badge-no-respondida { background: #e9ecef; color: #6c757d; }
-        .respuesta-content { margin-top: 18px; padding-top: 18px; border-top: 1px solid #e9edf2; }
-        .opciones-seleccionadas { background: #f1f5f9; padding: 14px 16px; border-radius: 12px; margin: 12px 0; }
-        .opcion-item { padding: 6px 0; font-size: 0.9rem; }
-        .media-container { margin: 15px 0; border-radius: 12px; overflow: hidden; background: #f1f5f9; }
-        .media-container img, .media-container video { max-width: 100%; border-radius: 12px; display: block; }
 
-        /* Archivo card */
-        .archivo-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 15px 0;
-            transition: all 0.2s;
+        .badge-completado {
+            background: #d4edda;
+            color: var(--success-color);
         }
-        .archivo-card:hover { border-color: var(--azul-medio); box-shadow: var(--shadow-sm); }
-        .archivo-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .archivo-icon.pdf     { background: #fee2e2; color: var(--danger-color); }
-        .archivo-icon.word    { background: #e0f0ff; color: #2563eb; }
-        .archivo-icon.excel   { background: #e0f7e8; color: var(--success-color); }
-        .archivo-icon.default { background: #f1f3f5; color: var(--azul-oscuro); }
-        .archivo-info { flex: 1; }
-        .archivo-nombre { font-weight: 700; font-family: var(--font-destacados); }
-        .archivo-acciones { display: flex; gap: 8px; }
-        .archivo-btn { padding: 9px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.25s ease; box-shadow: 0 6px 14px rgba(22, 43, 71, 0.12); }
-        .archivo-btn-abrir { background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%); color: white; }
-        .archivo-btn-abrir:hover { background: linear-gradient(135deg, #0a456d 0%, #071f35 100%); color: white; text-decoration: none; transform: translateY(-2px); box-shadow: 0 10px 18px rgba(22, 43, 71, 0.22); }
-        .archivo-btn-descargar { background: linear-gradient(135deg, #2c7be5 0%, #105788 100%); color: white; }
-        .archivo-btn-descargar:hover { background: linear-gradient(135deg, #1f6fd1 0%, #0a456d 100%); color: white; text-decoration: none; transform: translateY(-2px); box-shadow: 0 10px 18px rgba(16, 87, 136, 0.24); }
-        .metadata { display: flex; gap: 20px; font-size: 12px; color: #6c757d; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0; }
-        .empty-state { text-align: center; padding: 50px 20px; color: #9aa6b5; }
-        .empty-state i { font-size: 56px; margin-bottom: 16px; color: #cbd5e1; }
 
-        /* Botones */
-        .btn-primary-custom { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--azul-oscuro); color: white; border-radius: 10px; font-family: var(--font-destacados); font-weight: 700; text-decoration: none; transition: 0.3s; }
-        .btn-primary-custom:hover { background: var(--rojo-acento); color: white; transform: translateY(-2px); }
+        .badge-en-progreso {
+            background: #fff3cd;
+            color: #856404;
+        }
 
-        /* Partículas decorativas */
-        .bg-particles { position: fixed; top: 0; right: 0; width: 350px; height: 350px; pointer-events: none; z-index: 0; opacity: 0.04; }
-        .bg-particle { position: absolute; border-radius: 50%; background: var(--azul-medio); animation: floatParticle 8s infinite ease-in-out; }
-        .bg-particle:nth-child(1) { width: 60px; height: 60px; top: 10%; right: 20%; animation-delay: 0s; }
-        .bg-particle:nth-child(2) { width: 40px; height: 40px; top: 50%; right:  5%; animation-delay: 2s; }
-        .bg-particle:nth-child(3) { width: 80px; height: 80px; top: 70%; right: 30%; animation-delay: 4s; }
-        .bg-particle:nth-child(4) { width: 30px; height: 30px; top: 30%; right: 50%; animation-delay: 1s; }
+        .badge-no-iniciado {
+            background: #f8d7da;
+            color: var(--danger-color);
+        }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #6b7d8e;
+        }
+
+        /* ========== PARTÍCULAS DECORATIVAS ========== */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 350px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.04;
+        }
+
+        .bg-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--azul-medio);
+            animation: floatParticle 8s infinite ease-in-out;
+        }
+
+        .bg-particle:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 10%;
+            right: 20%;
+            animation-delay: 0s;
+        }
+        .bg-particle:nth-child(2) {
+            width: 40px;
+            height: 40px;
+            top: 50%;
+            right: 5%;
+            animation-delay: 2s;
+        }
+        .bg-particle:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            top: 70%;
+            right: 30%;
+            animation-delay: 4s;
+        }
+        .bg-particle:nth-child(4) {
+            width: 30px;
+            height: 30px;
+            top: 30%;
+            right: 50%;
+            animation-delay: 1s;
+        }
+
         @keyframes floatParticle {
-            0%,100%{transform:translateY(0) translateX(0) scale(1);}
-            25%{transform:translateY(-40px) translateX(20px) scale(1.3);}
-            50%{transform:translateY(-10px) translateX(-15px) scale(0.8);}
-            75%{transform:translateY(-50px) translateX(10px) scale(1.2);}
+            0%,
+            100% {
+                transform: translateY(0) translateX(0) scale(1);
+            }
+            25% {
+                transform: translateY(-40px) translateX(20px) scale(1.3);
+            }
+            50% {
+                transform: translateY(-10px) translateX(-15px) scale(0.8);
+            }
+            75% {
+                transform: translateY(-50px) translateX(10px) scale(1.2);
+            }
         }
 
-        /* Responsive */
-        @media (max-width: 992px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) {
-            .sidebar { width: var(--sidebar-collapsed); }
-            .sidebar-nav a span { display: none; }
-            .sidebar-nav a { justify-content: center; padding: 14px; gap: 0; }
-            .main-content { margin-left: var(--sidebar-collapsed); padding: 20px 16px; }
-            .response-header h1 { font-size: 1.4rem; }
-            .search-filter-bar { flex-direction: column; align-items: stretch; }
-            .filtros-wrap { justify-content: flex-start; }
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
         }
-        @media (max-width: 576px) { .stats-grid { grid-template-columns: 1fr; } }
-        @keyframes rippleEffect { to { transform: scale(4); opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: var(--sidebar-collapsed);
+            }
+            .sidebar-nav a span {
+                display: none;
+            }
+            .sidebar-nav a {
+                justify-content: center;
+                padding: 14px;
+                gap: 0;
+            }
+            .sidebar-nav a i {
+                font-size: 1.3rem;
+            }
+            .main-content {
+                margin-left: var(--sidebar-collapsed);
+                padding: 20px 16px;
+            }
+            .quiz-header {
+                padding: 20px;
+            }
+            .quiz-header h1 {
+                font-size: 1.4rem;
+            }
+            .table-container {
+                padding: 15px;
+            }
+            table th,
+            table td {
+                padding: 10px;
+                font-size: 13px;
+            }
+            .sidebar-brand {
+                padding: 16px 8px 8px 8px;
+            }
+            .logo-wrapper img {
+                max-height: 58px;
+            }
+            .stat-card .stat-value {
+                font-size: 20px;
+            }
+            .back-link {
+                margin-bottom: 16px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .stat-card {
+                padding: 14px 16px;
+            }
+            .back-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 56px;
+            }
+            .main-content {
+                margin-left: 56px;
+                padding: 14px 10px;
+            }
+            .sidebar-brand {
+                padding: 12px 4px 6px 4px;
+            }
+            .logo-wrapper img {
+                max-height: 46px;
+            }
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
-<!-- Partículas decorativas -->
-<div class="bg-particles" aria-hidden="true">
-    <div class="bg-particle"></div>
-    <div class="bg-particle"></div>
-    <div class="bg-particle"></div>
-    <div class="bg-particle"></div>
-</div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar">
-    <div class="sidebar-brand">
-        <div class="logo-wrapper" title="Dashboard">
-            <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca">
-        </div>
-    </div>
-    <nav class="sidebar-nav">
-        <a href="{% url 'panel_admin' %}">
-            <i class="fa-solid fa-gauge-high"></i>
-            <span>Panel de Administración</span>
-        </a>
-        <a href="{% url 'gestionar_usuarios' %}">
-            <i class="fa-solid fa-users"></i>
-            <span>Gestionar Usuarios</span>
-        </a>
-        <a href="{% url 'gestionar_cursos' %}" class="active">
-            <i class="fa-solid fa-chalkboard-user"></i>
-            <span>Gestionar Cursos</span>
-        </a>
-        <a href="{% url 'administrar_noticias' %}">
-            <i class="fa-solid fa-pen-to-square"></i>
-            <span>Administrar Noticias</span>
-        </a>
-        <a href="{% url 'estadisticas_cursos' %}">
-            <i class="fa-solid fa-chart-column"></i>
-            <span>Reporte Cursos</span>
-        </a>
-        <a href="{% url 'subir_archivo' %}">
-            <i class="fa-solid fa-file"></i>
-            <span>Subir Archivo</span>
-        </a>
-        <a href="{% url 'logout' %}" class="logout-link">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span>Cerrar Sesión</span>
-        </a>
-    </nav>
-</aside>
-
-<!-- CONTENIDO PRINCIPAL -->
-<main class="main-content">
-    {% csrf_token %}
-
-    <!-- Volver -->
-    <a href="{% url 'gestion_quiz' id_curso=curso.id_curso %}" class="back-link">
-        <i class="fas fa-arrow-left"></i> Volver a Gestión de Quiz
-    </a>
-
-    <!-- Header -->
-    <div class="response-header">
-        <h1>Respuestas del Quiz</h1>
-        <p><strong>{{ curso.titulo }}</strong> — {{ quiz.titulo }}</p>
-        <p><i class="fas fa-user-circle"></i> <strong>Empleado:</strong> {{ usuario.nombre_completo }}</p>
+    <!-- Partículas decorativas -->
+    <div class="bg-particles" aria-hidden="true">
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
+        <div class="bg-particle"></div>
     </div>
 
-    <!-- Estadísticas -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
-            <div class="stat-label">Total Preguntas</div>
-            <div class="stat-value">{{ total }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-check-double"></i></div>
-            <div class="stat-label">Respondidas</div>
-            <div class="stat-value">{{ respondidas }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-star-of-life"></i></div>
-            <div class="stat-label">Correctas</div>
-            <div class="stat-value">{{ correctas }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
-            <div class="stat-label">Progreso</div>
-            <div class="stat-value">{{ porcentaje }}%</div>
-        </div>
-    </div>
-
-    <!-- Barra de progreso + estado -->
-    <div class="progress-container">
-        <div class="progress-mini">
-            <div class="progress-bar" style="width: {{ porcentaje }}%;"></div>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div class="estado-badge">
-                {% if completado %}
-                    <i class="fas fa-check-circle" style="color: var(--success-color);"></i> Quiz Completado
-                {% elif respondidas > 0 %}
-                    <i class="fas fa-hourglass-half" style="color: var(--warning-color);"></i> En Progreso
-                {% else %}
-                    <i class="fas fa-circle-notch" style="color: #999;"></i> No Iniciado
-                {% endif %}
+    <!-- SIDEBAR (MISMO DISEÑO QUE CÓDIGO 2) -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-wrapper" title="Dashboard">
+                <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca">
             </div>
-            <small class="text-muted">{{ respondidas }} de {{ total }} preguntas respondidas</small>
         </div>
-    </div>
 
-    <!-- Barra de búsqueda y filtros (NUEVO) -->
-    <div class="search-filter-bar">
-        <div class="search-wrap">
-            <i class="fas fa-search"></i>
-            <input type="text" id="buscar-pregunta" placeholder="Buscar por nombre de pregunta...">
+        <nav class="sidebar-nav">
+            <a href="{% url 'panel_admin' %}">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Panel de Administración</span>
+            </a>
+            <a href="{% url 'gestionar_usuarios' %}">
+                <i class="fa-solid fa-users"></i>
+                <span>Gestionar Usuarios</span>
+            </a>
+            <a href="{% url 'gestionar_cursos' %}" class="active">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>Gestionar Cursos</span>
+            </a>
+            <a href="{% url 'administrar_noticias' %}">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Administrar Noticias</span>
+            </a>
+
+            <a href="{% url 'estadisticas_cursos' %}">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Reporte Cursos</span>
+            </a>
+
+             <a href="{% url 'subir_archivo' %}" >
+                    <i class="fa-solid fa-file"></i>
+                    <span>Subir Archivo</span>
+                </a>
+            <a href="{% url 'logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        {% csrf_token %}
+
+        <!-- Botón Volver a Gestionar Cursos -->
+        <a href="{% url 'gestionar_cursos' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Volver a Gestionar Cursos
+        </a>
+
+        <!-- Header del Quiz -->
+        <div class="quiz-header">
+            <div class="course-name">
+                <i class="fas fa-book"></i> {{ curso.titulo }}
+            </div>
+            <h1>Gestión de Quiz</h1>
+            {% if quiz %}
+            <p class="text-muted mb-3">{{ quiz.descripcion }}</p>
+            <a href="{% url 'crear_quiz' id_curso=curso.id_curso %}" class="btn-primary-custom">
+                <i class="fas fa-edit"></i> Editar Quiz
+            </a>
+            {% else %}
+            <p class="text-muted mb-3">No hay quiz creado para este curso</p>
+            <a href="{% url 'crear_quiz' id_curso=curso.id_curso %}" class="btn-primary-custom">
+                <i class="fas fa-plus"></i> Crear Quiz
+            </a>
+            {% endif %}
         </div>
-        <div class="filtros-wrap">
-            <span class="filtro-pill activo-todos" data-filtro="todos">
-                <i class="fas fa-list"></i> Todos
-            </span>
-            <span class="filtro-pill" data-filtro="no-iniciado">
-                <i class="fas fa-circle-notch"></i> No iniciado
-            </span>
-            <span class="filtro-pill" data-filtro="en-progreso">
-                <i class="fas fa-hourglass-half"></i> En progreso
-            </span>
-            <span class="filtro-pill" data-filtro="completado">
-                <i class="fas fa-check-circle"></i> Completado
-            </span>
+
+        <!-- Tarjetas de estadísticas (4 en una línea) -->
+        {% if quiz and estadisticas %}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-label">Total de Empleados</div>
+                <div class="stat-value">{{ estadisticas|length }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-label">Quiz Completados</div>
+                <div class="stat-value">
+                    {% with completados=estadisticas|dictsort:"completado"|slice:"-1"|first %}
+                    {{ 0 }}
+                    {% endwith %}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-label">En Progreso</div>
+                <div class="stat-value">
+                    {{ estadisticas|length }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <div class="stat-label">Preguntas</div>
+                <div class="stat-value">{{ quiz.preguntas.count }}</div>
+            </div>
         </div>
-    </div>
+        {% endif %}
 
-    <!-- Detalle de respuestas -->
-    <div class="respuestas-container">
-        <h3><i class="fas fa-list-check"></i> Detalle de Respuestas</h3>
+        <!-- Tabla de Progreso -->
+        {% if quiz and estadisticas %}
+        <div class="table-container">
+            <h3>
+                <i class="fas fa-chart-bar"></i> Progreso de Empleados
+            </h3>
 
-        {% if respuestas %}
-            {% for respuesta in respuestas %}
-            <div class="pregunta-card"
-                 data-texto="{{ respuesta.pregunta.texto|lower }}"
-                 data-estado="{% if not respuesta.respondida %}no-iniciado{% elif respuesta.es_correcta %}completado{% else %}en-progreso{% endif %}">
-
-                <div class="pregunta-header">
-                    <div class="pregunta-numero">{{ forloop.counter }}</div>
-                    <div class="pregunta-info">
-                        <div class="pregunta-titulo">{{ respuesta.pregunta.texto }}</div>
-                        <span class="pregunta-tipo">
-                            {{ respuesta.pregunta.get_tipo_respuesta_display }}
-                        </span>
-                        {% if respuesta.respondida %}
-                            {% if respuesta.es_correcta %}
-                                <span class="respuesta-badge badge-correcta">
-                                    <i class="fas fa-check-circle"></i> Correcta
-                                </span>
-                            {% else %}
-                                <span class="respuesta-badge badge-incorrecta">
-                                    <i class="fas fa-times-circle"></i> Incorrecta
-                                </span>
-                            {% endif %}
-                        {% else %}
-                            <span class="respuesta-badge badge-no-respondida">
-                                <i class="fas fa-question-circle"></i> No Respondida
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Empleado</th>
+                        <th style="width: 20%;">Preguntas Respondidas</th>
+                        <th style="width: 25%;">Progreso</th>
+                        <th style="width: 15%;">Estado</th>
+                        <th style="width: 10%;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in estadisticas %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-user-circle"></i> {{ stat.usuario }}
+                        </td>
+                        <td>
+                            {{ stat.respondidas }} / {{ stat.total }}
+                        </td>
+                        <td>
+                            <div class="progress-mini mb-2">
+                                <div class="progress-bar" style="width: {{ stat.porcentaje }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ stat.porcentaje }}%</small>
+                        </td>
+                        <td>
+                            {% if stat.completado %}
+                            <span class="badge-custom badge-completado">
+                                <i class="fas fa-check-circle"></i> Completado
                             </span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                {% if respuesta.respondida %}
-                <div class="respuesta-content">
-                    <!-- Opción múltiple / única -->
-                    {% if respuesta.pregunta.tipo_respuesta in 'unica' or respuesta.pregunta.tipo_respuesta in 'multiple' %}
-                        {% if respuesta.opciones_seleccionadas %}
-                        <div class="opciones-seleccionadas">
-                            {% for opcion in respuesta.opciones_seleccionadas %}
-                            <div class="opcion-item"><i class="fas fa-check-circle text-success"></i> {{ opcion }}</div>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                    {% endif %}
-                    <!-- Verdadero/Falso -->
-                    {% if respuesta.pregunta.tipo_respuesta == 'vf' %}
-                        <div class="respuesta-texto mt-2"><strong>Respuesta:</strong> {{ respuesta.respuesta_texto }}</div>
-                    {% endif %}
-                    <!-- Abierta -->
-                    {% if respuesta.pregunta.tipo_respuesta == 'abierta' %}
-                        <div class="respuesta-texto" style="background: #f8fafc; padding: 12px; border-radius: 12px; margin-top: 8px;">
-                            <strong>Respuesta:</strong>
-                            <p style="margin: 8px 0 0 0; white-space: pre-wrap;">{{ respuesta.respuesta_texto }}</p>
-                        </div>
-                    {% endif %}
-
-                    <!-- Archivo / Media -->
-                    {% if respuesta.pregunta.tipo_respuesta == 'archivo' and respuesta.archivo_subido_url %}
-                        {% if respuesta.tipo_archivo == 'imagen_video' %}
-                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px; background:#f8fafc; margin:15px 0;">
-                                <iframe src="{{ respuesta.archivo_subido_url }}"
-                                        frameborder="0"
-                                        scrolling="no"
-                                        allowfullscreen
-                                        style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:12px;">
-                                </iframe>
-                            </div>
-                        {% elif respuesta.es_sharepoint %}
-                            <div class="archivo-card">
-                                <div class="archivo-icon
-                                    {% if respuesta.tipo_archivo == 'pdf' %}pdf
-                                    {% elif respuesta.tipo_archivo == 'word' %}word
-                                    {% elif respuesta.tipo_archivo == 'excel' %}excel
-                                    {% else %}default{% endif %}">
-                                    {% if respuesta.tipo_archivo == 'pdf' %}<i class="fas fa-file-pdf"></i>
-                                    {% elif respuesta.tipo_archivo == 'word' %}<i class="fas fa-file-word"></i>
-                                    {% elif respuesta.tipo_archivo == 'excel' %}<i class="fas fa-file-excel"></i>
-                                    {% elif respuesta.tipo_archivo == 'powerpoint' %}<i class="fas fa-file-powerpoint"></i>
-                                    {% else %}<i class="fas fa-file"></i>{% endif %}
-                                </div>
-                                <div class="archivo-info">
-                                    <div class="archivo-nombre">{{ respuesta.nombre_archivo|default:'Archivo de SharePoint' }}</div>
-                                    <small style="color:#64748b;">SharePoint / OneDrive</small>
-                                </div>
-                                <div class="archivo-acciones">
-                                    <a href="{{ respuesta.url_visualizacion }}"
-                                       target="_blank" rel="noopener noreferrer"
-                                       class="archivo-btn archivo-btn-abrir sp-abrir-btn">
-                                        <i class="fas fa-external-link-alt"></i> Abrir
-                                    </a>
-                                    {% if respuesta.url_descarga %}
-                                    <a href="{{ respuesta.url_descarga }}"
-                                       class="archivo-btn archivo-btn-descargar" download>
-                                        <i class="fas fa-download"></i> Descargar
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="archivo-card">
-                                <div class="archivo-icon default">
-                                    <i class="fas fa-file"></i>
-                                </div>
-                                <div class="archivo-info">
-                                    <div class="archivo-nombre">{{ respuesta.nombre_archivo|default:'Archivo enviado' }}</div>
-                                    <small style="color:#64748b;">{{ respuesta.tipo_archivo|upper }}</small>
-                                </div>
-                                <div class="archivo-acciones">
-                                    <a href="{{ respuesta.url_visualizacion|default:respuesta.archivo_subido_url }}"
-                                       target="_blank" rel="noopener noreferrer"
-                                       class="archivo-btn archivo-btn-abrir">
-                                        <i class="fas fa-external-link-alt"></i> Abrir
-                                    </a>
-                                    {% if respuesta.url_descarga %}
-                                    <a href="{{ respuesta.url_descarga }}"
-                                       class="archivo-btn archivo-btn-descargar" download>
-                                        <i class="fas fa-download"></i> Descargar
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endif %}
-
-                    <div class="metadata">
-                        {% if respuesta.fecha_respuesta %}
-                        <span><i class="far fa-calendar-alt"></i> {{ respuesta.fecha_respuesta|date:"d/m/Y H:i" }}</span>
-                        {% endif %}
-                        {% if respuesta.intentos_fallidos > 0 %}
-                        <span><i class="fas fa-redo"></i> {{ respuesta.intentos_fallidos }} intento(s) fallido(s)</span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% else %}
-                <div class="empty-state" style="padding: 20px;">
-                    <i class="fas fa-eye-slash"></i>
-                    <p style="margin:0">Sin respuesta registrada</p>
-                </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-
-            <!-- Mensaje sin resultados de filtro (NUEVO) -->
-            <div class="no-resultados-filtro" id="no-resultados-filtro">
-                <i class="fas fa-search"></i>
-                <p style="margin: 0; font-size: 0.95rem;">No se encontraron preguntas con ese criterio.</p>
-            </div>
-
-        {% else %}
+                            {% elif stat.respondidas > 0 %}
+                            <span class="badge-custom badge-en-progreso">
+                                <i class="fas fa-hourglass-half"></i> En Progreso
+                            </span>
+                            {% else %}
+                            <span class="badge-custom badge-no-iniciado">
+                                <i class="fas fa-circle-notch"></i> No Iniciado
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'ver_respuestas_quiz' id_curso=curso.id_curso usuario_id=stat.usuario_id %}"
+                                class="btn-info-custom" title="Ver Detalles">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif quiz %}
+        <div class="table-container">
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
-                <p>No hay respuestas registradas aún.</p>
+                <p>Aún no hay empleados que hayan resuelto este quiz</p>
             </div>
+        </div>
         {% endif %}
-    </div>
-</main>
+    </main>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    // ================================================================
-    // 1. RIPPLE EFFECT
-    // ================================================================
-    document.querySelectorAll('.btn-primary-custom, .archivo-btn, .back-link').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            const ripple = document.createElement('span');
-            ripple.style.cssText = `
-                position: absolute; border-radius: 50%;
-                background: rgba(255,255,255,0.4); transform: scale(0);
-                animation: rippleEffect 0.6s ease-out; pointer-events: none; z-index: 0;
-            `;
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-            ripple.style.top  = (e.clientY - rect.top  - size / 2) + 'px';
-            this.style.position = 'relative';
-            this.style.overflow = 'hidden';
-            this.appendChild(ripple);
-            ripple.addEventListener('animationend', () => ripple.remove());
-        });
-    });
-
-    // ================================================================
-    // 2. Convertir embed.aspx → Doc.aspx en botones de SharePoint
-    // ================================================================
-    document.querySelectorAll('.sp-abrir-btn').forEach(btn => {
-        let url = btn.getAttribute('href') || '';
-        if (!url.includes('embed.aspx')) return;
-        const uid  = (url.match(/UniqueId=([a-f0-9\-]{36})/i) || [])[1];
-        const base = (url.match(/(https?:\/\/[^\/]+\/personal\/[^\/]+)/i) || [])[1];
-        if (uid && base) {
-            btn.setAttribute('href', `${base}/_layouts/15/Doc.aspx?sourcedoc=%7B${uid}%7D&action=default`);
-            const descargar = btn.closest('.archivo-card')?.querySelector('.archivo-btn-descargar');
-            if (descargar) {
-                descargar.setAttribute('href', `${base}/_layouts/15/download.aspx?UniqueId=${uid}`);
-            }
-        }
-    });
-
-    // ================================================================
-    // 3. ANIMACIÓN DE ENTRADA PARA TARJETAS ESTADÍSTICAS
-    // ================================================================
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, { threshold: 0.15 });
-
-    document.querySelectorAll('.stat-card').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
-        observer.observe(card);
-        setTimeout(() => {
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, 150 + index * 100);
-    });
-
-    // ================================================================
-    // 4. BÚSQUEDA Y FILTROS (NUEVO)
-    // ================================================================
-    const cards            = document.querySelectorAll('.pregunta-card');
-    const inputBuscar      = document.getElementById('buscar-pregunta');
-    const pills            = document.querySelectorAll('.filtro-pill');
-    const noResultados     = document.getElementById('no-resultados-filtro');
-    let filtroActivo       = 'todos';
-
-    const mapaClase = {
-        'todos'       : 'activo-todos',
-        'no-iniciado' : 'activo-no-iniciado',
-        'en-progreso' : 'activo-progreso',
-        'completado'  : 'activo-completado'
-    };
-
-    function aplicarFiltros() {
-        const texto = inputBuscar ? inputBuscar.value.toLowerCase().trim() : '';
-        let visibles = 0;
-
-        cards.forEach(card => {
-            const textoCard  = (card.dataset.texto  || '').toLowerCase();
-            const estadoCard = (card.dataset.estado || '');
-
-            const coincideTexto  = texto === '' || textoCard.includes(texto);
-            const coincideEstado = filtroActivo === 'todos' || estadoCard === filtroActivo;
-
-            if (coincideTexto && coincideEstado) {
-                card.style.display = '';
-                visibles++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        if (noResultados) {
-            noResultados.style.display = visibles === 0 ? 'block' : 'none';
-        }
-    }
-
-    // Búsqueda en tiempo real
-    if (inputBuscar) {
-        inputBuscar.addEventListener('input', aplicarFiltros);
-    }
-
-    // Filtro por pills
-    pills.forEach(pill => {
-        pill.addEventListener('click', function () {
-            filtroActivo = this.dataset.filtro;
-
-            // Quitar todas las clases activas
-            pills.forEach(p => {
-                Object.values(mapaClase).forEach(cls => p.classList.remove(cls));
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Efecto ripple en botones personalizados
+            document.querySelectorAll('.btn-primary-custom, .btn-info-custom').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    const ripple = document.createElement('span');
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255,255,255,0.4);
+                        transform: scale(0);
+                        animation: rippleEffect 0.6s ease-out;
+                        pointer-events: none;
+                        z-index: 0;
+                    `;
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                    this.appendChild(ripple);
+                    ripple.addEventListener('animationend', () => ripple.remove());
+                });
             });
 
-            // Aplicar clase activa a la pill seleccionada
-            this.classList.add(mapaClase[filtroActivo]);
+            // Animación de entrada para tarjetas de estadísticas
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.15 });
 
-            aplicarFiltros();
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition =
+                    `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
+                observer.observe(card);
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 150 + index * 100);
+            });
         });
-    });
-});
-</script>
+    </script>
 </body>
 </html>
