@@ -79,21 +79,21 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv("DATABASE_URL"),
+       conn_max_age=600,
+        ssl_require=True
+    )
+}
+
 #DATABASES = {
-#    'default': dj_database_url.config(
-#        default=os.getenv("DATABASE_URL"),
+#    'default': dj_database_url.parse(
+#        "",
 #        conn_max_age=600,
 #        ssl_require=True
 #    )
 #}
-
-DATABASES = {
-    'default': dj_database_url.parse(
-        "postgresql://neondb_owner:npg_XxSAk2lpy8ut@ep-plain-unit-aqa0q5cu-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
 
 
 
