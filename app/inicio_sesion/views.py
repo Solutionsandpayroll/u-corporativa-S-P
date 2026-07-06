@@ -174,7 +174,7 @@ def solicitar_recuperacion(request):
 
             # ── Renderizar la plantilla HTML del correo ──
             cuerpo_html = render_to_string(
-                'inicio_sesion/recuperar_contrasena/correo_recuperacion.html',
+                'inicio_sesion/recuperar_contrasena/plantilla_envio_correo.html',
                 {
                     'usuario': usuario,
                     'codigo': codigo_recuperacion.codigo,
@@ -317,7 +317,7 @@ def reenviar_codigo(request):
 
         # ── Renderizar la plantilla HTML del correo ──
         cuerpo_html = render_to_string(
-            'inicio_sesion/recuperar_contrasena/correo_recuperacion.html',
+            'inicio_sesion/recuperar_contrasena/plantilla_envio_correo.html',
             {
                 'usuario': usuario,
                 'codigo': codigo_recuperacion.codigo,
