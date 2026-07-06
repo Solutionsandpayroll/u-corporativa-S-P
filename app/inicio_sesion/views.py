@@ -10,6 +10,7 @@ from .decorador import *
 from django.contrib.messages import get_messages
 from django.core.mail import send_mail
 import requests
+from .graph import enviar_correo_via_graph
 
 
 def login_view(request):
@@ -171,20 +172,29 @@ def solicitar_recuperacion(request):
                 usuario=usuario
             )
 
-            payload = {
-                'correo_destino': usuario.correo,
-                'nombre_completo': usuario.nombre_completo,
-                'codigo': codigo_recuperacion.codigo,
-                'asunto': 'Recuperación de contraseña',
-            }
+            # ── Renderizar la plantilla HTML del correo ──
+            cuerpo_html = render_to_string(
+                'inicio_sesion/recuperar_contrasena/correo_recuperacion.html',
+                {
+                    'usuario': usuario,
+                    'codigo': codigo_recuperacion.codigo,
+                }
+            )
 
+            # ── Envío vía Microsoft Graph (reemplaza Power Automate) ──
             try:
-                response = requests.post(
-                    settings.POWER_AUTOMATE_RECUPERACION_URL,
-                    json=payload,
-                    timeout=10
+                respuesta = enviar_correo_via_graph(
+                    destinatario=usuario.correo,
+                    asunto='Recuperación de contraseña',
+                    cuerpo_html=cuerpo_html,
                 )
-                response.raise_for_status()
+
+                if respuesta.status_code not in (200, 202):
+                    messages.error(
+                        request,
+                        f'Error al enviar el correo: {respuesta.status_code} - {respuesta.text}'
+                    )
+                    return render(request, 'inicio_sesion/recuperar_contrasena/solicitar_cambio.html')
 
                 messages.success(
                     request,
@@ -212,6 +222,7 @@ def solicitar_recuperacion(request):
             )
 
     return render(request, 'inicio_sesion/recuperar_contrasena/solicitar_cambio.html')
+
 
 #=========================================================
 # VIEW PARA VERIFICAR EL CODIGO DE RECUPERACION
@@ -304,28 +315,35 @@ def reenviar_codigo(request):
             usuario=usuario
         )
 
-        payload = {
-            'correo_destino': usuario.correo,
-            'nombre_completo': usuario.nombre_completo,
-            'codigo': codigo_recuperacion.codigo,
-            'asunto': 'Nuevo código de recuperación',
-        }
+        # ── Renderizar la plantilla HTML del correo ──
+        cuerpo_html = render_to_string(
+            'inicio_sesion/recuperar_contrasena/correo_recuperacion.html',
+            {
+                'usuario': usuario,
+                'codigo': codigo_recuperacion.codigo,
+            }
+        )
 
+        # ── Envío vía Microsoft Graph (reemplaza Power Automate) ──
         try:
-            response = requests.post(
-                settings.POWER_AUTOMATE_RECUPERACION_URL,
-                json=payload,
-                timeout=10
+            respuesta = enviar_correo_via_graph(
+                destinatario=usuario.correo,
+                asunto='Nuevo código de recuperación',
+                cuerpo_html=cuerpo_html,
             )
-            response.raise_for_status()
 
-            messages.success(
-                request,
-                'Se envió un nuevo código a tu correo.'
-            )
+            if respuesta.status_code not in (200, 202):
+                messages.error(
+                    request,
+                    f'Error al enviar el correo: {respuesta.status_code} - {respuesta.text}'
+                )
+            else:
+                messages.success(
+                    request,
+                    'Se envió un nuevo código a tu correo.'
+                )
 
         except requests.exceptions.RequestException as e:
-
             messages.error(
                 request,
                 f'Error al enviar el correo: {str(e)}'
@@ -346,6 +364,7 @@ def reenviar_codigo(request):
         )
 
     return redirect('validar_codigo')
+
 
 #=========================================================
 # VIEW PARA CAMBIAR LA CONTRASEÑA DESPUES DE VERIFICAR EL CODIGO
