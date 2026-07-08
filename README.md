@@ -8,7 +8,8 @@ Este proyecto es una aplicación web Django para gestionar inicio de sesión, us
 2. Si las credenciales son correctas, se crea la sesión y el sistema redirige al panel correspondiente según el rol.
 3. Las peticiones del panel de administración y del panel de empleado se atienden en la app contenido.
 4. La lógica de negocio se concentra en las vistas y en funciones reutilizables de contenido/utils.py.
-5. La respuesta puede ser una página HTML renderizada con templates o una respuesta JSON en las rutas AJAX y API internas.
+5. La recuperación de contraseña envía correos con Microsoft Graph desde app/inicio_sesion/graph.py.
+6. La respuesta puede ser una página HTML renderizada con templates o una respuesta JSON en las rutas AJAX y API internas.
 
 ## Estructura tecnica
 | Archivo o carpeta | Rol |
@@ -17,6 +18,7 @@ Este proyecto es una aplicación web Django para gestionar inicio de sesión, us
 | app/app/settings.py | Configuración del proyecto, base de datos, static, templates y apps instaladas. |
 | app/app/urls.py | Enrutamiento principal del proyecto. |
 | app/inicio_sesion/views.py | Login, logout, gestión de usuarios y recuperación de contraseña. |
+| app/inicio_sesion/graph.py | Configuración de Microsoft Graph para envío de correos de recuperación. |
 | app/inicio_sesion/urls.py | Rutas de autenticación y administración de usuarios. |
 | app/contenido/views.py | Paneles, noticias, cursos, bloques de contenido, quizzes, archivos y estadísticas. |
 | app/contenido/urls.py | Rutas principales de contenido y API internas. |
@@ -71,6 +73,7 @@ Si el proyecto es Django, la relación principal es la siguiente:
 - Entorno virtual: recomendado.
 - Dependencias: requirements.txt.
 - Base de datos: la configuración usa DATABASE_URL mediante dj-database-url.
+- Correo: la recuperación de contraseña usa Microsoft Graph configurado en app/inicio_sesion/graph.py.
 
 Nota: el archivo app/db.sqlite3 existe en el proyecto, pero la configuración activa no apunta directamente a SQLite; espera la variable DATABASE_URL.
 
@@ -104,6 +107,9 @@ pip install -r requirements.txt
 ```powershell
 $env:SECRET_KEY = "tu_clave_secreta"
 $env:DATABASE_URL = "sqlite:///db.sqlite3"
+$env:GRAPH_TENANT_ID = "tu_tenant_id"
+$env:GRAPH_CLIENT_ID = "tu_client_id"
+$env:GRAPH_CLIENT_SECRET = "tu_client_secret"
 ```
 
 Si usas otra base de datos, reemplaza DATABASE_URL por la cadena correspondiente.
@@ -148,4 +154,5 @@ El archivo build_files.sh instala dependencias, ejecuta collectstatic y luego ap
 - Los archivos estáticos están en la carpeta app/static.
 - WhiteNoise está configurado para servir estáticos.
 - El proyecto usa sesiones para controlar el acceso por rol.
+- El archivo app/inicio_sesion/graph.py centraliza la configuración de Microsoft Graph para enviar correos desde noreply@solutionsandpayroll.com.
 - vercel.json apunta al WSGI del proyecto en app/app/wsgi.py.
