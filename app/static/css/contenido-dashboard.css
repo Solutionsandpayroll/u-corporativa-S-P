@@ -1,4 +1,199 @@
 /* ========================================
+   DROPZONE - Estilo unificado con Gestión de Cursos
+   ======================================== */
+.dropzone-wrapper { margin-bottom: 4px; }
+
+.dropzone {
+    position: relative;
+    border: 2px dashed #cbd5e1;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #f9fafb 0%, #f3f6f9 100%);
+    padding: 22px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .25s ease, background .25s ease, transform .15s ease, box-shadow .25s ease;
+    overflow: hidden;
+}
+
+.dropzone:hover {
+    border-color: var(--azul-medio);
+    background: linear-gradient(180deg, #f4f9fc 0%, #eaf3f8 100%);
+}
+
+.dropzone.dragover {
+    border-color: var(--rojo-acento);
+    background: linear-gradient(180deg, #fff5f7 0%, #ffeef2 100%);
+    transform: scale(1.01);
+    box-shadow: 0 8px 24px rgba(229, 17, 72, 0.12);
+}
+
+.dropzone.has-file {
+    border-style: solid;
+    border-color: var(--azul-medio);
+    background: linear-gradient(180deg, #ffffff 0%, #f4f9fc 100%);
+    padding: 14px;
+}
+
+.dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.dropzone-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.dropzone-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(16, 87, 136, 0.1);
+    color: var(--azul-medio);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    line-height: 1;
+    margin: 0 auto 10px auto;
+    transition: transform .25s ease, background .25s ease;
+}
+
+.dropzone-icon i { display: block; }
+
+.dropzone.dragover .dropzone-icon {
+    background: rgba(229, 17, 72, 0.12);
+    color: var(--rojo-acento);
+    transform: translateY(-4px);
+}
+
+.dropzone-text-main {
+    font-family: var(--font-destacados);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--azul-oscuro);
+    margin-bottom: 4px;
+}
+
+.dropzone-text-main span {
+    color: var(--azul-medio);
+    text-decoration: underline;
+}
+
+.dropzone-text-sub {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.dropzone-preview {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+}
+
+.dropzone.has-file .dropzone-preview { display: flex; }
+.dropzone.has-file .dropzone-placeholder { display: none; }
+
+.dropzone-preview-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid var(--gris);
+    background: #eef2f6;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--azul-medio);
+    font-size: 18px;
+}
+
+.dropzone-preview-info { flex: 1; min-width: 0; }
+
+.dropzone-preview-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--azul-oscuro);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropzone-preview-size {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.dropzone-remove-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .2s ease;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.dropzone-remove-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.imagen-actual-aviso {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #f0f7fb;
+    border: 1px solid #d6e9f2;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #105788;
+}
+
+.imagen-actual-aviso i { font-size: 13px; }
+
+/* Mini dropzone para filas de archivos adjuntos (múltiples) */
+.dropzone-mini {
+    padding: 12px 14px;
+}
+
+.dropzone-mini .dropzone-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.dropzone-mini .dropzone-text-main { font-size: 12px; }
+.dropzone-mini .dropzone-text-sub { font-size: 10px; }
+.dropzone-mini .dropzone-preview-thumb { width: 40px; height: 40px; }
+
+
+/* ========================================
    DASHBOARD PREMIUM - ESTILOS COMPLETOS
    (Incluye sidebar y fondo del panel de administración)
    ======================================== */
@@ -187,7 +382,7 @@ body {
 .main-content {
     flex: 1;
     margin-left: var(--sidebar-width);
-    padding: 24px 36px 32px; /* ✅ FIX 1: menos padding top ya que quitamos el header */
+    padding: 24px 36px 32px;
     transition: margin-left var(--transition-speed) ease;
     min-height: 100vh;
     animation: fadeInContent 0.5s ease-out;
@@ -270,7 +465,7 @@ body {
 .dashboard-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 0 80px 0; /* padding bottom para el FAB */
+    padding: 0 0 80px 0;
 }
 
 .content-layout {
@@ -776,20 +971,19 @@ body {
 .mini-card-meta i { font-size: 10px; opacity: 0.6; }
 
 /* ========================================
-   ✅ FIX 2: FAB ÚNICO CON MENÚ DESPLEGABLE
+   FAB ÚNICO CON MENÚ DESPLEGABLE
    ======================================== */
 
 .fab-container {
     position: fixed;
-    bottom: 16px;                     /* ← antes 32px, ahora más abajo */
+    bottom: 16px;
     right: 32px;
     z-index: 500;
     display: flex;
-    flex-direction: column-reverse;   /* ← ¡clave! menú arriba, botón abajo */
+    flex-direction: column-reverse;
     align-items: flex-end;
-    gap: 16px;                        /* separación entre menú y botón */
+    gap: 16px;
 }
-/* Botón principal FAB */
 .fab-main-btn {
     width: 58px;
     height: 58px;
@@ -818,7 +1012,6 @@ body {
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Cuando el menú está abierto, rota el ícono + */
 .fab-container.open .fab-main-btn .fas {
     transform: rotate(45deg);
 }
@@ -828,7 +1021,6 @@ body {
     box-shadow: 0 10px 28px rgba(22, 43, 71, 0.55);
 }
 
-/* Menú desplegable */
 .fab-menu {
     display: flex;
     flex-direction: column;
@@ -836,7 +1028,7 @@ body {
     gap: 10px;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-10px);     /* ← empieza 10px arriba, luego cae */
+    transform: translateY(-10px);
     transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
@@ -846,7 +1038,6 @@ body {
     transform: translateY(0);
 }
 
-/* Ítems del menú */
 .fab-menu-item {
     display: flex;
     align-items: center;
@@ -890,7 +1081,6 @@ body {
     background: rgba(255, 255, 255, 0.25);
 }
 
-/* Stagger de entrada de los ítems */
 .fab-container.open .fab-menu-item:nth-child(1) {
     transition-delay: 0.05s;
 }
@@ -971,7 +1161,7 @@ body {
 .btn-submit-modal:hover { background: var(--secondary); box-shadow: var(--shadow-md); }
 
 /* ========================================
-   ✅ FIX 3: MODAL EDITAR — COMPLETAMENTE REDISEÑADO
+   MODAL EDITAR — COMPLETAMENTE REDISEÑADO
    ======================================== */
 
 .modal-editar-overlay {
@@ -1001,7 +1191,6 @@ body {
     overflow: hidden;
 }
 
-/* Header del modal editar */
 .modal-editar-header {
     display: flex;
     align-items: center;
@@ -1068,7 +1257,6 @@ body {
     color: white;
 }
 
-/* Body del modal editar */
 .modal-editar-body {
     padding: 24px 28px;
     overflow-y: auto;
@@ -1079,7 +1267,6 @@ body {
 .modal-editar-body::-webkit-scrollbar-track { background: #f8fafc; }
 .modal-editar-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-/* Fila de 2 columnas */
 .editar-form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1087,7 +1274,6 @@ body {
     margin-bottom: 18px;
 }
 
-/* Labels editar */
 .editar-label {
     display: block;
     font-size: 12px;
@@ -1098,7 +1284,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Inputs editar */
 .editar-input {
     width: 100%;
     padding: 10px 14px;
@@ -1153,7 +1338,6 @@ body {
     color: #94a3b8;
 }
 
-/* Botón remover archivo editar */
 .editar-btn-remover {
     width: 34px;
     height: 34px;
@@ -1176,7 +1360,6 @@ body {
     border-color: #fecaca;
 }
 
-/* Botón agregar archivo editar */
 .editar-btn-agregar-link {
     display: inline-flex;
     align-items: center;
@@ -1199,7 +1382,6 @@ body {
     border-style: solid;
 }
 
-/* Render toggle editar */
 .render-toggle-group-editar {
     display: flex;
     gap: 10px;
@@ -1237,7 +1419,6 @@ body {
     box-shadow: 0 4px 12px rgba(22, 43, 71, 0.25);
 }
 
-/* Footer del modal editar */
 .modal-editar-footer {
     display: flex;
     gap: 12px;
@@ -1292,7 +1473,6 @@ body {
 
 /* ========================================
    TARJETA COMPACTA DEL CUESTIONARIO (EMPLEADO)
-   Diseño más pequeño, optimizado para espacio
    ======================================== */
 
 .card-quiz-premium {
@@ -1312,15 +1492,13 @@ body {
     box-shadow: 0 12px 28px rgba(22, 43, 71, 0.12);
 }
 
-/* Columna izquierda: contenido del cuestionario */
 .quiz-info-left {
     flex: 1;
     padding: 18px 20px;
     overflow-y: auto;
-    max-height: 480px; /* Altura controlada para que no sea gigante */
+    max-height: 480px;
 }
 
-/* Encabezado del quiz */
 .quiz-header {
     display: flex;
     align-items: center;
@@ -1343,20 +1521,19 @@ body {
 .quiz-titulo {
     font-family: 'Nunito Sans', sans-serif;
     font-weight: 800;
-    font-size: 1rem; /* Antes 1.2rem */
+    font-size: 1rem;
     color: #162b47;
     margin: 0 0 2px 0;
     line-height: 1.3;
 }
 
 .quiz-subtitulo {
-    font-size: 0.7rem; /* Antes 0.75rem */
+    font-size: 0.7rem;
     color: #475569;
     font-weight: 600;
     font-family: 'Calibri', 'Trebuchet MS', sans-serif;
 }
 
-/* Descripción opcional */
 .quiz-descripcion {
     font-size: 0.8rem;
     color: #334155;
@@ -1368,7 +1545,6 @@ body {
     margin-bottom: 12px;
 }
 
-/* Estadísticas */
 .quiz-estadisticas {
     display: flex;
     gap: 12px;
@@ -1403,7 +1579,6 @@ body {
     color: #16a34a;
 }
 
-/* Barra de progreso lineal */
 .quiz-barra-progreso {
     width: 100%;
     height: 5px;
@@ -1420,7 +1595,6 @@ body {
     transition: width 0.4s ease;
 }
 
-/* Preguntas individuales */
 .quiz-pregunta {
     background: #ffffff;
     border: 1px solid #edf2f7;
@@ -1460,7 +1634,6 @@ body {
     font-weight: 800;
 }
 
-/* Opciones de respuesta */
 .opciones-container {
     display: flex;
     flex-direction: column;
@@ -1517,15 +1690,14 @@ body {
     background: white;
 }
 
-/* Botón enviar - Optimización de Marca Minimalista */
 .btn-quiz-submit {
     width: 100%;
     padding: 10px 16px;
-    background: #e51148; /* Ajustado al Rojo de Acento oficial de la marca */
+    background: #e51148;
     border: none;
     border-radius: 12px;
-    color: #ffffff; /* Neutro claro 1 */
-    font-family: 'Nunito Sans', sans-serif; /* Consistencia tipográfica */
+    color: #ffffff;
+    font-family: 'Nunito Sans', sans-serif;
     font-weight: 800;
     font-size: 0.85rem;
     display: flex;
@@ -1536,20 +1708,18 @@ body {
     margin: 16px 0 4px 0;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    
-    /* Microinteracción fluida (Curva Bezier limpia) */
     transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    box-shadow: 0 3px 10px rgba(229, 17, 72, 0.2); /* Sombra sutil con el canal alfa del rojo */
+    box-shadow: 0 3px 10px rgba(229, 17, 72, 0.2);
 }
 
 .btn-quiz-submit:hover {
-    transform: translateY(-2px); /* Elevación sutil y limpia */
-    box-shadow: 0 6px 16px rgba(229, 17, 72, 0.35); /* Sombra de enfoque moderna */
-    filter: brightness(1.1); /* Incremento de luminosidad controlado y correcto sin alterar el color base */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(229, 17, 72, 0.35);
+    filter: brightness(1.1);
 }
 
 .btn-quiz-submit:active {
-    transform: translateY(0); /* Efecto de pulsación mecánica al hacer clic */
+    transform: translateY(0);
 }
 
 .btn-quiz-submit i {
@@ -1557,12 +1727,10 @@ body {
     transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Opcional: Si el icono es una flecha o similar, genera un leve avance cinético en hover */
 .btn-quiz-submit:hover i {
     transform: translateX(2px);
 }
 
-/* Columna derecha: anillo de progreso circular (más pequeño) */
 .quiz-progress-ring {
     display: flex;
     align-items: center;
@@ -1577,7 +1745,7 @@ body {
 
 .progress-ring {
     transform: rotate(-90deg);
-    width: 70px;      /* Reducido de 80 a 70 */
+    width: 70px;
     height: 70px;
 }
 
@@ -1595,11 +1763,10 @@ body {
     transition: stroke-dashoffset 0.9s ease;
 }
 
-/* Porcentaje dentro del anillo */
 .quiz-porcentaje-texto {
     font-family: 'Nunito Sans', sans-serif;
     font-weight: 900;
-    font-size: 1rem;   /* Antes 1.3rem */
+    font-size: 1rem;
     color: #162b47;
     background: white;
     width: 48px;
@@ -1647,7 +1814,6 @@ body {
     transform: none;
 }
 
-/* Separador de sección dentro del form editar */
 .editar-section-divider {
     display: flex;
     align-items: center;
@@ -1777,47 +1943,41 @@ body {
     align-items: center;
     gap: 4px;
     white-space: nowrap;
-    padding: 6px 10px; /* Se mantiene el tamaño exacto */
-    background: #e0e5e5; /* Neutro claro 2: GRIS de la marca */
-    border: 1px solid #c8cece; /* Gris un poco más oscuro para el borde */
+    padding: 6px 10px;
+    background: #e0e5e5;
+    border: 1px solid #c8cece;
     border-radius: 8px;
-    font-size: 11px; /* Se mantiene el tamaño exacto */
-    font-weight: 700; /* Bold para destacar según manual */
-    color: #000000; /* Neutro oscuro: NEGRO de la marca */
+    font-size: 11px;
+    font-weight: 700;
+    color: #000000;
     cursor: pointer;
     transition: all 0.2s;
     text-decoration: none;
-    font-family: 'Nunito Sans', sans-serif; /* Tipografía oficial */
+    font-family: 'Nunito Sans', sans-serif;
 }
 
 .adjunto-btn i { 
-    font-size: 13px; /* Se mantiene el tamaño exacto */
+    font-size: 13px;
 }
 
-/* --- ESTADOS HOVER CON COLORES DE MARCA --- */
-
-/* Hover general (Abrir / Descargar): Azul Oscuro Principal */
 .adjunto-btn:hover {
-    background: #162b47; /* Principal: AZUL OSCURO */
-    color: #ffffff; /* Neutro claro 1: BLANCO */
+    background: #162b47;
+    color: #ffffff;
     border-color: #162b47;
 }
 
-/* Hover específico para Descargar (Opcional: puedes usar el Azul Medio Secundario para diferenciarlo) */
 .adjunto-btn.btn-descargar:hover {
-    background: #105788; /* Secundario: AZUL MEDIO */
+    background: #105788;
     border-color: #105788;
     color: #ffffff;
 }
 
-/* Hover específico para Eliminar: Rojo de Acento (Llamados a la acción/Puntuales) */
 .adjunto-btn.btn-eliminar:hover {
-    background: #e51148; /* Acento: ROJO */
+    background: #e51148;
     border-color: #e51148;
     color: #ffffff;
 }
 
-/* Inputs dinámicos agregar */
 .input-link-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 
 .input-link-archivo {
@@ -1882,7 +2042,7 @@ body {
 }
 
 /* ============================================
-   MODALES DE CONFIRMACIÓN Y ÉXITO (HTML2 style)
+   MODALES DE CONFIRMACIÓN Y ÉXITO
    ============================================ */
 .confirm-modal {
     position: fixed;
@@ -1999,7 +2159,7 @@ body {
         padding: 20px;
     }
     .quiz-info-left {
-        max-height: 450px;        /* Un poco menos en móvil */
+        max-height: 450px;
     }
 }
 

@@ -680,10 +680,7 @@
             <i class="fa-solid fa-chart-column"></i>
             <span>Reporte Cursos</span>
         </a>
-        <a href="{% url 'subir_archivo' %}">
-            <i class="fa-solid fa-file"></i>
-            <span>Subir Archivo</span>
-        </a>
+        
         <a href="{% url 'logout' %}" class="logout-link">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Cerrar Sesión</span>
@@ -808,26 +805,36 @@
 
                     <!-- Archivo / Media (NUEVA LÓGICA) -->
                     {% if respuesta.pregunta.tipo_respuesta == 'archivo' and respuesta.archivo_subido_url %}
-                        {% if respuesta.tipo_archivo == 'imagen_video' %}
-                            <!-- Imagen o video de SharePoint: usar embed.aspx (url_limpia), NO Doc.aspx -->
+                        {% if respuesta.es_media %}
+                            <!-- Imagen, video o PDF: TODOS se muestran embebidos igual (van juntos) -->
                             <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px; background:#f8fafc; margin:15px 0;">
-                                <iframe src="{{ respuesta.archivo_subido_url }}"
+                                <iframe src="{{ respuesta.url_embed }}"
                                         frameborder="0"
                                         scrolling="no"
                                         allowfullscreen
                                         style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:12px;">
                                 </iframe>
                             </div>
+                            {% if respuesta.es_sharepoint %}
+                            <div class="archivo-acciones" style="margin-top:10px; display:flex; gap:8px;">
+                                <a href="{{ respuesta.url_visualizacion }}" target="_blank" rel="noopener noreferrer" class="archivo-btn archivo-btn-abrir">
+                                    <i class="fas fa-external-link-alt"></i> Abrir
+                                </a>
+                                {% if respuesta.url_descarga %}
+                                <a href="{{ respuesta.url_descarga }}" class="archivo-btn archivo-btn-descargar" download>
+                                    <i class="fas fa-download"></i> Descargar
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         {% elif respuesta.es_sharepoint %}
-                            <!-- Documento SharePoint: tarjeta con botón Doc.aspx -->
+                            <!-- Documento SharePoint (word/excel/ppt/otro): tarjeta con botón Doc.aspx -->
                             <div class="archivo-card">
                                 <div class="archivo-icon
-                                    {% if respuesta.tipo_archivo == 'pdf' %}pdf
-                                    {% elif respuesta.tipo_archivo == 'word' %}word
+                                    {% if respuesta.tipo_archivo == 'word' %}word
                                     {% elif respuesta.tipo_archivo == 'excel' %}excel
                                     {% else %}default{% endif %}">
-                                    {% if respuesta.tipo_archivo == 'pdf' %}<i class="fas fa-file-pdf"></i>
-                                    {% elif respuesta.tipo_archivo == 'word' %}<i class="fas fa-file-word"></i>
+                                    {% if respuesta.tipo_archivo == 'word' %}<i class="fas fa-file-word"></i>
                                     {% elif respuesta.tipo_archivo == 'excel' %}<i class="fas fa-file-excel"></i>
                                     {% elif respuesta.tipo_archivo == 'powerpoint' %}<i class="fas fa-file-powerpoint"></i>
                                     {% else %}<i class="fas fa-file"></i>{% endif %}
@@ -839,7 +846,7 @@
                                 <div class="archivo-acciones">
                                     <a href="{{ respuesta.url_visualizacion }}"
                                        target="_blank" rel="noopener noreferrer"
-                                       class="archivo-btn archivo-btn-abrir sp-abrir-btn">
+                                       class="archivo-btn archivo-btn-abrir">
                                         <i class="fas fa-external-link-alt"></i> Abrir
                                     </a>
                                     {% if respuesta.url_descarga %}
@@ -866,12 +873,6 @@
                                        class="archivo-btn archivo-btn-abrir">
                                         <i class="fas fa-external-link-alt"></i> Abrir
                                     </a>
-                                    {% if respuesta.url_descarga %}
-                                    <a href="{{ respuesta.url_descarga }}"
-                                       class="archivo-btn archivo-btn-descargar" download>
-                                        <i class="fas fa-download"></i> Descargar
-                                    </a>
-                                    {% endif %}
                                 </div>
                             </div>
                         {% endif %}
@@ -932,27 +933,7 @@
         });
 
         // ================================================================
-        // 2. Convertir embed.aspx → Doc.aspx en botones de SharePoint
-        // ================================================================
-        document.querySelectorAll('.sp-abrir-btn').forEach(btn => {
-            let url = btn.getAttribute('href') || '';
-            if (!url.includes('embed.aspx')) return;
-
-            const uid = (url.match(/UniqueId=([a-f0-9\-]{36})/i) || [])[1];
-            const base = (url.match(/(https?:\/\/[^\/]+\/personal\/[^\/]+)/i) || [])[1];
-
-            if (uid && base) {
-                btn.setAttribute('href', `${base}/_layouts/15/Doc.aspx?sourcedoc=%7B${uid}%7D&action=default`);
-                // Actualizar descarga si existe
-                const descargar = btn.closest('.archivo-card')?.querySelector('.archivo-btn-descargar');
-                if (descargar) {
-                    descargar.setAttribute('href', `${base}/_layouts/15/download.aspx?UniqueId=${uid}`);
-                }
-            }
-        });
-
-        // ================================================================
-        // 3. ANIMACIÓN DE ENTRADA PARA TARJETAS ESTADÍSTICAS (igual que antes)
+        // 2. ANIMACIÓN DE ENTRADA PARA TARJETAS ESTADÍSTICAS (igual que antes)
         // ================================================================
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {

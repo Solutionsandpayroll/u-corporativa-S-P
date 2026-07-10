@@ -9,7 +9,7 @@
     <!-- Tipografías de marca -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Calibri:wght@700&display=swap" rel="stylesheet">
 
     <!-- Font Awesome 6 -->
@@ -17,7 +17,7 @@
 
     <style>
         /* ============================================
-           TODOS LOS ESTILOS PREMIUM (sidebar, botones, tabla, modales)
+           ESTILOS PREMIUM (sidebar, botones, tabla, modales)
            ============================================ */
         :root {
             --azul-oscuro: #162b47;
@@ -188,7 +188,7 @@
             color: var(--azul-oscuro);
         }
 
-        /* Botón crear curso premium */
+        /* Botón premium */
         .btn-create-premium {
             background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
             border: none;
@@ -210,39 +210,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(22, 43, 71, 0.35);
             filter: brightness(1.05);
-        }
-
-        /* Botones de acciones de tabla */
-        .btn {
-            padding: 8px 16px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            font-family: var(--font-destacados);
-            font-weight: 700;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
-
-        .acciones .btn {
-            background: var(--gris);
-            color: var(--azul-oscuro);
-        }
-        .acciones .btn i {
-            color: var(--azul-medio);
-        }
-        .acciones .btn:hover {
-            background: var(--azul-medio);
-            color: var(--blanco);
-        }
-        .acciones .btn:hover i {
-            color: var(--blanco);
         }
 
         /* Tabla */
@@ -291,6 +258,38 @@
             flex-wrap: wrap;
         }
 
+        .btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .acciones .btn {
+            background: var(--gris);
+            color: var(--azul-oscuro);
+        }
+        .acciones .btn i {
+            color: var(--azul-medio);
+        }
+        .acciones .btn:hover {
+            background: var(--azul-medio);
+            color: var(--blanco);
+        }
+        .acciones .btn:hover i {
+            color: var(--blanco);
+        }
+
         .sin-registros {
             text-align: center;
             padding: 40px;
@@ -328,9 +327,9 @@
         }
 
         /* ============================================
-           MODAL PREMIUM (crear/editar noticia)
+           MODALES UNIFICADOS (igual que en gestión de cursos)
            ============================================ */
-        .modal-editar-overlay {
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(15, 15, 26, 0.65);
@@ -342,8 +341,7 @@
             padding: 20px;
             animation: fadeIn 0.25s ease;
         }
-
-        .modal-editar-content {
+        .modal-content {
             background: #ffffff;
             border-radius: 20px;
             width: 100%;
@@ -355,8 +353,7 @@
             animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             overflow: hidden;
         }
-
-        .modal-editar-header {
+        .modal-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -364,14 +361,12 @@
             background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
             flex-shrink: 0;
         }
-
-        .modal-editar-header-left {
+        .modal-header-left {
             display: flex;
             align-items: center;
             gap: 14px;
         }
-
-        .modal-editar-icon {
+        .modal-icon {
             width: 44px;
             height: 44px;
             border-radius: 12px;
@@ -384,22 +379,19 @@
             font-size: 18px;
             flex-shrink: 0;
         }
-
-        .modal-editar-titulo {
+        .modal-titulo {
             font-size: 18px;
             font-weight: 700;
             color: white;
             margin: 0 0 2px 0;
             line-height: 1.2;
         }
-
-        .modal-editar-subtitulo {
+        .modal-subtitulo {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.65);
             margin: 0;
         }
-
-        .modal-editar-close {
+        .modal-close {
             width: 36px;
             height: 36px;
             border-radius: 10px;
@@ -412,32 +404,30 @@
             justify-content: center;
             transition: all 0.2s;
         }
-
-        .modal-editar-close:hover {
+        .modal-close:hover {
             background: rgba(239, 68, 68, 0.3);
             border-color: rgba(239, 68, 68, 0.5);
             color: white;
         }
-
-        .modal-editar-body {
+        .modal-body {
             padding: 24px 28px;
             overflow-y: auto;
             flex: 1;
         }
-
-        /* Layout de dos columnas */
-        .form-row-2cols {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            padding: 18px 28px 24px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+            background: #fafbfc;
         }
 
-        .form-full-width {
+        /* Campos del formulario */
+        .form-group {
             margin-bottom: 20px;
         }
-
-        .editar-label {
+        .form-label {
             display: block;
             font-size: 12px;
             font-weight: 700;
@@ -446,8 +436,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
-        .editar-input, .editar-textarea, select.editar-input {
+        .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 12px 14px;
             border: 2px solid #e5e7eb;
@@ -459,194 +448,242 @@
             transition: all 0.2s ease;
             outline: none;
         }
-
-        .editar-input:focus, .editar-textarea:focus, select.editar-input:focus {
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
             border-color: var(--azul-medio);
             background: white;
             box-shadow: 0 0 0 3px rgba(16, 87, 136, 0.1);
         }
-
-        .editar-textarea {
+        .form-textarea {
             resize: vertical;
             min-height: 120px;
         }
 
-        .field-error {
-            margin-top: 6px;
-            font-size: 0.82rem;
-            color: #dc2626;
-            font-weight: 600;
+        /* Layout de dos columnas para título y tipo */
+        .form-row-2cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
-        .form-error-summary {
-            margin-bottom: 18px;
-            padding: 12px 14px;
-            border-radius: 12px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #b91c1c;
-            font-size: 0.92rem;
-            font-weight: 600;
+        /* ============================================
+           DROPZONE - Imagen de apoyo (idéntico al de cursos)
+           ============================================ */
+        .dropzone-wrapper {
+            margin-bottom: 4px;
         }
-
-        .is-invalid {
-            border-color: #dc2626 !important;
-            background: #fff7f7 !important;
-        }
-
-        .modal-editar-footer {
+        .dropzone {
+            position: relative;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #f9fafb 0%, #f3f6f9 100%);
+            padding: 28px 20px;
             display: flex;
-            gap: 12px;
-            padding: 18px 28px 24px;
-            border-top: 1px solid #f1f5f9;
-            flex-shrink: 0;
-            background: #fafbfc;
-        }
-
-        .editar-btn-cancelar {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: white;
-            color: #64748b;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s;
-            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .25s ease, background .25s ease, transform .15s ease, box-shadow .25s ease;
+            overflow: hidden;
         }
-
-        .editar-btn-cancelar:hover {
-            background: #fef2f2;
-            border-color: #fecaca;
-            color: #ef4444;
+        .dropzone:hover {
+            border-color: var(--azul-medio);
+            background: linear-gradient(180deg, #f4f9fc 0%, #eaf3f8 100%);
         }
-
-        .confirm-buttons .btn {
-    min-width: 120px;
-    transition: all 0.3s ease;
-    background: var(--gris);
-    color: var(--azul-oscuro);
-    border: 2px solid var(--gris);
-    border-radius: 12px;
-    font-weight: 600;
-    padding: 10px 24px;
-    font-family: var(--font-destacados);
-    cursor: pointer;
-}
-.confirm-buttons .btn:hover {
-    background: var(--azul-medio);
-    color: white;
-    border-color: var(--azul-medio);
-}
-
-        .editar-btn-guardar {
-            flex: 2;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
-            color: white;
-            font-size: 14px;
+        .dropzone.dragover {
+            border-color: var(--rojo-acento);
+            background: linear-gradient(180deg, #fff5f7 0%, #ffeef2 100%);
+            transform: scale(1.01);
+            box-shadow: 0 8px 24px rgba(229, 17, 72, 0.12);
+        }
+        .dropzone.has-file {
+            border-style: solid;
+            border-color: var(--azul-medio);
+            background: linear-gradient(180deg, #ffffff 0%, #f4f9fc 100%);
+            padding: 16px;
+        }
+        .dropzone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .dropzone-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .dropzone-icon {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(16, 87, 136, 0.1);
+            color: var(--azul-medio);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            line-height: 1;
+            margin: 0 auto 12px auto;
+            transition: transform .25s ease, background .25s ease;
+        }
+        .dropzone-icon i { display: block; }
+        .dropzone.dragover .dropzone-icon {
+            background: rgba(229, 17, 72, 0.12);
+            color: var(--rojo-acento);
+            transform: translateY(-4px);
+        }
+        .dropzone-text-main {
+            font-family: var(--font-destacados);
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.25s;
+            font-size: 14px;
+            color: var(--azul-oscuro);
+            margin-bottom: 4px;
+        }
+        .dropzone-text-main span {
+            color: var(--azul-medio);
+            text-decoration: underline;
+        }
+        .dropzone-text-sub {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        /* Vista previa cuando ya hay archivo seleccionado */
+        .dropzone-preview {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            text-align: left;
+        }
+        .dropzone.has-file .dropzone-preview { display: flex; }
+        .dropzone.has-file .dropzone-placeholder { display: none; }
+        .dropzone-preview-thumb {
+            width: 56px; height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--gris);
+            background: #eef2f6;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 14px rgba(16, 87, 136, 0.35);
+            color: var(--azul-medio);
+            font-size: 20px;
         }
+        .dropzone-preview-info { flex: 1; min-width: 0; }
+        .dropzone-preview-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--azul-oscuro);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dropzone-preview-size {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .dropzone-remove-btn {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #ef4444;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+        .dropzone-remove-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+        .imagen-actual-aviso {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f0f7fb;
+            border: 1px solid #d6e9f2;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #105788;
+        }
+        .imagen-actual-aviso i { font-size: 13px; }
 
-        .editar-btn-guardar:hover {
+        /* Botones del modal */
+        .btn-cancel {
+            flex: 1; padding: 12px 20px;
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            background: white; color: #64748b;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-cancel:hover {
+            background: #fef2f2; border-color: #fecaca; color: #ef4444;
+        }
+        .btn-save {
+            flex: 2; padding: 12px 20px;
+            border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--azul-medio) 0%, var(--azul-oscuro) 100%);
+            color: white; font-size: 14px; font-weight: 700;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(16,87,136,.35);
+        }
+        .btn-save:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(16, 87, 136, 0.45);
+            box-shadow: 0 6px 20px rgba(16,87,136,.45);
             filter: brightness(1.05);
         }
 
-        /* Modal de confirmación y éxito (idéntico al de cursos) */
+        /* Modal de confirmación */
         .confirm-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
             z-index: 2100;
         }
-        .confirm-modal .confirm-content {
-            background: white;
-            padding: 35px 30px;
+        .confirm-content {
+            background: white; padding: 35px 30px;
             border-radius: 28px;
-            max-width: 450px;
-            width: 90%;
+            max-width: 450px; width: 90%;
             text-align: center;
-            animation: zoomIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+            animation: zoomIn .25s cubic-bezier(.34,1.2,.64,1);
         }
         @keyframes zoomIn {
-            from { opacity: 0; transform: scale(0.9); }
+            from { opacity: 0; transform: scale(.9); }
             to { opacity: 1; transform: scale(1); }
         }
-        .confirm-modal .confirm-content i {
-            font-size: 3.5rem;
-            color: var(--azul-medio);
-            margin-bottom: 10px;
-        }
-        .confirm-modal .confirm-content p {
-            margin: 20px 0;
-            font-size: 1.2rem;
-            color: var(--azul-oscuro);
-            font-weight: 600;
-        }
-        .confirm-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 15px;
-        }
-        .confirm-buttons .btn {
-            min-width: 120px;
-        }
+        .confirm-content i { font-size: 3.5rem; color: var(--azul-medio); margin-bottom: 10px; }
+        .confirm-content p { margin: 20px 0; font-size: 1.2rem; color: var(--azul-oscuro); font-weight: 600; }
+        .confirm-buttons { display: flex; gap: 20px; justify-content: center; margin-top: 15px; }
+        .confirm-buttons .btn { min-width: 120px; }
 
+        /* Modal de éxito */
         .success-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2200;
-            transition: opacity 0.5s ease;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 2200; transition: opacity 0.5s ease;
         }
-        .success-modal .success-content {
-            background: white;
-            padding: 35px 30px;
+        .success-content {
+            background: white; padding: 35px 30px;
             border-radius: 28px;
-            max-width: 450px;
-            width: 90%;
+            max-width: 450px; width: 90%;
             text-align: center;
-            animation: zoomIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+            animation: zoomIn .25s cubic-bezier(.34,1.2,.64,1);
         }
-        .success-modal .success-content i {
-            font-size: 3.5rem;
-            color: var(--azul-medio);
-            margin-bottom: 10px;
-        }
-        .success-modal .success-content p {
-            margin: 20px 0;
-            font-size: 1.2rem;
-            color: var(--azul-oscuro);
-            font-weight: 600;
-        }
-        .success-modal.fade-out {
-            opacity: 0;
-        }
+        .success-content i { font-size: 3.5rem; color: var(--azul-medio); margin-bottom: 10px; }
+        .success-content p { margin: 20px 0; font-size: 1.2rem; color: var(--azul-oscuro); font-weight: 600; }
+        .success-modal.fade-out { opacity: 0; }
 
         /* Partículas decorativas */
         .bg-particles {
@@ -677,6 +714,9 @@
             75% { transform: translateY(-50px) translateX(10px) scale(1.2); }
         }
 
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar { width: var(--sidebar-collapsed); }
@@ -689,21 +729,14 @@
             .page-header { flex-direction: column; align-items: stretch; }
             .btn-create-premium { justify-content: center; }
             .form-row-2cols { grid-template-columns: 1fr; gap: 15px; }
+            .acciones { flex-direction: column; align-items: stretch; }
+            .acciones .btn { justify-content: center; }
         }
         @media (max-width: 480px) {
             .sidebar { width: 56px; }
             .main-content { margin-left: 56px; padding: 14px 10px; }
             .sidebar-brand { padding: 12px 4px 6px 4px; }
             .logo-wrapper img { max-height: 46px; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -719,7 +752,7 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="logo-wrapper" title="Dashboard">
-                <img src="/static/img/logo_biocore_blanco.png" alt="Logo de la marca">
+                <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo de la marca">
             </div>
         </div>
 
@@ -728,12 +761,10 @@
                 <i class="fa-solid fa-gauge-high"></i>
                 <span>Panel de Administración</span>
             </a>
-
             <a href="{% url 'gestionar_usuarios' %}">
                 <i class="fa-solid fa-users"></i>
                 <span>Gestionar Usuarios</span>
             </a>
-            
             <a href="{% url 'gestionar_cursos' %}">
                 <i class="fa-solid fa-chalkboard-user"></i>
                 <span>Gestionar Cursos</span>
@@ -742,18 +773,10 @@
                 <i class="fa-solid fa-pen-to-square"></i>
                 <span>Administrar Noticias</span>
             </a>
-
             <a href="{% url 'estadisticas_cursos' %}">
                 <i class="fa-solid fa-chart-column"></i>
                 <span>Reporte Cursos</span>
             </a>
-
-            <a href="{% url 'subir_archivo' %}" >
-                <i class="fa-solid fa-file"></i>
-                <span>Subir Archivo</span>
-            </a>
-
-            
             <a href="{% url 'logout' %}" class="logout-link">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Cerrar Sesión</span>
@@ -825,69 +848,101 @@
         </div>
     </main>
 
-    <!-- MODAL PREMIUM PARA CREAR/EDITAR NOTICIA -->
-    <div id="modalNoticia" class="modal-editar-overlay">
-        <div class="modal-editar-content">
-            <div class="modal-editar-header">
-                <div class="modal-editar-header-left">
-                    <div class="modal-editar-icon"><i class="fas fa-plus-circle"></i></div>
+    <!-- MODAL PREMIUM PARA CREAR/EDITAR NOTICIA (unificado con el diseño de cursos) -->
+    <div id="modalNoticia" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-icon"><i class="fas fa-plus-circle"></i></div>
                     <div>
-                        <h3 class="modal-editar-titulo" id="modalTitle">Crear Noticia</h3>
-                        <p class="modal-editar-subtitulo" id="modalSubtitle">Completa los campos y guarda la noticia</p>
+                        <h3 class="modal-titulo" id="modalTitle">Crear Noticia</h3>
+                        <p class="modal-subtitulo" id="modalSubtitle">Completa los campos y guarda la noticia</p>
                     </div>
                 </div>
-                <button class="modal-editar-close" onclick="cerrarModalNoticia()">
+                <button class="modal-close" onclick="cerrarModalNoticia()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-editar-body">
+            <div class="modal-body">
                 {% if noticia_form.errors or contenido_form.errors %}
-                    <div class="form-error-summary">
+                    <div style="margin-bottom:18px; padding:12px 14px; border-radius:12px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:0.92rem; font-weight:600;">
                         Revisa los campos marcados en rojo. El título es obligatorio y la descripción es opcional.
                     </div>
                 {% endif %}
-                <form method="POST" id="noticiaForm" action="{% if editando %}{% url 'editar_noticia' noticia.id_noticia %}{% else %}{% url 'administrar_noticias' %}{% endif %}">
+
+                <form method="POST" id="noticiaForm" enctype="multipart/form-data" action="{% if editando %}{% url 'editar_noticia' noticia.id_noticia %}{% else %}{% url 'administrar_noticias' %}{% endif %}">
                     {% csrf_token %}
                     <!-- Fila de dos columnas: Título y Tipo de Contenido -->
                     <div class="form-row-2cols">
-                        <div>
-                            <label class="editar-label">Título *</label>
+                        <div class="form-group">
+                            <label class="form-label">Título *</label>
                             {{ noticia_form.titulo }}
                             {% if noticia_form.titulo.errors %}
-                                <div class="field-error">{{ noticia_form.titulo.errors.0 }}</div>
+                                <div class="field-error" style="margin-top:6px; font-size:0.82rem; color:#dc2626; font-weight:600;">{{ noticia_form.titulo.errors.0 }}</div>
                             {% endif %}
                         </div>
-                        <div>
-                            <label class="editar-label">Tipo de Contenido</label>
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Contenido</label>
                             {{ contenido_form.tipo_con }}
                             {% if contenido_form.tipo_con.errors %}
-                                <div class="field-error">{{ contenido_form.tipo_con.errors.0 }}</div>
+                                <div class="field-error" style="margin-top:6px; font-size:0.82rem; color:#dc2626; font-weight:600;">{{ contenido_form.tipo_con.errors.0 }}</div>
                             {% endif %}
                         </div>
                     </div>
+
                     <!-- Descripción a ancho completo -->
-                    <div class="form-full-width">
-                        <label class="editar-label">Descripción</label>
+                    <div class="form-group">
+                        <label class="form-label">Descripción</label>
                         {{ noticia_form.descripcion }}
                         {% if noticia_form.descripcion.errors %}
-                            <div class="field-error">{{ noticia_form.descripcion.errors.0 }}</div>
+                            <div class="field-error" style="margin-top:6px; font-size:0.82rem; color:#dc2626; font-weight:600;">{{ noticia_form.descripcion.errors.0 }}</div>
                         {% endif %}
                     </div>
-                    <!-- URL del recurso -->
-                    <div class="form-full-width">
-                        <label class="editar-label">URL del Recurso (iframe/imagen)</label>
-                        {{ contenido_form.url_recurso }}
-                        {% if contenido_form.url_recurso.errors %}
-                            <div class="field-error">{{ contenido_form.url_recurso.errors.0 }}</div>
-                        {% endif %}
+
+                    <!-- BLOQUE DROPZONE: Imagen de Apoyo (idéntico al de cursos) -->
+                    <div class="form-group dropzone-wrapper">
+                        <label class="form-label"><i class="fas fa-image"></i> Imagen de Apoyo</label>
+                        <div class="dropzone" id="dropzoneNoticia">
+                            <input type="file" name="imagen_archivo" id="id_imagen_archivo" accept="image/*" data-url-actual="{{ contenido_form.url_recurso.value|default:'' }}">
+
+                            <div class="dropzone-placeholder">
+                                <div class="dropzone-icon">
+                                    <i class="fas fa-cloud-arrow-up"></i>
+                                </div>
+                                <div class="dropzone-text-main">Arrastra una imagen aquí o <span>haz clic para elegir</span></div>
+                                <div class="dropzone-text-sub">PNG, JPG o WEBP · máx. 5 MB</div>
+                            </div>
+
+                            <div class="dropzone-preview">
+                                <img class="dropzone-preview-thumb" id="dropzonePreviewImg" style="display:none;" alt="Vista previa">
+                                <div class="dropzone-preview-thumb" id="dropzonePreviewIcon"><i class="fas fa-file-image"></i></div>
+                                <div class="dropzone-preview-info">
+                                    <div class="dropzone-preview-name" id="dropzoneFileName">archivo.png</div>
+                                    <div class="dropzone-preview-size" id="dropzoneFileSize">0 KB</div>
+                                </div>
+                                <button type="button" class="dropzone-remove-btn" id="dropzoneRemoveBtn" title="Quitar archivo">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Aviso de imagen actual (se muestra en edición si existe) -->
+                        <div class="imagen-actual-aviso" id="imagen-actual-nombre" style="display:none;">
+                            <i class="fas fa-circle-info"></i>
+                            <span>Ya existe una imagen cargada. Sube una nueva solo si deseas reemplazarla.</span>
+                        </div>
+                        <!-- (Opcional: preview de la imagen actual si es una imagen válida) -->
+                        <div id="preview-imagen-actual" style="display:none; margin-top:10px;">
+                            <img id="img-actual-preview" src="" style="max-width:100%; max-height:180px; border-radius:12px; border:1px solid var(--gris);">
+                        </div>
                     </div>
+                    <!-- FIN DROPZONE -->
                 </form>
             </div>
-            <div class="modal-editar-footer">
-                <button class="editar-btn-cancelar" onclick="cerrarModalNoticia()">
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="cerrarModalNoticia()">
                     <i class="fas fa-times"></i> Cancelar
                 </button>
-                <button class="editar-btn-guardar" id="guardarNoticiaBtn">
+                <button class="btn-save" id="guardarNoticiaBtn">
                     <i class="fas fa-save"></i> Guardar Noticia
                 </button>
             </div>
@@ -900,8 +955,8 @@
             <i class="fas fa-question-circle"></i>
             <p id="confirmMessage">¿Aceptas guardar los cambios?</p>
             <div class="confirm-buttons">
-                <button class="btn btn-primary" id="confirmYes">Sí, aceptar</button>
-                <button class="btn btn-secondary" id="confirmNo">Cancelar</button>
+                <button class="btn" id="confirmYes">Sí, aceptar</button>
+                <button class="btn" id="confirmNo">Cancelar</button>
             </div>
         </div>
     </div>
@@ -926,17 +981,26 @@
         const confirmMessage = document.getElementById('confirmMessage');
         const successModal = document.getElementById('successModal');
         const successMessageSpan = document.getElementById('successMessage');
+        const imagenActualAviso = document.getElementById('imagen-actual-nombre');
+        const previewImagenActual = document.getElementById('preview-imagen-actual');
+        const imgActualPreview = document.getElementById('img-actual-preview');
+
+        // Elementos del dropzone
+        const dropzone = document.getElementById('dropzoneNoticia');
+        const dropzoneInput = document.getElementById('id_imagen_archivo');
+        const dropzonePreviewImg = document.getElementById('dropzonePreviewImg');
+        const dropzonePreviewIcon = document.getElementById('dropzonePreviewIcon');
+        const dropzoneFileName = document.getElementById('dropzoneFileName');
+        const dropzoneFileSize = document.getElementById('dropzoneFileSize');
+        const dropzoneRemoveBtn = document.getElementById('dropzoneRemoveBtn');
+
         let confirmCallback = null;
         let isEditMode = {{ editando|yesno:"true,false" }};
         let formHasErrors = {% if noticia_form.errors or contenido_form.errors %}true{% else %}false{% endif %};
-        let tituloHasError = {% if noticia_form.titulo.errors %}true{% else %}false{% endif %};
-        let descripcionHasError = {% if noticia_form.descripcion.errors %}true{% else %}false{% endif %};
-        let tipoConHasError = {% if contenido_form.tipo_con.errors %}true{% else %}false{% endif %};
-        let urlRecursoHasError = {% if contenido_form.url_recurso.errors %}true{% else %}false{% endif %};
 
-        // Función para mostrar mensaje de éxito
+        // Funciones de utilidad
         function showSuccess(message) {
-            successMessageSpan.innerText = message;
+            successMessageSpan.textContent = message;
             successModal.style.display = 'flex';
             successModal.classList.remove('fade-out');
             setTimeout(() => {
@@ -948,71 +1012,147 @@
         }
 
         function showConfirm(message, onConfirm) {
-            confirmMessage.innerText = message;
+            confirmMessage.textContent = message;
             confirmModal.style.display = 'flex';
             confirmCallback = onConfirm;
         }
 
-        document.getElementById('confirmYes').onclick = () => {
-            confirmModal.style.display = 'none';
-            if (confirmCallback) confirmCallback();
-            confirmCallback = null;
-        };
-        document.getElementById('confirmNo').onclick = () => {
-            confirmModal.style.display = 'none';
-            confirmCallback = null;
-        };
+        // ---- Dropzone: formateo de tamaño ----
+        function formatearTamano(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
 
-        // Aplicar clases CSS a los campos del formulario
-        function aplicarClasesInputs() {
-            const inputs = document.querySelectorAll('#noticiaForm input, #noticiaForm textarea, #noticiaForm select');
-            inputs.forEach(input => {
-                if (input.tagName === 'TEXTAREA') {
-                    input.classList.add('editar-textarea');
-                } else {
-                    input.classList.add('editar-input');
-                }
-            });
+        // ---- Dropzone: mostrar vista previa del archivo seleccionado ----
+        function mostrarPreviewArchivo(file) {
+            if (!file) return;
+            dropzone.classList.add('has-file');
+            dropzoneFileName.textContent = file.name;
+            dropzoneFileSize.textContent = formatearTamano(file.size);
 
-            if (tituloHasError) {
-                const tituloInput = document.getElementById('id_titulo');
-                if (tituloInput) tituloInput.classList.add('is-invalid');
-            }
-            if (descripcionHasError) {
-                const descripcionInput = document.getElementById('id_descripcion');
-                if (descripcionInput) descripcionInput.classList.add('is-invalid');
-            }
-            if (tipoConHasError) {
-                const tipoConInput = document.getElementById('id_tipo_con');
-                if (tipoConInput) tipoConInput.classList.add('is-invalid');
-            }
-            if (urlRecursoHasError) {
-                const urlRecursoInput = document.getElementById('id_url_recurso');
-                if (urlRecursoInput) urlRecursoInput.classList.add('is-invalid');
+            if (file.type && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    dropzonePreviewImg.src = e.target.result;
+                    dropzonePreviewImg.style.display = 'block';
+                    dropzonePreviewIcon.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                dropzonePreviewImg.style.display = 'none';
+                dropzonePreviewIcon.style.display = 'flex';
             }
         }
 
-        // Limpiar todos los campos del formulario (para creación)
-        function limpiarFormulario() {
-            const fields = noticiaForm.querySelectorAll('input:not([type=hidden]), textarea, select');
-            fields.forEach(field => {
-                if (field.tagName === 'SELECT') {
-                    field.value = 'imagen';  // valor por defecto "imagen"
-                } else {
-                    field.value = '';
-                }
-            });
-            // Restablecer el campo oculto CSRF (no se toca)
-            document.querySelector('[name=csrfmiddlewaretoken]').value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        function limpiarDropzone() {
+            dropzoneInput.value = '';
+            dropzone.classList.remove('has-file');
+            dropzonePreviewImg.src = '';
+            dropzonePreviewImg.style.display = 'none';
+            dropzonePreviewIcon.style.display = 'flex';
+            dropzoneFileName.textContent = '';
+            dropzoneFileSize.textContent = '';
         }
 
-        // Abrir modal para crear
+        // ---- Eventos del dropzone ----
+        dropzoneInput.addEventListener('change', () => {
+            if (dropzoneInput.files && dropzoneInput.files.length > 0) {
+                mostrarPreviewArchivo(dropzoneInput.files[0]);
+                // Ocultar aviso de imagen actual y preview
+                imagenActualAviso.style.display = 'none';
+                previewImagenActual.style.display = 'none';
+            }
+        });
+
+        dropzoneRemoveBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            limpiarDropzone();
+            // Si está en edición y había imagen, mostrar el aviso nuevamente
+            const urlActual = dropzoneInput.dataset.urlActual || '';
+            if (isEditMode && urlActual) {
+                // Mostrar aviso genérico
+                imagenActualAviso.style.display = 'flex';
+                // Si es una imagen previsualizable, mostrar preview
+                if (esImagenPrevisualizable(urlActual)) {
+                    imgActualPreview.src = urlActual;
+                    previewImagenActual.style.display = 'block';
+                } else {
+                    previewImagenActual.style.display = 'none';
+                }
+            }
+        });
+
+        // Eventos de arrastrar y soltar
+        ['dragenter', 'dragover'].forEach(evento => {
+            dropzone.addEventListener(evento, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'dragend'].forEach(evento => {
+            dropzone.addEventListener(evento, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                dropzoneInput.files = files;
+                mostrarPreviewArchivo(files[0]);
+                imagenActualAviso.style.display = 'none';
+                previewImagenActual.style.display = 'none';
+            }
+        });
+
+        // Función para determinar si una URL es imagen previsualizable
+        function esImagenPrevisualizable(url) {
+            if (!url) return false;
+            const urlLower = url.toLowerCase();
+            if (urlLower.includes('sharepoint.com') || urlLower.includes('embed.aspx') || urlLower.includes('doc.aspx')) return false;
+            if (urlLower.includes('.pdf') || urlLower.includes('.doc') || urlLower.includes('.xls') || urlLower.includes('.ppt')) return false;
+            return true;
+        }
+
+        // Mostrar el estado de la imagen actual en modo edición
+        function mostrarEstadoImagenActual(url) {
+            if (!url) return;
+            // Si es una imagen previsualizable, mostrar preview
+            if (esImagenPrevisualizable(url)) {
+                imgActualPreview.src = url;
+                previewImagenActual.style.display = 'block';
+                imagenActualAviso.style.display = 'none';
+            } else {
+                previewImagenActual.style.display = 'none';
+                imagenActualAviso.style.display = 'flex';
+            }
+        }
+
+        // ---- Funciones del modal ----
         function abrirModalCrear() {
-            limpiarFormulario();
+            // Resetear formulario y dropzone
+            noticiaForm.reset();
+            // Limpiar dropzone
+            limpiarDropzone();
+            // Ocultar avisos de imagen actual
+            imagenActualAviso.style.display = 'none';
+            previewImagenActual.style.display = 'none';
+            // Quitar datos de URL actual
+            if (dropzoneInput) dropzoneInput.dataset.urlActual = '';
+            // Configurar acción
             noticiaForm.action = "{% url 'administrar_noticias' %}";
-            modalTitleSpan.innerText = 'Crear Noticia';
-            modalSubtitleSpan.innerText = 'Completa los campos y guarda la noticia';
-            document.querySelector('.modal-editar-icon i').className = 'fas fa-plus-circle';
+            modalTitleSpan.textContent = 'Crear Noticia';
+            modalSubtitleSpan.textContent = 'Completa los campos y guarda la noticia';
+            document.querySelector('.modal-icon i').className = 'fas fa-plus-circle';
             isEditMode = false;
             modalNoticia.style.display = 'flex';
             aplicarClasesInputs();
@@ -1023,9 +1163,36 @@
             isEditMode = false;
         }
 
+        function aplicarClasesInputs() {
+            const inputs = document.querySelectorAll('#noticiaForm input:not([type="file"]), #noticiaForm textarea, #noticiaForm select');
+            inputs.forEach(input => {
+                if (input.tagName === 'TEXTAREA') {
+                    input.classList.add('form-textarea');
+                } else {
+                    input.classList.add('form-input');
+                }
+            });
+            // Añadir clase a selects y campos con errores
+            const selectTipo = document.getElementById('id_tipo_con');
+            if (selectTipo) selectTipo.classList.add('form-select');
+            // Marcar campos con errores
+            {% if noticia_form.titulo.errors %}
+                const tituloInput = document.getElementById('id_titulo');
+                if (tituloInput) tituloInput.classList.add('is-invalid');
+            {% endif %}
+            {% if noticia_form.descripcion.errors %}
+                const descripcionInput = document.getElementById('id_descripcion');
+                if (descripcionInput) descripcionInput.classList.add('is-invalid');
+            {% endif %}
+            {% if contenido_form.tipo_con.errors %}
+                const tipoConInput = document.getElementById('id_tipo_con');
+                if (tipoConInput) tipoConInput.classList.add('is-invalid');
+            {% endif %}
+        }
+
+        // ---- Eventos ----
         btnCrearNoticia.addEventListener('click', abrirModalCrear);
 
-        // Evento guardar
         guardarNoticiaBtn.addEventListener('click', (e) => {
             e.preventDefault();
             if (isEditMode) {
@@ -1037,7 +1204,23 @@
             }
         });
 
-        // Confirmación para enlaces de eliminar
+        document.getElementById('confirmYes').addEventListener('click', () => {
+            confirmModal.style.display = 'none';
+            if (confirmCallback) confirmCallback();
+            confirmCallback = null;
+        });
+        document.getElementById('confirmNo').addEventListener('click', () => {
+            confirmModal.style.display = 'none';
+            confirmCallback = null;
+        });
+
+        window.onclick = function(event) {
+            if (event.target == modalNoticia) cerrarModalNoticia();
+            if (event.target == confirmModal) confirmModal.style.display = 'none';
+            if (event.target == successModal) successModal.style.display = 'none';
+        };
+
+        // Confirmación de eliminación
         document.querySelectorAll('.btn-delete[data-confirm="true"]').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1048,21 +1231,7 @@
             });
         });
 
-        // Cerrar modales al hacer clic fuera
-        window.onclick = function(event) {
-            if (event.target == modalNoticia) cerrarModalNoticia();
-            if (event.target == confirmModal) confirmModal.style.display = 'none';
-            if (event.target == successModal) successModal.style.display = 'none';
-        };
-
-        // Mostrar mensajes de Django como modal de éxito
-        {% if messages %}
-            {% for message in messages %}
-                showSuccess('{{ message }}');
-            {% endfor %}
-        {% endif %}
-
-        // Animación de entrada de filas y abrir modal si es edición
+        // Inicialización: animación de filas, mensajes y manejo de edición
         document.addEventListener('DOMContentLoaded', () => {
             const rows = document.querySelectorAll('tbody tr');
             rows.forEach((row, index) => {
@@ -1075,22 +1244,39 @@
                 }, 100 + index * 50);
             });
 
+            // Si estamos en modo edición (por errores o por editar)
             if (isEditMode) {
                 modalNoticia.style.display = 'flex';
-                document.querySelector('.modal-editar-icon i').className = 'fas fa-edit';
-                modalTitleSpan.innerText = 'Editar Noticia';
-                modalSubtitleSpan.innerText = 'Modifica los campos y guarda los cambios';
+                document.querySelector('.modal-icon i').className = 'fas fa-edit';
+                modalTitleSpan.textContent = 'Editar Noticia';
+                modalSubtitleSpan.textContent = 'Modifica los campos y guarda los cambios';
                 aplicarClasesInputs();
+                // Mostrar estado de la imagen actual si existe
+                const urlActual = dropzoneInput ? dropzoneInput.dataset.urlActual : '';
+                if (urlActual) {
+                    mostrarEstadoImagenActual(urlActual);
+                }
             }
 
             if (formHasErrors) {
                 modalNoticia.style.display = 'flex';
                 if (!isEditMode) {
-                    modalTitleSpan.innerText = 'Crear Noticia';
+                    modalTitleSpan.textContent = 'Crear Noticia';
                 }
-                modalSubtitleSpan.innerText = 'Corrige los campos marcados y vuelve a guardar';
+                modalSubtitleSpan.textContent = 'Corrige los campos marcados y vuelve a guardar';
                 aplicarClasesInputs();
+                const urlActual = dropzoneInput ? dropzoneInput.dataset.urlActual : '';
+                if (urlActual) {
+                    mostrarEstadoImagenActual(urlActual);
+                }
             }
+
+            // Mensajes de Django
+            {% if messages %}
+                {% for message in messages %}
+                    showSuccess('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
         });
     </script>
 </body>

@@ -606,10 +606,7 @@
                 <i class="fa-solid fa-chart-column"></i>
                 <span>Reporte Cursos</span>
             </a>
-            <a href="{% url 'subir_archivo' %}">
-                <i class="fa-solid fa-file"></i>
-                <span>Subir Archivo</span>
-            </a>
+        
             <a href="{% url 'logout' %}" class="logout-link">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Cerrar Sesión</span>
@@ -675,19 +672,6 @@
                 <p>Visualiza estadísticas y métricas sobre los cursos disponibles.</p>
                 <a href="{% url 'estadisticas_cursos' %}" class="btn-card">
                     <span>Ir a Generar Reporte</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </a>
-            </article>
-
-
-            <article class="card">
-                <div class="card-icon-wrapper news">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </div>
-                <h2>Consulta Como Subir Contenido</h2>
-                <p>Conoce el proceso de subida de contenido al sistema.</p>
-                <a href="{% url 'subir_archivo' %}" class="btn-card">
-                    <span>Ir a Subir Archivo</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </a>
             </article>

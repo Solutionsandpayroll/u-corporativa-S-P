@@ -404,6 +404,156 @@
             box-shadow: 0 0 0 3px rgba(16,87,136,.1);
         }
         .form-textarea { resize: vertical; min-height: 120px; }
+
+        /* ============================================
+           DROPZONE - Imagen del Curso (rediseño)
+           ============================================ */
+        .dropzone-wrapper { margin-bottom: 4px; }
+        .dropzone {
+            position: relative;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #f9fafb 0%, #f3f6f9 100%);
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .25s ease, background .25s ease, transform .15s ease, box-shadow .25s ease;
+            overflow: hidden;
+        }
+        .dropzone:hover {
+            border-color: var(--azul-medio);
+            background: linear-gradient(180deg, #f4f9fc 0%, #eaf3f8 100%);
+        }
+        .dropzone.dragover {
+            border-color: var(--rojo-acento);
+            background: linear-gradient(180deg, #fff5f7 0%, #ffeef2 100%);
+            transform: scale(1.01);
+            box-shadow: 0 8px 24px rgba(229, 17, 72, 0.12);
+        }
+        .dropzone.has-file {
+            border-style: solid;
+            border-color: var(--azul-medio);
+            background: linear-gradient(180deg, #ffffff 0%, #f4f9fc 100%);
+            padding: 16px;
+        }
+        .dropzone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .dropzone-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .dropzone-icon {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(16, 87, 136, 0.1);
+            color: var(--azul-medio);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            line-height: 1;
+            margin: 0 auto 12px auto;
+            transition: transform .25s ease, background .25s ease;
+        }
+        .dropzone-icon i { display: block; }
+        .dropzone.dragover .dropzone-icon {
+            background: rgba(229, 17, 72, 0.12);
+            color: var(--rojo-acento);
+            transform: translateY(-4px);
+        }
+        .dropzone-text-main {
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--azul-oscuro);
+            margin-bottom: 4px;
+        }
+        .dropzone-text-main span {
+            color: var(--azul-medio);
+            text-decoration: underline;
+        }
+        .dropzone-text-sub {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        /* Vista previa cuando ya hay archivo seleccionado */
+        .dropzone-preview {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            text-align: left;
+        }
+        .dropzone.has-file .dropzone-preview { display: flex; }
+        .dropzone.has-file .dropzone-placeholder { display: none; }
+        .dropzone-preview-thumb {
+            width: 56px; height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--gris);
+            background: #eef2f6;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--azul-medio);
+            font-size: 20px;
+        }
+        .dropzone-preview-info { flex: 1; min-width: 0; }
+        .dropzone-preview-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--azul-oscuro);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dropzone-preview-size {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .dropzone-remove-btn {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #ef4444;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+        .dropzone-remove-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+        .imagen-actual-aviso {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f0f7fb;
+            border: 1px solid #d6e9f2;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #105788;
+        }
+        .imagen-actual-aviso i { font-size: 13px; }
+
         .btn-cancel {
             flex: 1; padding: 12px 20px;
             border: 2px solid #e2e8f0; border-radius: 12px;
@@ -588,10 +738,6 @@
                 <i class="fa-solid fa-chart-column"></i>
                 <span>Reporte Cursos</span>
             </a>
-            <a href="{% url 'subir_archivo' %}">
-                <i class="fa-solid fa-file"></i>
-                <span>Subir Archivo</span>
-            </a>
             <a href="{% url 'logout' %}" class="logout-link">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Cerrar Sesión</span>
@@ -713,7 +859,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" id="cursoForm">
+                <!-- FORMULARIO CON enctype AGREGADO -->
+                <form method="POST" id="cursoForm" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div>
@@ -729,9 +876,37 @@
                         <label class="form-label">Descripción</label>
                         {{ form.descripcion }}
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">URL Imagen (SharePoint/OneDrive)</label>
-                        <input type="text" name="imagen_url" class="form-input" placeholder="Pega la URL de imagen" id="id_imagen_url">
+
+                    <!-- BLOQUE REDISEÑADO: Imagen del Curso (dropzone) -->
+                    <div class="form-group dropzone-wrapper">
+                        <label class="form-label"><i class="fas fa-image"></i> Imagen del Curso</label>
+                        <div class="dropzone" id="dropzoneImagen">
+                            <input type="file" name="imagen_archivo" id="id_imagen_archivo" accept="image/*">
+
+                            <div class="dropzone-placeholder">
+                                <div class="dropzone-icon">
+                                    <i class="fas fa-cloud-arrow-up"></i>
+                                </div>
+                                <div class="dropzone-text-main">Arrastra una imagen aquí o <span>haz clic para elegir</span></div>
+                                <div class="dropzone-text-sub">PNG, JPG o WEBP · máx. 5 MB</div>
+                            </div>
+
+                            <div class="dropzone-preview">
+                                <img class="dropzone-preview-thumb" id="dropzonePreviewImg" style="display:none;" alt="Vista previa">
+                                <div class="dropzone-preview-thumb" id="dropzonePreviewIcon"><i class="fas fa-file-image"></i></div>
+                                <div class="dropzone-preview-info">
+                                    <div class="dropzone-preview-name" id="dropzoneFileName">archivo.png</div>
+                                    <div class="dropzone-preview-size" id="dropzoneFileSize">0 KB</div>
+                                </div>
+                                <button type="button" class="dropzone-remove-btn" id="dropzoneRemoveBtn" title="Quitar archivo">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="imagen-actual-aviso" id="imagen-actual-nombre" style="display:none;">
+                            <i class="fas fa-circle-info"></i>
+                            <span>Ya existe una imagen cargada. Sube una nueva solo si deseas reemplazarla.</span>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -799,6 +974,16 @@
         const tbodyCursos       = document.getElementById('tbody-cursos');
         const filaSinResultados = document.getElementById('fila-sin-resultados');
         const deleteForm        = document.getElementById('deleteForm');
+        const imagenActualNombre = document.getElementById('imagen-actual-nombre');
+
+        // Elementos del Dropzone
+        const dropzone          = document.getElementById('dropzoneImagen');
+        const dropzoneInput     = document.getElementById('id_imagen_archivo');
+        const dropzonePreviewImg = document.getElementById('dropzonePreviewImg');
+        const dropzonePreviewIcon = document.getElementById('dropzonePreviewIcon');
+        const dropzoneFileName  = document.getElementById('dropzoneFileName');
+        const dropzoneFileSize  = document.getElementById('dropzoneFileSize');
+        const dropzoneRemoveBtn = document.getElementById('dropzoneRemoveBtn');
 
         let confirmCallback = null;
         let isEditMode = false;
@@ -836,6 +1021,86 @@
             filaSinResultados.style.display = (visibles === 0 && filas.length > 0) ? 'table-row' : 'none';
         }
 
+        // ---- Dropzone: formateo de tamaño ----
+        function formatearTamano(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // ---- Dropzone: mostrar vista previa del archivo ----
+        function mostrarPreviewArchivo(file) {
+            if (!file) return;
+            dropzone.classList.add('has-file');
+            dropzoneFileName.textContent = file.name;
+            dropzoneFileSize.textContent = formatearTamano(file.size);
+
+            if (file.type && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    dropzonePreviewImg.src = e.target.result;
+                    dropzonePreviewImg.style.display = 'block';
+                    dropzonePreviewIcon.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                dropzonePreviewImg.style.display = 'none';
+                dropzonePreviewIcon.style.display = 'flex';
+            }
+        }
+
+        function limpiarDropzone() {
+            dropzoneInput.value = '';
+            dropzone.classList.remove('has-file');
+            dropzonePreviewImg.src = '';
+            dropzonePreviewImg.style.display = 'none';
+            dropzonePreviewIcon.style.display = 'flex';
+            dropzoneFileName.textContent = '';
+            dropzoneFileSize.textContent = '';
+        }
+
+        // Cambio vía click / selector nativo
+        dropzoneInput.addEventListener('change', () => {
+            if (dropzoneInput.files && dropzoneInput.files.length > 0) {
+                mostrarPreviewArchivo(dropzoneInput.files[0]);
+            }
+        });
+
+        // Quitar archivo seleccionado
+        dropzoneRemoveBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            limpiarDropzone();
+        });
+
+        // Eventos de arrastrar y soltar
+        ['dragenter', 'dragover'].forEach(evento => {
+            dropzone.addEventListener(evento, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'dragend'].forEach(evento => {
+            dropzone.addEventListener(evento, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                dropzoneInput.files = files;
+                mostrarPreviewArchivo(files[0]);
+            }
+        });
+
         // ---- Modales ----
         function abrirModalCrear() {
             cursoForm.reset();
@@ -843,7 +1108,9 @@
             modalTitleSpan.textContent = 'Crear Curso';
             modalSubtitleSpan.textContent = 'Completa los campos y guarda el curso';
             document.querySelector('.modal-icon i').className = 'fas fa-plus-circle';
-            document.getElementById('id_imagen_url').value = '';
+            // Limpiar aviso de imagen actual y dropzone
+            imagenActualNombre.style.display = 'none';
+            limpiarDropzone();
             isEditMode = false;
             modalCurso.style.display = 'flex';
             aplicarClasesInputs();
@@ -869,7 +1136,10 @@
             document.getElementById('id_estado').value = estado;
             document.getElementById('id_titulo').value = titulo;
             document.getElementById('id_descripcion').value = descripcion;
-            document.getElementById('id_imagen_url').value = imagenUrl;
+
+            // Limpiar dropzone y mostrar aviso de imagen actual
+            limpiarDropzone();
+            imagenActualNombre.style.display = imagenUrl ? 'flex' : 'none';
 
             cursoForm.action = "{% url 'editar_curso' 0 %}".replace('0', idCurso);
             modalTitleSpan.textContent = 'Editar Curso';

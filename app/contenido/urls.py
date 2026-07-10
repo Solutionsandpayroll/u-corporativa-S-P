@@ -46,7 +46,7 @@ urlpatterns = [
     path('empleado/curso/<str:id_curso>/', ver_curso_empleado, name='ver_curso_empleado'),
 
     # RUTAS DE SUBIR ARCHIVO
-    path('subir-archivo/', subir_archivo, name='subir_archivo'),
+
     
     # RUTAS DE SUBIR ARCHIVO
     path('estadisticas/', cursos_estadisticas, name='estadisticas_cursos'),

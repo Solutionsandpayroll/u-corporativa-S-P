@@ -89,18 +89,32 @@ def extraer_base_sharepoint(url_iframe):
     return match.group(1) if match else ''
 
 
-def preparar_archivo_sharepoint(url_iframe):
-    """Normaliza enlaces de archivo y construye URLs de visualización y descarga."""
+def preparar_archivo_sharepoint(url_iframe, nombre_hint=''):
+    """Normaliza enlaces de archivo y construye URLs de visualización, descarga y embed."""
     url_original = (url_iframe or '').strip()
     url_limpia = limpiar_iframe(url_original)
     titulo = extraer_titulo_iframe(url_original)
-    nombre = titulo or extraer_nombre_archivo(url_original)
+    nombre = (nombre_hint or '').strip() or titulo or extraer_nombre_archivo(url_original)
     unique_id = extraer_unique_id_sharepoint(url_original)
     base = extraer_base_sharepoint(url_original)
     es_sharepoint = any(x in url_limpia.lower() for x in ['sharepoint.com', 'onedrive.com', 'embed.aspx', 'doc.aspx'])
 
+    # url_embed: SIEMPRE la versión embed.aspx (para iframe / vista previa)
     if unique_id and base:
-        url_visualizacion = f"{base}/_layouts/15/Doc.aspx?sourcedoc=%7B{unique_id}%7D&action=default"
+        url_embed = f"{base}/_layouts/15/embed.aspx?UniqueId={unique_id}"
+    else:
+        url_embed = url_limpia
+
+    # url_visualizacion: para PDF conviene usar la URL original limpia,
+    # porque Doc.aspx puede abrir la carpeta de OneDrive en vez del visor.
+    nombre_lower = (nombre or '').lower()
+    es_pdf = nombre_lower.endswith('.pdf') or '.pdf' in (url_limpia or '').lower()
+
+    if unique_id and base:
+        if es_pdf:
+            url_visualizacion = url_limpia
+        else:
+            url_visualizacion = f"{base}/_layouts/15/Doc.aspx?sourcedoc=%7B{unique_id}%7D&action=default"
         url_descarga = f"{base}/_layouts/15/download.aspx?UniqueId={unique_id}"
     else:
         url_visualizacion = url_limpia
@@ -113,6 +127,7 @@ def preparar_archivo_sharepoint(url_iframe):
         'unique_id': unique_id,
         'base': base,
         'es_sharepoint': es_sharepoint,
+        'url_embed': url_embed,
         'url_visualizacion': url_visualizacion,
         'url_descarga': url_descarga,
     }

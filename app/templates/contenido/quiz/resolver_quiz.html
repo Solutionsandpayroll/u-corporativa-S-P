@@ -25,6 +25,7 @@
             --rojo-acento: #e51148;
             --blanco: #ffffff;
             --gris: #e0e5e5;
+            --negro: #000000;
             --sidebar-width: 250px;
             --sidebar-collapsed: 70px;
             --transition-speed: 0.3s;
@@ -271,15 +272,6 @@
             border-color: var(--azul-medio);
         }
 
-        /* Ajuste para que el radio/checkbox no sobresalga del contenedor */
-        .custom-option .form-check-input {
-            margin-top: 0;
-            flex-shrink: 0;
-            position: relative;
-            width: 1.2em;
-            height: 1.2em;
-        }
-
         .form-check-input:checked + .form-check-label {
             font-weight: 700;
             color: var(--azul-oscuro);
@@ -336,6 +328,169 @@
             border: none; cursor: pointer;
         }
         .adjunto-btn:hover { background: var(--rojo-acento); color: white; text-decoration: none; transform: translateY(-1px); }
+
+        /* NUEVO: Estilos para el Dropzone (igual que en noticias) */
+        .dropzone-wrapper {
+            margin-bottom: 4px;
+        }
+        .dropzone {
+            position: relative;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #f9fafb 0%, #f3f6f9 100%);
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .25s ease, background .25s ease, transform .15s ease, box-shadow .25s ease;
+            overflow: hidden;
+        }
+        .dropzone:hover {
+            border-color: var(--azul-medio);
+            background: linear-gradient(180deg, #f4f9fc 0%, #eaf3f8 100%);
+        }
+        .dropzone.dragover {
+            border-color: var(--rojo-acento);
+            background: linear-gradient(180deg, #fff5f7 0%, #ffeef2 100%);
+            transform: scale(1.01);
+            box-shadow: 0 8px 24px rgba(229, 17, 72, 0.12);
+        }
+        .dropzone.has-file {
+            border-style: solid;
+            border-color: var(--azul-medio);
+            background: linear-gradient(180deg, #ffffff 0%, #f4f9fc 100%);
+            padding: 16px;
+        }
+        .dropzone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .dropzone-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .dropzone-icon {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(16, 87, 136, 0.1);
+            color: var(--azul-medio);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            line-height: 1;
+            margin: 0 auto 12px auto;
+            transition: transform .25s ease, background .25s ease;
+        }
+        .dropzone-icon i { display: block; }
+        .dropzone.dragover .dropzone-icon {
+            background: rgba(229, 17, 72, 0.12);
+            color: var(--rojo-acento);
+            transform: translateY(-4px);
+        }
+        .dropzone-text-main {
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--azul-oscuro);
+            margin-bottom: 4px;
+        }
+        .dropzone-text-main span {
+            color: var(--azul-medio);
+            text-decoration: underline;
+        }
+        .dropzone-text-sub {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        /* Vista previa cuando ya hay archivo seleccionado */
+        .dropzone-preview {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            text-align: left;
+        }
+        .dropzone.has-file .dropzone-preview { display: flex; }
+        .dropzone.has-file .dropzone-placeholder { display: none; }
+        .dropzone-preview-thumb {
+            width: 56px; height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--gris);
+            background: #eef2f6;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--azul-medio);
+            font-size: 20px;
+        }
+        .dropzone-preview-info { flex: 1; min-width: 0; }
+        .dropzone-preview-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--azul-oscuro);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dropzone-preview-size {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .dropzone-remove-btn {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #ef4444;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+        .dropzone-remove-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+        .imagen-actual-aviso {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f0f7fb;
+            border: 1px solid #d6e9f2;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #105788;
+        }
+        .imagen-actual-aviso i { font-size: 13px; }
+        .archivo-apoyo-preview {
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f1f5f9;
+            border: 1px solid #e0e5e5;
+        }
+        .archivo-apoyo-preview img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: contain;
+            display: block;
+            background: #fff;
+        }
 
         /* Botón Validar */
         .btn-primary-custom {
@@ -472,9 +627,6 @@
             <a href="{% url 'ver_curso_empleado' id_curso=quiz.curso.id_curso %}" class="back-link">
                 <i class="fas fa-arrow-left"></i> Volver al contenido del curso
             </a>
-            <a href="{% url 'subir_archivo' %}?id_curso={{ quiz.curso.id_curso }}" class="btn-outline-primary-custom">
-                <i class="fas fa-circle-question"></i> Como subir un archivo
-            </a>
         </div>
 
         <!-- Header de Progreso -->
@@ -539,17 +691,15 @@
                     {% if estado and estado.es_correcta %}
                         <i class="fas fa-check-circle" style="color: var(--success-color); font-size: 2rem;"></i>
                     {% endif %}
-                    <!-- Icono de estado -->
                 </div>
             </div>
 
-            <!-- Contenido Multimedia Unificado (misma lógica que en CÓDIGO 1) -->
+            <!-- Contenido Multimedia Unificado (con soporte para url_embed) -->
             <div class="row g-4 mb-4">
                 {% if p.imagen_url %}
                 <div class="col-lg-6">
                     <div class="media-container border">
                         {% if 'sharepoint.com' in p.imagen_url or 'embed.aspx' in p.imagen_url %}
-                            <!-- iframe para SharePoint -->
                             <div class="iframe-apoyo-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px; background: #f8fafc;">
                                 <iframe src="{{ p.imagen_url }}" frameborder="0" scrolling="no" allowfullscreen
                                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 10px;"></iframe>
@@ -562,30 +712,33 @@
                 </div>
                 {% endif %}
 
+                <!-- Archivo de apoyo (bloque original, sin modificar) -->
                 {% if p.archivo_apoyo %}
                 <div class="col-lg-6">
                     {% with archivo=p.archivo_apoyo %}
-                        {% if archivo.nombre|lower|slice:"-4:" == '.jpg' or archivo.nombre|lower|slice:"-5:" == '.jpeg' or archivo.nombre|lower|slice:"-4:" == '.png' or archivo.nombre|lower|slice:"-4:" == '.gif' or archivo.nombre|lower|slice:"-4:" == '.svg' or archivo.nombre|lower|slice:"-5:" == '.webp' %}
-                            <!-- Es una imagen: previsualización directa -->
-                            <div class="media-container border">
-                                <img src="{{ archivo.url_visualizacion }}" class="img-preview" alt="{{ archivo.nombre }}"
-                                     onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'p-3 text-center text-muted\'><i class=\'fas fa-image fa-2x mb-2\'></i><p>No se pudo cargar la imagen</p></div>';">
+                        {% with ext=archivo.nombre|lower|slice:"-5:" %}
+                        {% if '.jpg' in ext or '.jpeg' in ext or '.png' in ext or '.gif' in ext or '.svg' in ext or '.webp' in ext or '.mp4' in ext or '.mov' in ext or '.pdf' in ext %}
+                            <div class="media-container border" style="position:relative; padding-bottom:75%; height:0; overflow:hidden;">
+                                <iframe src="{{ archivo.url_embed }}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:10px;"
+                                        frameborder="0" scrolling="no" allowfullscreen></iframe>
+                            </div>
+                            <div class="adjunto-acciones" style="margin-top:8px;">
+                                <a href="{{ archivo.url_visualizacion }}" target="_blank" rel="noopener noreferrer" class="adjunto-btn abrir-archivo">
+                                    <i class="fas fa-external-link-alt"></i> Abrir
+                                </a>
+                                {% if archivo.url_descarga %}
+                                <a href="{{ archivo.url_descarga }}" class="adjunto-btn descargar-archivo" download>
+                                    <i class="fas fa-download"></i> Descargar
+                                </a>
+                                {% endif %}
                             </div>
                         {% else %}
-                            <!-- Es un documento: tarjeta con icono y acciones -->
                             <div class="adjunto-card" data-url="{{ archivo.url_visualizacion }}">
                                 <div class="adjunto-icon">
-                                    {% with ext=archivo.nombre|lower|slice:"-5:" %}
-                                        {% if '.pdf' in ext or '.doc' in ext or '.docx' in ext or '.xls' in ext or '.xlsx' in ext or '.ppt' in ext or '.pptx' in ext %}
-                                            {% if '.pdf' in ext %}<i class="fas fa-file-pdf"></i>
-                                            {% elif '.doc' in ext %}<i class="fas fa-file-word"></i>
-                                            {% elif '.xls' in ext %}<i class="fas fa-file-excel"></i>
-                                            {% elif '.ppt' in ext %}<i class="fas fa-file-powerpoint"></i>
-                                            {% endif %}
-                                        {% else %}
-                                            <i class="fas fa-file"></i>
-                                        {% endif %}
-                                    {% endwith %}
+                                    {% if '.doc' in ext %}<i class="fas fa-file-word"></i>
+                                    {% elif '.xls' in ext %}<i class="fas fa-file-excel"></i>
+                                    {% elif '.ppt' in ext %}<i class="fas fa-file-powerpoint"></i>
+                                    {% else %}<i class="fas fa-file"></i>{% endif %}
                                 </div>
                                 <div class="adjunto-info">
                                     <div class="adjunto-nombre" title="{{ archivo.nombre }}">{{ archivo.nombre }}</div>
@@ -603,6 +756,7 @@
                                 </div>
                             </div>
                         {% endif %}
+                        {% endwith %}
                     {% endwith %}
                 </div>
                 {% endif %}
@@ -636,17 +790,44 @@
                               style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px;"></textarea>
                 {% endif %}
 
+                <!-- NUEVO BLOQUE: PREGUNTA TIPO ARCHIVO CON DROPZONE (diseño unificado) -->
                 {% if p.tipo_respuesta == 'archivo' %}
-                    <select name="tipo_archivo" class="form-select mb-3" {% if estado and estado.es_correcta %}disabled{% endif %}
-                            style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px;">
-                        <option value="">Selecciona el tipo de archivo</option>
-                        <option value="imagen_video">Imagen o video</option>
-                        <option value="documento">Archivos (PDF, Word, Excel, PowerPoint, etc.)</option>
-                    </select>
-                    <textarea name="archivo_url" class="form-control mb-3" rows="3" placeholder="Pega aquí el iframe o enlace del archivo..."
-                              {% if estado and estado.es_correcta %}disabled{% endif %}
-                              style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px;"></textarea>
-                    <small class="text-muted d-block mb-3">Pega el iframe completo de SharePoint/OneDrive o la URL directa del archivo. El sistema detecta automáticamente si es imagen, video o documento.</small>
+                <div class="form-group dropzone-wrapper">
+                    <label class="form-label" style="display:block; margin-bottom:6px; font-weight:700; color:#374151; text-transform:uppercase; font-size:12px;">
+                        <i class="fas fa-file-upload"></i> Subir Archivo
+                    </label>
+                    <div class="dropzone" id="dropzone-pregunta-{{ p.id }}">
+                        <input type="file" name="archivo_empleado" id="archivo-empleado-{{ p.id }}" class="archivo-empleado-input"
+                               data-pregunta="{{ p.id }}" data-url-actual="{{ estado.respuesta|default:'' }}" accept="*/*"
+                               {% if estado and estado.es_correcta %}disabled{% endif %}>
+                        <div class="dropzone-placeholder">
+                            <div class="dropzone-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+                            <div class="dropzone-text-main">Arrastra un archivo aquí o <span>haz clic para elegir</span></div>
+                            <div class="dropzone-text-sub">Imagen, video, PDF, Word, Excel, etc.</div>
+                        </div>
+                        <div class="dropzone-preview">
+                            <img class="dropzone-preview-thumb" id="dropzone-preview-img-{{ p.id }}" style="display:none;" alt="Vista previa">
+                            <div class="dropzone-preview-thumb" id="dropzone-preview-icon-{{ p.id }}"><i class="fas fa-file"></i></div>
+                            <div class="dropzone-preview-info">
+                                <div class="dropzone-preview-name" id="dropzone-filename-{{ p.id }}"></div>
+                                <div class="dropzone-preview-size" id="dropzone-filesize-{{ p.id }}"></div>
+                            </div>
+                            <button type="button" class="dropzone-remove-btn" id="dropzone-remove-{{ p.id }}" title="Quitar archivo">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Aviso si ya existe un archivo cargado -->
+                    <div id="archivo-actual-aviso-{{ p.id }}" class="imagen-actual-aviso" style="display:none; margin-top:8px;">
+                        <i class="fas fa-circle-info"></i>
+                        <span>Ya existe un archivo cargado. Sube uno nuevo solo si deseas reemplazarlo.</span>
+                    </div>
+                    <!-- Vista previa del archivo actual (si es imagen) -->
+                    <div id="archivo-actual-preview-{{ p.id }}" class="archivo-apoyo-preview" style="display:none; margin-top:10px;">
+                        <img id="archivo-actual-img-{{ p.id }}" src="" alt="Archivo actual" style="max-width:100%; max-height:180px; border-radius:12px; border:1px solid var(--gris);">
+                    </div>
+                    <small class="text-muted d-block mb-3 mt-2">Formatos aceptados: imágenes, videos, PDF, Office. Máx. 10 MB.</small>
+                </div>
                 {% endif %}
 
                 <div class="d-flex align-items-center mt-3">
@@ -667,46 +848,218 @@
 
     <script>
     $(document).ready(function() {
-        // 1. Manejo del envío del formulario (AJAX)
+
+        // --- Utilidades para dropzone ---
+        function formatearTamano(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function esImagenPrevisualizable(url) {
+            if (!url) return false;
+            const urlLower = url.toLowerCase();
+            if (urlLower.startsWith('<iframe')) return false;
+            if (urlLower.includes('sharepoint.com') || urlLower.includes('embed.aspx') || urlLower.includes('doc.aspx')) return false;
+            if (urlLower.includes('.pdf') || urlLower.includes('.doc') || urlLower.includes('.xls') || urlLower.includes('.ppt')) return false;
+            return true;
+        }
+
+        // --- Inicialización de todos los dropzones (archivo de pregunta) ---
+        $('.dropzone[id^="dropzone-pregunta-"]').each(function() {
+            const dropzoneEl = $(this);
+            const preguntaId = dropzoneEl.attr('id').replace('dropzone-pregunta-', '');
+            const fileInput = document.getElementById('archivo-empleado-' + preguntaId);
+            const urlActual = fileInput ? fileInput.dataset.urlActual : '';
+
+            // Elementos del dropzone
+            const previewImg = document.getElementById('dropzone-preview-img-' + preguntaId);
+            const previewIcon = document.getElementById('dropzone-preview-icon-' + preguntaId);
+            const fileNameEl = document.getElementById('dropzone-filename-' + preguntaId);
+            const fileSizeEl = document.getElementById('dropzone-filesize-' + preguntaId);
+            const removeBtn = document.getElementById('dropzone-remove-' + preguntaId);
+            const avisoActual = document.getElementById('archivo-actual-aviso-' + preguntaId);
+            const previewActualDiv = document.getElementById('archivo-actual-preview-' + preguntaId);
+            const previewActualImg = document.getElementById('archivo-actual-img-' + preguntaId);
+
+            // Mostrar archivo actual si existe
+            if (urlActual) {
+                if (esImagenPrevisualizable(urlActual)) {
+                    previewActualImg.src = urlActual;
+                    previewActualDiv.style.display = 'block';
+                } else {
+                    avisoActual.style.display = 'flex';
+                }
+            }
+
+            // Función para mostrar la vista previa del archivo seleccionado
+            function mostrarPreview(file) {
+                if (!file) return;
+                dropzoneEl.addClass('has-file');
+                fileNameEl.textContent = file.name;
+                fileSizeEl.textContent = formatearTamano(file.size);
+
+                if (file.type && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImg.src = e.target.result;
+                        previewImg.style.display = 'block';
+                        previewIcon.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewImg.style.display = 'none';
+                    previewIcon.style.display = 'flex';
+                }
+
+                // Ocultar avisos del archivo actual
+                avisoActual.style.display = 'none';
+                previewActualDiv.style.display = 'none';
+            }
+
+            function limpiarDropzone() {
+                fileInput.value = '';
+                dropzoneEl.removeClass('has-file');
+                previewImg.src = '';
+                previewImg.style.display = 'none';
+                previewIcon.style.display = 'flex';
+                fileNameEl.textContent = '';
+                fileSizeEl.textContent = '';
+
+                // Mostrar aviso del archivo original si existía
+                if (urlActual) {
+                    if (esImagenPrevisualizable(urlActual)) {
+                        previewActualImg.src = urlActual;
+                        previewActualDiv.style.display = 'block';
+                        avisoActual.style.display = 'none';
+                    } else {
+                        avisoActual.style.display = 'flex';
+                        previewActualDiv.style.display = 'none';
+                    }
+                }
+            }
+
+            // Eventos del input file
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    mostrarPreview(this.files[0]);
+                } else {
+                    limpiarDropzone();
+                }
+            });
+
+            // Botón de eliminar
+            removeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                limpiarDropzone();
+            });
+
+            // Eventos de arrastrar y soltar
+            const dropzoneDiv = dropzoneEl[0];
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzoneDiv.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzoneEl.addClass('dragover');
+                });
+            });
+            ['dragleave', 'dragend'].forEach(eventName => {
+                dropzoneDiv.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzoneEl.removeClass('dragover');
+                });
+            });
+            dropzoneDiv.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzoneEl.removeClass('dragover');
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                    fileInput.files = files;
+                    const changeEvent = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(changeEvent);
+                }
+            });
+        });
+
+        // 1. Manejo del envío del formulario (AJAX) — con prevención de doble clic
         $('.quiz-form').on('submit', function(e) {
             e.preventDefault();
             const form = $(this);
             if (form.hasClass('is-disabled')) {
                 return;
             }
+
+            const submitBtn = form.find('button[type="submit"]');
+
+            // Si ya está en proceso de validación, no hacer nada (evita doble click)
+            if (submitBtn.prop('disabled')) {
+                return;
+            }
+
             const preguntaId = form.data('pregunta');
             const feedbackDiv = $(`#feedback-${preguntaId}`);
             const statusIcon = $(`#status-${preguntaId}`);
             const card = $(`#card-${preguntaId}`);
 
+            // --- Bloquear el botón de inmediato y mostrar ícono de cargando ---
+            const textoOriginalBtn = submitBtn.html();
+            submitBtn.prop('disabled', true);
+            submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Validando...');
+
             const opciones = [];
             form.find('input[name="opcion_ids[]"]:checked').each(function() {
                 opciones.push($(this).val());
             });
-            
+
             const respuestaTexto = form.find('textarea[name="respuesta_texto"]').val() || '';
-            const archivoUrl = form.find('textarea[name="archivo_url"]').val() || '';
-            const tipoArchivo = form.find('select[name="tipo_archivo"]').val() || '';
+            const inputArchivo = form.find('input[name="archivo_empleado"]')[0];
+            const archivoSeleccionado = inputArchivo && inputArchivo.files.length > 0 ? inputArchivo.files[0] : null;
             const respuesta = opciones.length > 0 ? opciones.join(',') : respuestaTexto;
 
-            $.ajax({
-                url: "{% url 'responder_pregunta' %}",
-                method: "POST",
-                contentType: "application/json",
-                headers: {'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()},
-                data: JSON.stringify({
-                    pregunta_id: preguntaId,
-                    quiz_id: {{ quiz.id }},
-                    respuesta: respuesta,
-                    archivo_url: archivoUrl,
-                    tipo_archivo: tipoArchivo
-                }),
+            const csrfToken = $('[name=csrfmiddlewaretoken]').val();
+
+            let ajaxOptions;
+
+            if (archivoSeleccionado) {
+                const formData = new FormData();
+                formData.append('pregunta_id', preguntaId);
+                formData.append('quiz_id', '{{ quiz.id }}');
+                formData.append('respuesta', respuesta);
+                formData.append('archivo_empleado', archivoSeleccionado);
+
+                ajaxOptions = {
+                    url: "{% url 'responder_pregunta' %}",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {'X-CSRFToken': csrfToken}
+                };
+            } else {
+                ajaxOptions = {
+                    url: "{% url 'responder_pregunta' %}",
+                    method: "POST",
+                    contentType: "application/json",
+                    headers: {'X-CSRFToken': csrfToken},
+                    data: JSON.stringify({
+                        pregunta_id: preguntaId,
+                        quiz_id: {{ quiz.id }},
+                        respuesta: respuesta,
+                        archivo_url: ''
+                    })
+                };
+            }
+
+            $.ajax(Object.assign({}, ajaxOptions, {
                 success: function(response) {
                     feedbackDiv.removeClass('d-none');
                     let alertClass = response.es_correcta ? 'success' : 'danger';
                     let iconClass = response.es_correcta ? 'fa-check-circle' : 'fa-times-circle';
                     let mainMsg = response.es_correcta ? '¡Respuesta validada!' : 'No es correcto.';
-                    let extraMsg = response.es_correcta ? (response.nota_validacion || 'Has acertado esta pregunta.') : 
+                    let extraMsg = response.es_correcta ? (response.nota_validacion || 'Has acertado esta pregunta.') :
                         `<strong>Pista:</strong> ${response.pista || 'No disponible'}<br><strong>Recomendación:</strong> ${response.explicacion || ''}`;
 
                     feedbackDiv.html(`
@@ -723,9 +1076,10 @@
                         card.addClass('is-correct').removeClass('is-incorrect');
                         statusIcon.html('<i class="fas fa-check-circle" style="color: var(--success-color); font-size: 2rem;"></i>');
                         form.addClass('is-disabled');
-                        form.find('button[type="submit"]').prop('disabled', true);
-                        form.find('input, textarea').prop('disabled', true);
-                        
+                        submitBtn.prop('disabled', true);
+                        submitBtn.html('<i class="fas fa-check-circle"></i> Validado');
+                        form.find('input, textarea, select').prop('disabled', true);
+
                         if (response.completado) {
                             setTimeout(() => {
                                 location.reload();
@@ -734,6 +1088,9 @@
                     } else {
                         card.addClass('is-incorrect').removeClass('is-correct');
                         statusIcon.html('<i class="fas fa-times-circle" style="color: var(--danger-color); font-size: 2rem;"></i>');
+                        // No era correcta: se reactiva el botón para que pueda reintentar
+                        submitBtn.prop('disabled', false);
+                        submitBtn.html(textoOriginalBtn);
                     }
 
                     actualizarBarraProgreso();
@@ -742,13 +1099,21 @@
                     const xhr = arguments[0];
                     const mensaje = xhr?.responseJSON?.error || 'Error al conectar con el servidor.';
                     const responseYaValidada = xhr?.responseJSON?.ya_validada;
+
                     if (responseYaValidada) {
+                        // Ya estaba validada: dejamos el botón bloqueado, no se reactiva
                         alert(mensaje);
+                        submitBtn.prop('disabled', true);
+                        submitBtn.html('<i class="fas fa-check-circle"></i> Validado');
                         return;
                     }
+
+                    // Cualquier otro error: se reactiva el botón para reintentar
                     alert(mensaje);
+                    submitBtn.prop('disabled', false);
+                    submitBtn.html(textoOriginalBtn);
                 }
-            });
+            }));
         });
 
         // 2. Barra de Progreso
@@ -756,7 +1121,7 @@
             let total = $('.question-card').length;
             let respondidasCorrectas = $('.is-correct').length;
             let porcentaje = Math.round((respondidasCorrectas / total) * 100);
-            
+
             $('#quiz-bar').css('width', porcentaje + '%');
             $('#porcentaje-texto').text(porcentaje);
         }
@@ -779,42 +1144,6 @@
             } else if ($(this).attr('type') === 'checkbox') {
                 $(this).closest('.custom-option').toggleClass('selected');
             }
-        });
-
-        // 4. Corrección de URLs de SharePoint para documentos (solo si no están ya en el formato correcto)
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.adjunto-card').forEach(card => {
-                const abrirBtn = card.querySelector('.abrir-archivo');
-                const descargarBtn = card.querySelector('.descargar-archivo');
-                if (!abrirBtn) return;
-
-                let url = abrirBtn.getAttribute('href');
-                if (url && (url.includes('sharepoint.com') || url.includes('embed.aspx'))) {
-                    // Si la URL ya contiene 'Doc.aspx' o 'embed.aspx' con un action, la dejamos como está
-                    if (url.includes('Doc.aspx') || url.includes('embed.aspx')) {
-                        // No modificar, ya es un visor
-                        return;
-                    }
-                    // Intentar transformar si tiene un UniqueId/sourcedoc
-                    const uniqueIdMatch = url.match(/UniqueId=([a-f0-9\-]{36})/i) || 
-                                         url.match(/sourcedoc=([a-f0-9\-]{36})/i) ||
-                                         url.match(/%7B([a-f0-9\-]{36})%7D/i);
-                    if (uniqueIdMatch) {
-                        const uniqueId = uniqueIdMatch[1];
-                        const baseMatch = url.match(/(https?:\/\/[^\/]+\/[^\/]+\/[^\/]+)/);
-                        if (baseMatch) {
-                            const baseSP = baseMatch[1];
-                            const viewerUrl = `${baseSP}/_layouts/15/Doc.aspx?sourcedoc=%7B${uniqueId}%7D&action=default`;
-                            abrirBtn.setAttribute('href', viewerUrl);
-                            
-                            if (descargarBtn) {
-                                const downloadUrl = `${baseSP}/_layouts/15/download.aspx?UniqueId=${uniqueId}`;
-                                descargarBtn.setAttribute('href', downloadUrl);
-                            }
-                        }
-                    }
-                }
-            });
         });
     });
     </script>

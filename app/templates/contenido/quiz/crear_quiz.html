@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Calibri:wght@700&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap 5 (solo para utilidades, ya no para modales) -->
+    <!-- Bootstrap 5 (solo para utilidades) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -50,7 +50,7 @@
             overflow-x: hidden;
         }
 
-        /* ========== PARTÍCULAS DECORATIVAS (FONDO ANIMADO) ========== */
+        /* ========== PARTÍCULAS DECORATIVAS ========== */
         .bg-particles {
             position: fixed;
             top: 0;
@@ -61,29 +61,19 @@
             z-index: 0;
             opacity: 0.04;
         }
-
         .bg-particle {
             position: absolute;
             border-radius: 50%;
             background: var(--azul-medio);
             animation: floatParticle 8s infinite ease-in-out;
         }
-
-        .bg-particle:nth-child(1) {
-            width: 60px; height: 60px; top: 10%; right: 20%; animation-delay: 0s;
-        }
-        .bg-particle:nth-child(2) {
-            width: 40px; height: 40px; top: 50%; right: 5%; animation-delay: 2s;
-        }
-        .bg-particle:nth-child(3) {
-            width: 80px; height: 80px; top: 70%; right: 30%; animation-delay: 4s;
-        }
-        .bg-particle:nth-child(4) {
-            width: 30px; height: 30px; top: 30%; right: 50%; animation-delay: 1s;
-        }
+        .bg-particle:nth-child(1) { width: 60px; height: 60px; top: 10%; right: 20%; animation-delay: 0s; }
+        .bg-particle:nth-child(2) { width: 40px; height: 40px; top: 50%; right: 5%; animation-delay: 2s; }
+        .bg-particle:nth-child(3) { width: 80px; height: 80px; top: 70%; right: 30%; animation-delay: 4s; }
+        .bg-particle:nth-child(4) { width: 30px; height: 30px; top: 30%; right: 50%; animation-delay: 1s; }
 
         @keyframes floatParticle {
-            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            0%,100% { transform: translateY(0) translateX(0) scale(1); }
             25% { transform: translateY(-40px) translateX(20px) scale(1.3); }
             50% { transform: translateY(-10px) translateX(-15px) scale(0.8); }
             75% { transform: translateY(-50px) translateX(10px) scale(1.2); }
@@ -706,6 +696,154 @@
             transform: scale(1.1);
         }
 
+        /* ========== DROPZONE PARA IMAGEN Y ARCHIVO (ESTILO CURSOS) ========== */
+        .dropzone-wrapper {
+            margin-bottom: 4px;
+        }
+        .dropzone {
+            position: relative;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #f9fafb 0%, #f3f6f9 100%);
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .25s ease, background .25s ease, transform .15s ease, box-shadow .25s ease;
+            overflow: hidden;
+        }
+        .dropzone:hover {
+            border-color: var(--azul-medio);
+            background: linear-gradient(180deg, #f4f9fc 0%, #eaf3f8 100%);
+        }
+        .dropzone.dragover {
+            border-color: var(--rojo-acento);
+            background: linear-gradient(180deg, #fff5f7 0%, #ffeef2 100%);
+            transform: scale(1.01);
+            box-shadow: 0 8px 24px rgba(229, 17, 72, 0.12);
+        }
+        .dropzone.has-file {
+            border-style: solid;
+            border-color: var(--azul-medio);
+            background: linear-gradient(180deg, #ffffff 0%, #f4f9fc 100%);
+            padding: 16px;
+        }
+        .dropzone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .dropzone-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .dropzone-icon {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(16, 87, 136, 0.1);
+            color: var(--azul-medio);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            line-height: 1;
+            margin: 0 auto 12px auto;
+            transition: transform .25s ease, background .25s ease;
+        }
+        .dropzone-icon i { display: block; }
+        .dropzone.dragover .dropzone-icon {
+            background: rgba(229, 17, 72, 0.12);
+            color: var(--rojo-acento);
+            transform: translateY(-4px);
+        }
+        .dropzone-text-main {
+            font-family: var(--font-destacados);
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--azul-oscuro);
+            margin-bottom: 4px;
+        }
+        .dropzone-text-main span {
+            color: var(--azul-medio);
+            text-decoration: underline;
+        }
+        .dropzone-text-sub {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .dropzone-preview {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            text-align: left;
+        }
+        .dropzone.has-file .dropzone-preview { display: flex; }
+        .dropzone.has-file .dropzone-placeholder { display: none; }
+        .dropzone-preview-thumb {
+            width: 56px; height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--gris);
+            background: #eef2f6;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--azul-medio);
+            font-size: 20px;
+        }
+        .dropzone-preview-info { flex: 1; min-width: 0; }
+        .dropzone-preview-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--azul-oscuro);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dropzone-preview-size {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .dropzone-remove-btn {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #ef4444;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+        .dropzone-remove-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+        .imagen-actual-aviso {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f0f7fb;
+            border: 1px solid #d6e9f2;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #105788;
+        }
+        .imagen-actual-aviso i { font-size: 13px; }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -760,10 +898,6 @@
             <a href="{% url 'estadisticas_cursos' %}">
                 <i class="fa-solid fa-chart-column"></i>
                 <span>Reporte Cursos</span>
-            </a>
-            <a href="{% url 'subir_archivo' %}" >
-                <i class="fa-solid fa-file"></i>
-                <span>Subir Archivo</span>
             </a>
             <a href="{% url 'logout' %}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar Sesión</span></a>
         </nav>
@@ -848,7 +982,7 @@
                         </div>
                         <div class="accordion-body">
                             {% if pregunta.descripcion %}<p class="text-muted">{{ pregunta.descripcion }}</p>{% endif %}
-                            
+
                             {% if pregunta.imagen_url %}
                             <div class="mt-3">
                                 <label class="form-label"><i class="fas fa-image"></i> Imagen de apoyo</label>
@@ -978,14 +1112,71 @@
                     <textarea class="editar-textarea" id="nuevo-pregunta-descripcion" rows="2" placeholder="Proporciona contexto adicional..."></textarea>
                 </div>
 
-                <div class="form-full-width">
-                    <label class="editar-label"><i class="fas fa-image"></i> Imagen de Apoyo (URL o iframe SharePoint)</label>
-                    <textarea class="editar-textarea" id="nuevo-pregunta-imagen" rows="2" placeholder="Pega aquí una URL de imagen, código iframe de SharePoint..."></textarea>
+                <!-- DROPZONE PARA IMAGEN DE APOYO -->
+                <div class="form-full-width dropzone-wrapper">
+                    <label class="editar-label"><i class="fas fa-image"></i> Imagen de Apoyo</label>
+                    <div class="dropzone" id="dropzoneImagenPregunta">
+                        <input type="file" id="nuevo-pregunta-imagen-file" accept="image/*">
+                        <div class="dropzone-placeholder">
+                            <div class="dropzone-icon">
+                                <i class="fas fa-cloud-arrow-up"></i>
+                            </div>
+                            <div class="dropzone-text-main">Arrastra una imagen aquí o <span>haz clic para elegir</span></div>
+                            <div class="dropzone-text-sub">PNG, JPG o WEBP · máx. 5 MB</div>
+                        </div>
+                        <div class="dropzone-preview">
+                            <img class="dropzone-preview-thumb" id="dropzonePreviewImgPregunta" style="display:none;" alt="Vista previa">
+                            <div class="dropzone-preview-thumb" id="dropzonePreviewIconPregunta"><i class="fas fa-file-image"></i></div>
+                            <div class="dropzone-preview-info">
+                                <div class="dropzone-preview-name" id="dropzoneFileNamePregunta">archivo.png</div>
+                                <div class="dropzone-preview-size" id="dropzoneFileSizePregunta">0 KB</div>
+                            </div>
+                            <button type="button" class="dropzone-remove-btn" id="dropzoneRemoveBtnPregunta" title="Quitar archivo">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="imagen-actual-aviso-pregunta" class="imagen-actual-aviso" style="display:none;">
+                        <i class="fas fa-circle-info"></i>
+                        <span>Ya existe una imagen cargada. Sube una nueva solo si deseas reemplazarla.</span>
+                    </div>
+                    <div id="preview-imagen-actual-pregunta" style="display:none; margin-top:10px;">
+                        <img id="img-actual-preview-pregunta" src="" style="max-width:100%; max-height:180px; border-radius:12px; border:1px solid var(--gris);">
+                    </div>
                 </div>
 
-                <div class="form-full-width">
-                    <label class="editar-label"><i class="fas fa-file"></i> Archivo de Apoyo (Link iframe SharePoint)</label>
-                    <textarea class="editar-textarea" id="nuevo-pregunta-archivo" rows="2" placeholder="Pega aquí el código iframe de SharePoint/OneDrive..."></textarea>
+                <!-- DROPZONE PARA ARCHIVO DE APOYO -->
+                <div class="form-full-width dropzone-wrapper">
+                    <label class="editar-label"><i class="fas fa-file"></i> Archivo de Apoyo</label>
+                    <div class="dropzone" id="dropzoneArchivoPregunta">
+                        <input type="file" id="nuevo-pregunta-archivo-file">
+                        <div class="dropzone-placeholder">
+                            <div class="dropzone-icon">
+                                <i class="fas fa-cloud-arrow-up"></i>
+                            </div>
+                            <div class="dropzone-text-main">Arrastra un archivo aquí o <span>haz clic para elegir</span></div>
+                            <div class="dropzone-text-sub">PDF, Word, Excel, PowerPoint, etc.</div>
+                        </div>
+                        <div class="dropzone-preview">
+                            <div class="dropzone-preview-thumb" id="dropzonePreviewIconArchivo"><i class="fas fa-file"></i></div>
+                            <div class="dropzone-preview-info">
+                                <div class="dropzone-preview-name" id="dropzoneFileNameArchivo">archivo.pdf</div>
+                                <div class="dropzone-preview-size" id="dropzoneFileSizeArchivo">0 KB</div>
+                            </div>
+                            <button type="button" class="dropzone-remove-btn" id="dropzoneRemoveBtnArchivo" title="Quitar archivo">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="archivo-actual-aviso-pregunta" class="imagen-actual-aviso" style="display:none;">
+                        <i class="fas fa-circle-info"></i>
+                        <span>Ya existe un archivo cargado. Sube uno nuevo solo si deseas reemplazarlo.</span>
+                    </div>
+                    <div id="preview-archivo-actual-pregunta" style="display:none; margin-top:10px;">
+                        <div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f0f7fb; border:1px solid #d6e9f2; border-radius:10px; font-size:12px; color:#105788;">
+                            <i class="fas fa-file"></i> <span id="archivo-actual-nombre-texto">archivo</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="opciones-container" class="opciones-input" style="display: block;">
@@ -1111,6 +1302,172 @@
         const successIcon = document.getElementById('successIcon');
         const modalAsignacion = document.getElementById('modalAsignacion');
 
+        // ========== DROPZONE: IMAGEN ==========
+        const dropzoneImagen = document.getElementById('dropzoneImagenPregunta');
+        const inputImagen = document.getElementById('nuevo-pregunta-imagen-file');
+        const previewImgImagen = document.getElementById('dropzonePreviewImgPregunta');
+        const previewIconImagen = document.getElementById('dropzonePreviewIconPregunta');
+        const fileNameImagen = document.getElementById('dropzoneFileNamePregunta');
+        const fileSizeImagen = document.getElementById('dropzoneFileSizePregunta');
+        const removeBtnImagen = document.getElementById('dropzoneRemoveBtnPregunta');
+        const avisoImagenActual = document.getElementById('imagen-actual-aviso-pregunta');
+        const previewImagenActual = document.getElementById('preview-imagen-actual-pregunta');
+        const imgActualPreview = document.getElementById('img-actual-preview-pregunta');
+
+        // ========== DROPZONE: ARCHIVO ==========
+        const dropzoneArchivo = document.getElementById('dropzoneArchivoPregunta');
+        const inputArchivo = document.getElementById('nuevo-pregunta-archivo-file');
+        const previewIconArchivo = document.getElementById('dropzonePreviewIconArchivo');
+        const fileNameArchivo = document.getElementById('dropzoneFileNameArchivo');
+        const fileSizeArchivo = document.getElementById('dropzoneFileSizeArchivo');
+        const removeBtnArchivo = document.getElementById('dropzoneRemoveBtnArchivo');
+        const avisoArchivoActual = document.getElementById('archivo-actual-aviso-pregunta');
+        const previewArchivoActual = document.getElementById('preview-archivo-actual-pregunta');
+        const archivoActualNombreTexto = document.getElementById('archivo-actual-nombre-texto');
+
+        // Funciones comunes para dropzones
+        function formatearTamano(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function mostrarPreviewArchivo(dropzone, input, previewImg, previewIcon, fileName, fileSize, isImage) {
+            const file = input.files[0];
+            if (!file) return;
+            dropzone.classList.add('has-file');
+            fileName.textContent = file.name;
+            fileSize.textContent = formatearTamano(file.size);
+            if (isImage && file.type && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                    previewIcon.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewImg.style.display = 'none';
+                previewIcon.style.display = 'flex';
+                // Cambiar ícono según extensión
+                const ext = file.name.split('.').pop().toLowerCase();
+                let iconClass = 'fa-file';
+                if (['pdf'].includes(ext)) iconClass = 'fa-file-pdf';
+                else if (['doc','docx'].includes(ext)) iconClass = 'fa-file-word';
+                else if (['xls','xlsx'].includes(ext)) iconClass = 'fa-file-excel';
+                else if (['ppt','pptx'].includes(ext)) iconClass = 'fa-file-powerpoint';
+                else if (['zip','rar','7z'].includes(ext)) iconClass = 'fa-file-archive';
+                previewIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
+            }
+        }
+
+        function limpiarDropzone(dropzone, input, previewImg, previewIcon, fileName, fileSize) {
+            input.value = '';
+            dropzone.classList.remove('has-file');
+            if (previewImg) previewImg.src = '';
+            if (previewImg) previewImg.style.display = 'none';
+            previewIcon.style.display = 'flex';
+            previewIcon.innerHTML = '<i class="fas fa-file-image"></i>'; // Restaurar ícono por defecto
+            fileName.textContent = '';
+            fileSize.textContent = '';
+        }
+
+        function configurarDropzone(dropzone, input, previewImg, previewIcon, fileName, fileSize, isImage, removeBtn, avisoElement, previewActualElement) {
+            input.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    mostrarPreviewArchivo(dropzone, input, previewImg, previewIcon, fileName, fileSize, isImage);
+                    if (avisoElement) avisoElement.style.display = 'none';
+                    if (previewActualElement) previewActualElement.style.display = 'none';
+                }
+            });
+
+            removeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                limpiarDropzone(dropzone, input, previewImg, previewIcon, fileName, fileSize);
+                // Si estamos en edición y había archivo previo, mostrar aviso
+                if (avisoElement && input.dataset.urlActual) {
+                    avisoElement.style.display = 'flex';
+                }
+                if (previewActualElement) previewActualElement.style.display = 'none';
+            });
+
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropzone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add('dragover');
+                });
+            });
+            ['dragleave', 'dragend'].forEach(evt => {
+                dropzone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('dragover');
+                });
+            });
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                    input.files = files;
+                    mostrarPreviewArchivo(dropzone, input, previewImg, previewIcon, fileName, fileSize, isImage);
+                    if (avisoElement) avisoElement.style.display = 'none';
+                    if (previewActualElement) previewActualElement.style.display = 'none';
+                }
+            });
+        }
+
+        function mostrarEstadoArchivoActual(url, avisoElement, previewElement, imgElement, nombreElement, isImage) {
+            if (!url) return;
+            if (isImage) {
+                // Intentar mostrar preview si es imagen
+                if (esImagenPrevisualizable(url)) {
+                    imgElement.src = url;
+                    previewElement.style.display = 'block';
+                    avisoElement.style.display = 'none';
+                } else {
+                    previewElement.style.display = 'none';
+                    avisoElement.style.display = 'flex';
+                }
+            } else {
+                // Para archivos: mostrar nombre si está disponible
+                if (nombreElement) {
+                    const nombre = url.split('/').pop() || 'archivo';
+                    nombreElement.textContent = nombre;
+                    previewElement.style.display = 'flex';
+                    avisoElement.style.display = 'none';
+                } else {
+                    avisoElement.style.display = 'flex';
+                }
+            }
+        }
+
+        function esImagenPrevisualizable(url) {
+            if (!url) return false;
+            const urlLower = url.toLowerCase();
+            if (urlLower.includes('sharepoint.com') || urlLower.includes('embed.aspx') || urlLower.includes('doc.aspx')) return false;
+            if (urlLower.includes('.pdf') || urlLower.includes('.doc') || urlLower.includes('.xls') || urlLower.includes('.ppt')) return false;
+            return true;
+        }
+
+        // Inicializar dropzones
+        configurarDropzone(
+            dropzoneImagen, inputImagen, previewImgImagen, previewIconImagen,
+            fileNameImagen, fileSizeImagen, true, removeBtnImagen,
+            avisoImagenActual, previewImagenActual
+        );
+        // Para archivo, no usamos preview de imagen
+        configurarDropzone(
+            dropzoneArchivo, inputArchivo, null, previewIconArchivo,
+            fileNameArchivo, fileSizeArchivo, false, removeBtnArchivo,
+            avisoArchivoActual, previewArchivoActual
+        );
+        // Ajuste de ícono por defecto para archivo
+        previewIconArchivo.innerHTML = '<i class="fas fa-file"></i>';
+
         function getCsrfToken() {
             return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
         }
@@ -1133,11 +1490,9 @@
                 successIcon.className = 'fas fa-exclamation-circle';
                 successIcon.style.color = '#ffc107';
             }
-
             successMessageSpan.innerText = mensaje;
             successModal.style.display = 'flex';
             successModal.classList.remove('fade-out');
-
             setTimeout(() => {
                 successModal.classList.add('fade-out');
                 setTimeout(() => {
@@ -1226,10 +1581,19 @@
         function limpiarFormularioModal() {
             $('#nuevo-pregunta-texto').val('');
             $('#nuevo-pregunta-descripcion').val('');
-            $('#nuevo-pregunta-imagen').val('');
-            $('#nuevo-pregunta-archivo').val('');
             $('#nuevo-pregunta-pista').val('');
             $('#nuevo-pregunta-explicacion').val('');
+            // Limpiar dropzones
+            limpiarDropzone(dropzoneImagen, inputImagen, previewImgImagen, previewIconImagen, fileNameImagen, fileSizeImagen);
+            limpiarDropzone(dropzoneArchivo, inputArchivo, null, previewIconArchivo, fileNameArchivo, fileSizeArchivo);
+            // Ocultar avisos y previews
+            avisoImagenActual.style.display = 'none';
+            previewImagenActual.style.display = 'none';
+            avisoArchivoActual.style.display = 'none';
+            previewArchivoActual.style.display = 'none';
+            // Resetear data-urls
+            inputImagen.dataset.urlActual = '';
+            inputArchivo.dataset.urlActual = '';
             preguntaEnEdicionId = null;
             $('#guardarPreguntaBtn').html('<i class="fas fa-save"></i> Guardar Pregunta');
             $('#modalPregunta .modal-editar-titulo').text('Agregar Pregunta');
@@ -1267,8 +1631,27 @@
 
             $('#nuevo-pregunta-texto').val(texto);
             $('#nuevo-pregunta-descripcion').val(descripcion);
-            $('#nuevo-pregunta-imagen').val(imagenUrl);
-            $('#nuevo-pregunta-archivo').val(archivoUrl);
+
+            // Mostrar estado de imagen actual
+            if (imagenUrl) {
+                inputImagen.dataset.urlActual = imagenUrl;
+                mostrarEstadoArchivoActual(imagenUrl, avisoImagenActual, previewImagenActual, imgActualPreview, null, true);
+            } else {
+                inputImagen.dataset.urlActual = '';
+                avisoImagenActual.style.display = 'none';
+                previewImagenActual.style.display = 'none';
+            }
+
+            // Mostrar estado de archivo actual
+            if (archivoUrl) {
+                inputArchivo.dataset.urlActual = archivoUrl;
+                const nombreArchivo = archivoUrl.split('/').pop() || 'archivo';
+                mostrarEstadoArchivoActual(archivoUrl, avisoArchivoActual, previewArchivoActual, null, archivoActualNombreTexto, false);
+            } else {
+                inputArchivo.dataset.urlActual = '';
+                avisoArchivoActual.style.display = 'none';
+                previewArchivoActual.style.display = 'none';
+            }
 
             const opciones = Array.from(item.querySelectorAll('.opcion-item')).map(opcion => ({
                 texto: limpiarTextoOpcion(opcion),
@@ -1344,21 +1727,33 @@
                 tipo_respuesta: tipoActual,
                 pista: $('#nuevo-pregunta-pista').val(),
                 explicacion: $('#nuevo-pregunta-explicacion').val(),
-                imagen_url: $('#nuevo-pregunta-imagen').val(),
-                archivo_apoyo: $('#nuevo-pregunta-archivo').val(),
                 opciones: opciones,
                 quiz_titulo: $('#quiz-titulo').val()?.trim() || '',
                 quiz_descripcion: ($('#quiz-descripcion').val()?.trim() || descripcionPorDefectoQuiz),
                 quiz_activo: $('#quiz-activo').val() !== '0'
             };
 
+            const formData = new FormData();
+            formData.append('payload', JSON.stringify(payload));
+
+            const imagenFile = document.getElementById('nuevo-pregunta-imagen-file').files[0];
+            if (imagenFile) formData.append('imagen_archivo', imagenFile);
+
+            const archivoFile = document.getElementById('nuevo-pregunta-archivo-file').files[0];
+            if (archivoFile) formData.append('archivo_archivo', archivoFile);
+
+            const btnGuardar = $('#guardarPreguntaBtn');
+            btnGuardar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Subiendo...');
+
             $.ajax({
                 url: `{% url 'guardar_pregunta_quiz' id_curso=curso.id_curso %}`,
                 method: 'POST',
-                contentType: 'application/json',
+                contentType: false,
+                processData: false,
                 headers: { 'X-CSRFToken': getCsrfToken() },
-                data: JSON.stringify(payload),
+                data: formData,
                 success: function(resp) {
+                    btnGuardar.prop('disabled', false);
                     if (resp.success) {
                         const estabaEditando = !!preguntaEnEdicionId;
                         quizId = resp.quiz_id || quizId;
@@ -1367,9 +1762,11 @@
                         setTimeout(() => location.reload(), 1200);
                     } else {
                         mostrarAlerta('Error', resp.error || 'Error al guardar la pregunta', 'error');
+                        btnGuardar.html('<i class="fas fa-save"></i> Guardar Pregunta');
                     }
                 },
                 error: function() {
+                    btnGuardar.prop('disabled', false).html('<i class="fas fa-save"></i> Guardar Pregunta');
                     mostrarAlerta('Error', 'Error al conectar con el servidor', 'error');
                 }
             });

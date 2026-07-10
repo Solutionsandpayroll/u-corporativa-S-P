@@ -16,6 +16,7 @@ import uuid
 from django.utils import timezone
 from datetime import date
 import calendar
+from .graph_adjuntos import *
 
 
 def detectar_tipo_archivo_contenido(url_archivo, tipo_forzado=''):
@@ -25,6 +26,9 @@ def detectar_tipo_archivo_contenido(url_archivo, tipo_forzado=''):
         return 'imagen'
     if tipo_forzado in ['video', 'vid']:
         return 'video'
+    if tipo_forzado == 'pdf':          # ← Línea añadida
+        return 'pdf'
+    # Para 'archivos', 'word', 'excel', 'powerpoint' se sigue con detección por URL
 
     url_limpia = limpiar_iframe(url_archivo)
     url_lower = url_limpia.lower()
@@ -47,51 +51,101 @@ def detectar_tipo_archivo_contenido(url_archivo, tipo_forzado=''):
     return 'otro'
 
 
-def _guardar_pregunta_en_quiz(quiz, data, pregunta=None):
-    """Crea o actualiza una pregunta y sus opciones reutilizando la misma lógica."""
+def _procesar_archivo_subido(archivo_django):
+    """
+    Sube un archivo de Django (InMemoryUploadedFile) a OneDrive usando la carpeta de ADMIN.
+    Retorna el embed_html listo para guardar, igual que si el admin lo hubiera pegado.
+    """
+    if not archivo_django:
+        return None
+    resultado = subir_archivo_admin(
+        nombre_archivo=archivo_django.name,
+        contenido_bytes=archivo_django.read(),
+    )
+    return resultado  # dict con embed_html, embed_url, nombre, web_url
+
+
+def _procesar_archivo_empleado(archivo_django):
+    """
+    Sube un archivo de Django (InMemoryUploadedFile) a OneDrive usando la carpeta de EMPLEADOS.
+    Retorna el embed_html listo para guardar.
+    """
+    if not archivo_django:
+        return None
+    resultado = subir_archivo_empleado(
+        nombre_archivo=archivo_django.name,
+        contenido_bytes=archivo_django.read(),
+    )
+    return resultado
+
+
+def _guardar_pregunta_en_quiz(quiz, data, files=None, pregunta=None):
+    """Crea o actualiza una pregunta y sus opciones. 'files' es request.FILES."""
     texto = (data.get('texto') or '').strip()
     if not texto:
         return None, JsonResponse({'success': False, 'error': 'El texto es requerido'}, status=400)
 
     tipo_respuesta = (data.get('tipo_respuesta') or 'unica').strip()
+    files = files or {}
 
-    imagen_raw = (data.get('imagen_url') or '').strip()
-    imagen_url = None
-    if imagen_raw:
-        imagen_url = limpiar_iframe(imagen_raw) if '<iframe' in imagen_raw.lower() else imagen_raw
+    # --- Imagen de apoyo: ahora se sube el archivo, no se pega iframe ---
+    imagen_url = pregunta.imagen_url if pregunta else None
+    archivo_imagen = files.get('imagen_archivo')
+    if archivo_imagen:
+        try:
+            resultado_imagen = _procesar_archivo_subido(archivo_imagen)
+            # CORRECCIÓN: guardar solo la URL limpia, no el iframe completo
+            imagen_url = resultado_imagen['embed_url']
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return None, JsonResponse(
+                {'success': False, 'error': f'Error subiendo imagen: {type(e).__name__}: {e}'},
+                status=500
+            )
+    elif imagen_url and imagen_url.strip().startswith('<iframe'):
+        # Autocorrección: si el valor heredado está corrupto, límpialo aunque no se suba nada nuevo
+        imagen_url = limpiar_iframe(imagen_url)
 
-    archivo_raw = (data.get('archivo_apoyo') or '').strip()
+    # --- Archivo de apoyo: mismo cambio ---
     archivo_pregunta = pregunta.archivo_apoyo if pregunta and pregunta.archivo_apoyo else None
-    if archivo_raw:
-        archivo_datos = preparar_archivo_sharepoint(archivo_raw)
-        archivo_url = archivo_datos['url_limpia'] if archivo_datos['url_limpia'] else archivo_raw
-        if archivo_url:
-            nombre_archivo = archivo_datos['nombre']
-            if archivo_pregunta:
-                archivo_pregunta.nombre = nombre_archivo
-                archivo_pregunta.url_original = archivo_raw
-                archivo_pregunta.url_visualizacion = archivo_datos['url_visualizacion']
-                archivo_pregunta.url_descarga = archivo_datos['url_descarga']
-                archivo_pregunta.save()
-            else:
-                archivo_pregunta = ArchivoPregunta.objects.create(
-                    nombre=nombre_archivo,
-                    url_original=archivo_raw,
-                    url_visualizacion=archivo_datos['url_visualizacion'],
-                    url_descarga=archivo_datos['url_descarga']
-                )
+    archivo_subido = files.get('archivo_archivo')
+    if archivo_subido:
+        try:
+            resultado_archivo = _procesar_archivo_subido(archivo_subido)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return None, JsonResponse(
+                {'success': False, 'error': f'Error subiendo archivo: {type(e).__name__}: {e}'},
+                status=500
+            )
+
+        if archivo_pregunta:
+            archivo_pregunta.nombre = resultado_archivo['nombre']
+            archivo_pregunta.url_original = resultado_archivo['embed_html']
+            archivo_pregunta.url_visualizacion = resultado_archivo['embed_url']
+            archivo_pregunta.url_descarga = resultado_archivo['embed_url']
+            archivo_pregunta.save()
+        else:
+            archivo_pregunta = ArchivoPregunta.objects.create(
+                nombre=resultado_archivo['nombre'],
+                url_original=resultado_archivo['embed_html'],
+                url_visualizacion=resultado_archivo['embed_url'],
+                url_descarga=resultado_archivo['embed_url'],
+            )
 
     opciones_data = data.get('opciones', []) or []
     if tipo_respuesta in ['unica', 'multiple', 'vf'] and not opciones_data:
         return None, JsonResponse({'success': False, 'error': 'Agrega al menos una opción de respuesta'}, status=400)
 
     if tipo_respuesta == 'unica':
-        correctas = [opcion for opcion in opciones_data if opcion.get('es_correcta')]
+        correctas = [o for o in opciones_data if o.get('es_correcta')]
         if len(correctas) != 1:
             return None, JsonResponse({'success': False, 'error': 'La respuesta única debe tener exactamente una opción correcta'}, status=400)
 
     if tipo_respuesta == 'vf':
-        correctas = [opcion for opcion in opciones_data if opcion.get('es_correcta')]
+        correctas = [o for o in opciones_data if o.get('es_correcta')]
         if len(correctas) != 1:
             return None, JsonResponse({'success': False, 'error': 'Verdadero/Falso debe tener exactamente una respuesta correcta'}, status=400)
 
@@ -206,8 +260,27 @@ def administrar_noticias(request, id_noticia=None):
             contenido_guardado = contenido_form.save(commit=False)
             contenido_guardado.noticia = noticia_guardada
 
-            # Limpiar URL del iframe solo si se proporcionó un valor
-            if contenido_guardado.url_recurso:
+            # --- Subir archivo (misma lógica que las preguntas del quiz) ---
+            archivo_imagen = request.FILES.get('imagen_archivo')
+            if archivo_imagen:
+                try:
+                    resultado_imagen = _procesar_archivo_subido(archivo_imagen)
+                    contenido_guardado.url_recurso = resultado_imagen['embed_url']
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    messages.error(request, f'Error subiendo imagen: {type(e).__name__}: {e}')
+                    contexto = {
+                        'noticias': noticias,
+                        'noticia_form': noticia_form,
+                        'contenido_form': contenido_form,
+                        'editando': noticia is not None,
+                        'noticia': noticia,
+                        'form_tiene_errores': True,
+                    }
+                    return render(request, 'contenido/noticias/admin_noticias.html', contexto)
+            elif contenido_guardado.url_recurso:
+                # Si no subieron archivo nuevo, se mantiene la limpieza original
                 contenido_guardado.url_recurso = limpiar_iframe(contenido_guardado.url_recurso)
 
             contenido_guardado.save()
@@ -236,7 +309,7 @@ def administrar_noticias(request, id_noticia=None):
         'noticia_form': noticia_form,
         'contenido_form': contenido_form,
         'editando': noticia is not None,
-        'noticia': noticia,          # necesario para el action del modal en edición
+        'noticia': noticia,
         'form_tiene_errores': form_tiene_errores,
     }
 
@@ -299,18 +372,23 @@ def gestionar_cursos(request):
                 curso.id_curso = generar_id_unico('CURSO_')
             curso.save()
 
-            # Guardar imagen
-            imagen_url = request.POST.get('imagen_url', '').strip()
-            if imagen_url:
-                if '<iframe' in imagen_url.lower():
-                    url_limpia = limpiar_iframe(imagen_url)
-                else:
-                    url_limpia = imagen_url
-                Contenido.objects.update_or_create(
-                    curso=curso,
-                    tipo_con='imagen',
-                    defaults={'url_recurso': url_limpia, 'nombre_archivo': 'Imagen del Curso'}
-                )
+            # Guardar imagen (subida de archivo, misma lógica que preguntas/noticias)
+            archivo_imagen = request.FILES.get('imagen_archivo')
+            if archivo_imagen:
+                try:
+                    resultado_imagen = _procesar_archivo_subido(archivo_imagen)
+                    Contenido.objects.update_or_create(
+                        curso=curso,
+                        tipo_con='imagen',
+                        defaults={'url_recurso': resultado_imagen['embed_url'], 'nombre_archivo': 'Imagen del Curso'}
+                    )
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    messages.error(request, f'Error subiendo imagen: {type(e).__name__}: {e}')
+                    context = {'cursos': cursos, 'form': form}
+                    return render(request, 'contenido/cursos/gestionar_cursos.html', context)
+
             messages.success(request, 'Curso creado exitosamente.')
             return redirect('gestionar_cursos')
 
@@ -334,17 +412,26 @@ def editar_curso(request, id_curso):
         form = CursoForm(request.POST, instance=curso)
         if form.is_valid():
             curso_guardado = form.save()
-            imagen_url = request.POST.get('imagen_url', '').strip()
-            if imagen_url:
-                if '<iframe' in imagen_url.lower():
-                    url_limpia = limpiar_iframe(imagen_url)
-                else:
-                    url_limpia = imagen_url
-                Contenido.objects.update_or_create(
-                    curso=curso_guardado,
-                    tipo_con='imagen',
-                    defaults={'url_recurso': url_limpia, 'nombre_archivo': 'Imagen del Curso'}
-                )
+
+            # Guardar imagen (subida de archivo, misma lógica que preguntas/noticias)
+            archivo_imagen = request.FILES.get('imagen_archivo')
+            if archivo_imagen:
+                try:
+                    resultado_imagen = _procesar_archivo_subido(archivo_imagen)
+                    Contenido.objects.update_or_create(
+                        curso=curso_guardado,
+                        tipo_con='imagen',
+                        defaults={'url_recurso': resultado_imagen['embed_url'], 'nombre_archivo': 'Imagen del Curso'}
+                    )
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    messages.error(request, f'Error subiendo imagen: {type(e).__name__}: {e}')
+                    cursos = Curso.objects.prefetch_related('contenidos').all()
+                    context = {'form': form, 'cursos': cursos, 'editando': True}
+                    return render(request, 'contenido/cursos/gestionar_cursos.html', context)
+            # Si no subieron archivo nuevo, se conserva la imagen actual (no se toca)
+
             messages.success(request, 'Curso actualizado exitosamente.')
             return redirect('gestionar_cursos')
     else:
@@ -404,10 +491,18 @@ def agregar_contenido(request, id_curso):
 def guardar_bloque_contenido(request, id_curso):
     try:
         curso = get_object_or_404(Curso, id_curso=id_curso)
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            data = request.POST
+
+        # Ahora puede llegar como multipart/form-data (con archivos) o JSON (compatibilidad)
+        if request.content_type and 'multipart' in request.content_type:
+            payload_raw = request.POST.get('payload', '{}')
+            data = json.loads(payload_raw)
+            files = request.FILES
+        else:
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                data = request.POST
+            files = request.FILES  # vacío en este caso
 
         seccion = data.get('seccion')
         tipo = data.get('tipo')
@@ -423,13 +518,21 @@ def guardar_bloque_contenido(request, id_curso):
             if tipo not in tipos_permitidos:
                 return JsonResponse({'success': False, 'error': f'Tipo no válido. Use: {tipos_permitidos}'}, status=400)
 
-        url_recurso_original = data.get('url_recurso', '')
-        url_recurso_limpia = limpiar_iframe(url_recurso_original)
-
-        if tipo in ['banner', 'enlace']:
-            url_final = url_recurso_limpia
-        else:
-            url_final = ''
+        # --- URL/recurso principal: ahora puede venir de archivo subido (solo tipo 'banner') ---
+        url_final = ''
+        archivo_banner = files.get('banner_archivo') if tipo == 'banner' else None
+        if archivo_banner:
+            try:
+                resultado_banner = _procesar_archivo_subido(archivo_banner)
+                url_final = resultado_banner['embed_url']
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                return JsonResponse({'success': False, 'error': f'Error subiendo banner: {type(e).__name__}: {e}'}, status=500)
+        elif tipo in ['banner', 'enlace']:
+            # Compatibilidad: si no llega archivo, se conserva el flujo de URL/iframe (solo aplica a 'enlace' en la práctica)
+            url_recurso_original = data.get('url_recurso', '')
+            url_final = limpiar_iframe(url_recurso_original)
 
         bloque = BloqueContenido.objects.create(
             curso=curso,
@@ -443,6 +546,45 @@ def guardar_bloque_contenido(request, id_curso):
         )
 
         archivos_adjuntos = []
+
+        # --- Archivos adjuntos múltiples subidos desde el explorador ---
+        archivos_subidos = files.getlist('archivos_adjuntos') if hasattr(files, 'getlist') else []
+        tipos_subidos_raw = data.get('tipos_archivos_subidos', '')  # opcional: tipo forzado por archivo, uno por línea
+        tipos_subidos = [t.strip() for t in tipos_subidos_raw.split('\n')] if tipos_subidos_raw else []
+
+        if tipo in ['archivos', 'archivo_categorizado'] and archivos_subidos:
+            for i, archivo_django in enumerate(archivos_subidos):
+                try:
+                    resultado_archivo = _procesar_archivo_subido(archivo_django)
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    return JsonResponse({'success': False, 'error': f'Error subiendo archivo "{archivo_django.name}": {type(e).__name__}: {e}'}, status=500)
+
+                url_limpia = resultado_archivo['embed_url']
+                tipo_seleccionado = tipos_subidos[i] if i < len(tipos_subidos) else ''
+                tipo_contenido = detectar_tipo_archivo_contenido(url_limpia, tipo_seleccionado)
+
+                contenido = Contenido.objects.create(
+                    bloque=bloque,
+                    tipo_con=tipo_contenido,
+                    url_recurso=url_limpia,
+                    nombre_archivo=resultado_archivo.get('nombre') or archivo_django.name
+                )
+
+                archivos_adjuntos.append({
+                    'id': contenido.id_contenido,
+                    'url_archivo': contenido.url_recurso,
+                    'tipo_archivo': contenido.tipo_con,
+                    'icono': contenido.icono,
+                    'tipo_display': contenido.get_tipo_con_display(),
+                    'es_sharepoint': contenido.es_sharepoint,
+                    'url_visualizacion': contenido.url_visualizacion,
+                    'url_descarga': contenido.url_descarga,
+                    'nombre': contenido.get_nombre_display(),
+                })
+
+        # --- Compatibilidad: si además llegan URLs pegadas manualmente (flujo antiguo) ---
         urls_archivos = data.get('urls_archivos', '')
         nombres_archivos = data.get('nombres_archivos', '')
         tipos_archivos = data.get('tipos_archivos', '')
@@ -451,13 +593,12 @@ def guardar_bloque_contenido(request, id_curso):
             urls = [url.strip() for url in urls_archivos.split('\n') if url.strip()]
             nombres = [nombre.strip() for nombre in nombres_archivos.split('\n') if nombre.strip()] if nombres_archivos else []
             tipos = [tipo_archivo.strip() for tipo_archivo in tipos_archivos.split('\n') if tipo_archivo.strip()] if tipos_archivos else []
-            
+
             for i, url in enumerate(urls):
                 url_limpia = limpiar_iframe(url)
                 tipo_seleccionado = tipos[i] if i < len(tipos) else ''
                 tipo_contenido = detectar_tipo_archivo_contenido(url_limpia, tipo_seleccionado)
-                
-                # Obtener nombre del archivo
+
                 nombre_archivo = ''
                 if i < len(nombres) and nombres[i]:
                     nombre_archivo = nombres[i]
@@ -467,15 +608,14 @@ def guardar_bloque_contenido(request, id_curso):
                         nombre_archivo = title_match.group(1)
                     else:
                         nombre_archivo = url_limpia.split('/')[-1] if url_limpia else 'Archivo'
-                
-                # Guardar contenido con tipo detectado
+
                 contenido = Contenido.objects.create(
                     bloque=bloque,
                     tipo_con=tipo_contenido,
                     url_recurso=url_limpia,
                     nombre_archivo=nombre_archivo
                 )
-                
+
                 archivos_adjuntos.append({
                     'id': contenido.id_contenido,
                     'url_archivo': contenido.url_recurso,
@@ -545,71 +685,77 @@ def editar_bloque_contenido(request, id_bloque):
     """Actualiza un bloque de contenido existente."""
     try:
         bloque = get_object_or_404(BloqueContenido, id=id_bloque)
-        
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            data = request.POST
-        
-        # Actualizar campos básicos del bloque
+
+        if request.content_type and 'multipart' in request.content_type:
+            payload_raw = request.POST.get('payload', '{}')
+            data = json.loads(payload_raw)
+            files = request.FILES
+        else:
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                data = request.POST
+            files = request.FILES
+
         bloque.titulo = data.get('titulo', bloque.titulo)
         bloque.descripcion = data.get('descripcion', bloque.descripcion)
-        
-        # Actualizar URL del recurso si es necesario
-        if 'url_recurso' in data:
+
+        # --- Actualizar recurso principal (banner) si llega archivo nuevo ---
+        archivo_banner = files.get('banner_archivo') if bloque.tipo == 'banner' else None
+        if archivo_banner:
+            try:
+                resultado_banner = _procesar_archivo_subido(archivo_banner)
+                bloque.url_recurso = resultado_banner['embed_url']
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                return JsonResponse({'success': False, 'error': f'Error subiendo banner: {type(e).__name__}: {e}'}, status=500)
+        elif 'url_recurso' in data:
+            # Compatibilidad con flujo de URL/iframe (típicamente 'enlace')
             url_recurso_original = data.get('url_recurso', '')
             url_recurso_limpia = limpiar_iframe(url_recurso_original)
-            
             if bloque.tipo in ['banner', 'enlace']:
-                bloque.url_recurso = url_recurso_limpia
+                # Si llega vacío en edición, conservar el enlace/recurso previo.
+                if url_recurso_limpia:
+                    bloque.url_recurso = url_recurso_limpia
             else:
                 bloque.url_recurso = ''
-        
-        # Actualizar render_type si es sección principal
+
         if 'render_type' in data and bloque.seccion == 'principal':
             bloque.render_type = data.get('render_type')
-        
+
         bloque.save()
-        
-        # Actualizar contenidos/archivos si se proporcionan
+
+        # --- Agregar archivos adjuntos nuevos sin borrar los existentes ---
+        archivos_subidos = files.getlist('archivos_adjuntos') if hasattr(files, 'getlist') else []
         urls_archivos = data.get('urls_archivos', '')
-        nombres_archivos = data.get('nombres_archivos', '')
-        tipos_archivos = data.get('tipos_archivos', '')
-        
-        if bloque.tipo in ['archivos', 'archivo_categorizado'] and urls_archivos:
-            # Borrar contenidos antiguos
-            bloque.contenidos.all().delete()
-            
-            # Crear nuevos contenidos
-            urls = [url.strip() for url in urls_archivos.split('\n') if url.strip()]
-            nombres = [nombre.strip() for nombre in nombres_archivos.split('\n') if nombre.strip()] if nombres_archivos else []
-            tipos = [tipo_archivo.strip() for tipo_archivo in tipos_archivos.split('\n') if tipo_archivo.strip()] if tipos_archivos else []
-            
+
+        if bloque.tipo in ['archivos', 'archivo_categorizado'] and (archivos_subidos or urls_archivos):
             archivos_adjuntos = []
-            for i, url in enumerate(urls):
-                url_limpia = limpiar_iframe(url)
-                tipo_seleccionado = tipos[i] if i < len(tipos) else ''
+
+            # Archivos subidos desde el explorador
+            tipos_subidos_raw = data.get('tipos_archivos_subidos', '')
+            tipos_subidos = [t.strip() for t in tipos_subidos_raw.split('\n')] if tipos_subidos_raw else []
+
+            for i, archivo_django in enumerate(archivos_subidos):
+                try:
+                    resultado_archivo = _procesar_archivo_subido(archivo_django)
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    return JsonResponse({'success': False, 'error': f'Error subiendo archivo "{archivo_django.name}": {type(e).__name__}: {e}'}, status=500)
+
+                url_limpia = resultado_archivo['embed_url']
+                tipo_seleccionado = tipos_subidos[i] if i < len(tipos_subidos) else ''
                 tipo_contenido = detectar_tipo_archivo_contenido(url_limpia, tipo_seleccionado)
-                
-                # Obtener nombre del archivo
-                nombre_archivo = ''
-                if i < len(nombres) and nombres[i]:
-                    nombre_archivo = nombres[i]
-                else:
-                    title_match = re.search(r'title="([^"]+)"', url)
-                    if title_match:
-                        nombre_archivo = title_match.group(1)
-                    else:
-                        nombre_archivo = url_limpia.split('/')[-1] if url_limpia else 'Archivo'
-                
-                # Guardar contenido con tipo detectado
+
                 contenido = Contenido.objects.create(
                     bloque=bloque,
                     tipo_con=tipo_contenido,
                     url_recurso=url_limpia,
-                    nombre_archivo=nombre_archivo
+                    nombre_archivo=resultado_archivo.get('nombre') or archivo_django.name
                 )
-                
+
                 archivos_adjuntos.append({
                     'id': contenido.id_contenido,
                     'url_archivo': contenido.url_recurso,
@@ -621,7 +767,50 @@ def editar_bloque_contenido(request, id_bloque):
                     'url_descarga': contenido.url_descarga,
                     'nombre': contenido.get_nombre_display(),
                 })
-        
+
+            # Compatibilidad: URLs pegadas manualmente
+            nombres_archivos = data.get('nombres_archivos', '')
+            tipos_archivos = data.get('tipos_archivos', '')
+
+            if urls_archivos:
+                urls = [url.strip() for url in urls_archivos.split('\n') if url.strip()]
+                nombres = [nombre.strip() for nombre in nombres_archivos.split('\n') if nombre.strip()] if nombres_archivos else []
+                tipos = [tipo_archivo.strip() for tipo_archivo in tipos_archivos.split('\n') if tipo_archivo.strip()] if tipos_archivos else []
+
+                for i, url in enumerate(urls):
+                    url_limpia = limpiar_iframe(url)
+                    tipo_seleccionado = tipos[i] if i < len(tipos) else ''
+                    tipo_contenido = detectar_tipo_archivo_contenido(url_limpia, tipo_seleccionado)
+
+                    nombre_archivo = ''
+                    if i < len(nombres) and nombres[i]:
+                        nombre_archivo = nombres[i]
+                    else:
+                        title_match = re.search(r'title="([^"]+)"', url)
+                        if title_match:
+                            nombre_archivo = title_match.group(1)
+                        else:
+                            nombre_archivo = url_limpia.split('/')[-1] if url_limpia else 'Archivo'
+
+                    contenido = Contenido.objects.create(
+                        bloque=bloque,
+                        tipo_con=tipo_contenido,
+                        url_recurso=url_limpia,
+                        nombre_archivo=nombre_archivo
+                    )
+
+                    archivos_adjuntos.append({
+                        'id': contenido.id_contenido,
+                        'url_archivo': contenido.url_recurso,
+                        'tipo_archivo': contenido.tipo_con,
+                        'icono': contenido.icono,
+                        'tipo_display': contenido.get_tipo_con_display(),
+                        'es_sharepoint': contenido.es_sharepoint,
+                        'url_visualizacion': contenido.url_visualizacion,
+                        'url_descarga': contenido.url_descarga,
+                        'nombre': contenido.get_nombre_display(),
+                    })
+
         return JsonResponse({
             'success': True,
             'bloque': {
@@ -635,7 +824,7 @@ def editar_bloque_contenido(request, id_bloque):
                 'fecha_creacion': bloque.fecha_creacion.strftime('%d/%m/%Y %H:%M'),
             }
         })
-    
+
     except Exception as e:
         return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
     
@@ -707,10 +896,25 @@ def crear_quiz(request, id_curso):
         AsignacionCurso.objects.filter(curso=curso).values_list('usuario_id', flat=True)
     )
 
+    preguntas = quiz.preguntas.all().order_by('orden') if quiz else []
+
+    # Limpiar imagen_url y archivo_apoyo si contienen iframes crudos
+    for pregunta in preguntas:
+        # Limpiar imagen_url si tiene el iframe crudo
+        if pregunta.imagen_url and pregunta.imagen_url.strip().startswith('<iframe'):
+            pregunta.imagen_url = limpiar_iframe(pregunta.imagen_url)
+
+        archivo = pregunta.archivo_apoyo
+        if archivo:
+            for campo in ['url_visualizacion', 'url_descarga', 'url_original']:
+                valor = getattr(archivo, campo) or ''
+                if valor.strip().startswith('<iframe'):
+                    setattr(archivo, campo, limpiar_iframe(valor))
+
     context = {
         'curso': curso,
         'quiz': quiz,
-        'preguntas': quiz.preguntas.all().order_by('orden') if quiz else [],
+        'preguntas': preguntas,
         'usuarios': Usuario.objects.all().order_by('nombre_completo'),
         'usuarios_asignados_ids': usuarios_asignados_ids,
     }
@@ -744,13 +948,15 @@ def agregar_pregunta(request, quiz_id):
 @login_requerido
 @solo_admin
 def guardar_pregunta_quiz(request, id_curso):
-    """Crea o actualiza una pregunta; si el quiz no existe, lo crea automáticamente."""
     curso = get_object_or_404(Curso, id_curso=id_curso)
 
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
-    data = json.loads(request.body)
+    # Ahora llega como multipart/form-data, no application/json
+    payload_raw = request.POST.get('payload', '{}')
+    data = json.loads(payload_raw)
+
     quiz = Quiz.objects.filter(curso=curso).first()
 
     if not quiz:
@@ -764,7 +970,7 @@ def guardar_pregunta_quiz(request, id_curso):
     pregunta_id = data.get('pregunta_id')
     pregunta = get_object_or_404(Pregunta, id=pregunta_id, quiz=quiz) if pregunta_id else None
 
-    pregunta, error_response = _guardar_pregunta_en_quiz(quiz, data, pregunta=pregunta)
+    pregunta, error_response = _guardar_pregunta_en_quiz(quiz, data, files=request.FILES, pregunta=pregunta)
     if error_response:
         return error_response
 
@@ -858,12 +1064,14 @@ def resolver_quiz(request, id_curso):
         }
         return render(request, 'contenido/quiz/resolver_quiz.html', context)
 
+    # Procesar archivos de apoyo de las preguntas (igual que en ver_respuestas_quiz)
     for pregunta in preguntas:
         archivo = pregunta.archivo_apoyo
         if archivo:
             archivo_origen = archivo.url_original or archivo.url_visualizacion or archivo.url_descarga
-            archivo_datos = preparar_archivo_sharepoint(archivo_origen)
+            archivo_datos = preparar_archivo_sharepoint(archivo_origen, archivo.nombre)
             archivo.nombre = archivo.nombre or archivo_datos['nombre']
+            archivo.url_embed = archivo_datos['url_embed']      # ← NUEVO: URL para embebido
             archivo.url_visualizacion = archivo_datos['url_visualizacion']
             archivo.url_descarga = archivo_datos['url_descarga']
 
@@ -896,138 +1104,214 @@ def resolver_quiz(request, id_curso):
 @solo_empleado
 @require_POST
 def responder_pregunta(request):
-    """API para responder una pregunta del quiz."""
-    try:
-        data = json.loads(request.body)
-        usuario_id = request.session.get('id_usuario')
-        pregunta_id = data.get('pregunta_id')
-        quiz_id = data.get('quiz_id')
-        respuesta = (data.get('respuesta') or '').strip()
-        archivo_url_raw = (data.get('archivo_url') or '').strip()
-        archivo_url = limpiar_iframe(archivo_url_raw).strip()
-        tipo_archivo_seleccionado = (data.get('tipo_archivo') or '').strip().lower()
-        
-        if not all([usuario_id, pregunta_id, quiz_id]):
-            return JsonResponse({'success': False, 'error': 'Datos incompletos'}, status=400)
-        
-        pregunta = get_object_or_404(Pregunta, id=pregunta_id)
-        quiz = get_object_or_404(Quiz, id=quiz_id)
+    """
+    API para responder una pregunta del quiz.
+    Ahora soporta subida de archivos (multipart/form-data) además de la URL tradicional.
+    """
+    usuario_id = request.session.get('id_usuario')
+    
+    # Determinar si la petición es multipart (con archivo) o JSON
+    if request.content_type and 'multipart' in request.content_type:
+        # Si es multipart, los datos vienen en request.POST y request.FILES
+        data = request.POST.dict()
+        archivo_empleado = request.FILES.get('archivo_empleado')
+    else:
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Formato de datos inválido'}, status=400)
+        archivo_empleado = None
 
-        progreso, _ = ProgresoUsuario.objects.get_or_create(
-            usuario_id=usuario_id,
-            quiz=quiz,
-            pregunta=pregunta
-        )
+    pregunta_id = data.get('pregunta_id')
+    quiz_id = data.get('quiz_id')
+    respuesta = (data.get('respuesta') or '').strip()
+    archivo_url_raw = (data.get('archivo_url') or '').strip()
+    archivo_url = limpiar_iframe(archivo_url_raw).strip()
+    tipo_archivo_seleccionado = (data.get('tipo_archivo') or '').strip().lower()
 
-        if progreso.es_correcta:
-            return JsonResponse({
-                'success': False,
-                'error': 'Esta pregunta ya fue validada correctamente',
-                'ya_validada': True
-            }, status=400)
+    def detectar_tipo_desde_nombre(nombre_archivo):
+        nombre = (nombre_archivo or '').strip().lower()
+        if not nombre:
+            return ''
+        if any(nombre.endswith(x) for x in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']):
+            return 'imagen'
+        if any(nombre.endswith(x) for x in ['.mp4', '.avi', '.mov', '.mkv', '.webm']):
+            return 'video'
+        if nombre.endswith('.pdf'):
+            return 'pdf'
+        if any(nombre.endswith(x) for x in ['.doc', '.docx']):
+            return 'word'
+        if any(nombre.endswith(x) for x in ['.xls', '.xlsx']):
+            return 'excel'
+        if any(nombre.endswith(x) for x in ['.ppt', '.pptx']):
+            return 'powerpoint'
+        return ''
 
-        if pregunta.tipo_respuesta == 'archivo':
+    if not all([usuario_id, pregunta_id, quiz_id]):
+        return JsonResponse({'success': False, 'error': 'Datos incompletos'}, status=400)
+
+    pregunta = get_object_or_404(Pregunta, id=pregunta_id)
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+
+    progreso, _ = ProgresoUsuario.objects.get_or_create(
+        usuario_id=usuario_id,
+        quiz=quiz,
+        pregunta=pregunta
+    )
+
+    if progreso.es_correcta:
+        return JsonResponse({
+            'success': False,
+            'error': 'Esta pregunta ya fue validada correctamente',
+            'ya_validada': True
+        }, status=400)
+
+    # --- Manejo del archivo para preguntas tipo archivo ---
+    if pregunta.tipo_respuesta == 'archivo':
+        # Si el empleado subió un archivo, lo procesamos con subir_archivo_empleado
+        if archivo_empleado:
+            try:
+                resultado = _procesar_archivo_empleado(archivo_empleado)
+                # Igual que en noticias/cursos: se guarda solo la URL limpia (embed_url),
+                # no el iframe completo.
+                archivo_final = resultado['embed_url']
+                nombre_original = archivo_empleado.name  # ← Capturamos el nombre real ANTES de que se pierda
+            except GraphError as e:
+                return JsonResponse({'success': False, 'error': f'Error al subir el archivo: {e}'}, status=500)
+        else:
+            # Si no hay archivo, usamos la URL proporcionada (compatibilidad)
             if not archivo_url:
                 return JsonResponse({'success': False, 'error': 'Debes pegar el iframe o enlace del archivo'}, status=400)
-        elif not respuesta:
+            archivo_final = archivo_url_raw  # Se guarda el texto original (iframe o link)
+            nombre_original = ''
+    else:
+        # Para otros tipos, la respuesta es textual
+        if not respuesta:
             return JsonResponse({'success': False, 'error': 'La respuesta es requerida'}, status=400)
+        archivo_final = ''  # No se usa
+        nombre_original = ''
 
-        def detectar_tipo_archivo_respuesta(url_archivo):
-            url = (url_archivo or '').lower()
-            if not url:
-                return ''
-            if any(x in url for x in ['sharepoint.com', 'onedrive.com', 'embed.aspx', 'doc.aspx']):
-                return 'sharepoint'
-            if any(x in url for x in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']):
-                return 'imagen'
-            if any(x in url for x in ['.mp4', '.avi', '.mov', '.mkv', '.webm']):
-                return 'video'
-            if '.pdf' in url:
-                return 'pdf'
-            if any(x in url for x in ['.doc', '.docx']):
-                return 'word'
-            if any(x in url for x in ['.xls', '.xlsx']):
-                return 'excel'
-            if any(x in url for x in ['.ppt', '.pptx']):
-                return 'powerpoint'
-            return 'url'
-        
-        # Validar respuesta
-        es_correcta = False
-        nota_validacion = ''
-        
-        if pregunta.tipo_respuesta in ['unica', 'multiple']:
-            # Validar contra opciones correctas
-            opciones_correctas = set(
-                pregunta.opciones.filter(es_correcta=True).values_list('id', flat=True)
-            )
-            respuestas_usuario = set(map(int, respuesta.split(','))) if respuesta else set()
-            es_correcta = respuestas_usuario == opciones_correctas
-        
-        elif pregunta.tipo_respuesta == 'vf':
-            es_correcta = respuesta.lower() in ['verdadero', 'falso']
-        
-        elif pregunta.tipo_respuesta == 'abierta':
-            # La respuesta queda validada y el administrador revisa el contenido.
+    def detectar_tipo_archivo_respuesta(url_archivo):
+        url = (url_archivo or '').lower()
+        if not url:
+            return ''
+        if any(x in url for x in ['sharepoint.com', 'onedrive.com', 'embed.aspx', 'doc.aspx']):
+            return 'sharepoint'
+        if any(x in url for x in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']):
+            return 'imagen'
+        if any(x in url for x in ['.mp4', '.avi', '.mov', '.mkv', '.webm']):
+            return 'video'
+        if '.pdf' in url:
+            return 'pdf'
+        if any(x in url for x in ['.doc', '.docx']):
+            return 'word'
+        if any(x in url for x in ['.xls', '.xlsx']):
+            return 'excel'
+        if any(x in url for x in ['.ppt', '.pptx']):
+            return 'powerpoint'
+        return 'url'
+
+    def resolver_tipo_archivo(nombre_archivo='', url_archivo=''):
+        tipo_por_nombre = detectar_tipo_desde_nombre(nombre_archivo)
+        if tipo_por_nombre:
+            return tipo_por_nombre
+        tipo_por_url = detectar_tipo_archivo_respuesta(url_archivo)
+        if tipo_por_url:
+            return tipo_por_url
+        # Compatibilidad con payloads viejos del frontend
+        if tipo_archivo_seleccionado in ['imagen_video', 'documento']:
+            return tipo_archivo_seleccionado
+        return 'documento'
+
+    # Validar respuesta
+    es_correcta = False
+    nota_validacion = ''
+
+    if pregunta.tipo_respuesta in ['unica', 'multiple']:
+        opciones_correctas = set(
+            pregunta.opciones.filter(es_correcta=True).values_list('id', flat=True)
+        )
+        respuestas_usuario = set(map(int, respuesta.split(','))) if respuesta else set()
+        es_correcta = respuestas_usuario == opciones_correctas
+
+    elif pregunta.tipo_respuesta == 'vf':
+        es_correcta = respuesta.lower() in ['verdadero', 'falso']
+
+    elif pregunta.tipo_respuesta == 'abierta':
+        es_correcta = True
+        nota_validacion = 'La información va a ser validada por el administrador.'
+
+    elif pregunta.tipo_respuesta == 'archivo':
+        # Para archivo, se considera correcto si el empleado subió algo (archivo o URL)
+        if archivo_empleado or archivo_url:
             es_correcta = True
-            nota_validacion = 'La información va a ser validada por el administrador.'
-        
-        elif pregunta.tipo_respuesta == 'archivo':
-            es_correcta = bool(archivo_url)
-            if es_correcta:
-                tipo_final = tipo_archivo_seleccionado or detectar_tipo_archivo_respuesta(archivo_url)
-                nota_validacion = f'Tipo de archivo: {tipo_final}' if tipo_final else 'Archivo validado.'
-        
-        # Actualizar progreso
-        if not es_correcta:
-            progreso.intentos_fallidos += 1
-            if progreso.intentos_fallidos >= 3:
-                es_correcta = True  # Después de 3 intentos, se marca como correcta
-        
-        progreso.respondida = True
-        progreso.es_correcta = es_correcta
-        progreso.respuesta_texto = respuesta if pregunta.tipo_respuesta != 'archivo' else ''
-        
-        # MODIFICACIÓN: guardar prefijo tipo_archivo_seleccionado si existe
-        if pregunta.tipo_respuesta == 'archivo':
-            if tipo_archivo_seleccionado:
-                progreso.archivo_subido_url = f"{tipo_archivo_seleccionado}|||{archivo_url_raw}"
+            tipo_final = resolver_tipo_archivo(
+                nombre_original if archivo_empleado else '',
+                archivo_final if archivo_empleado else archivo_url
+            )
+            if archivo_empleado:
+                nota_validacion = 'Archivo subido correctamente.'
             else:
-                progreso.archivo_subido_url = archivo_url_raw
+                nota_validacion = f'Tipo de archivo: {tipo_final}' if tipo_final else 'Archivo validado.'
         else:
-            progreso.archivo_subido_url = ''
-        
-        progreso.fecha_respuesta = timezone.now()
-        progreso.save()
-        
-        # Verificar si el quiz está completado
-        total_preguntas = quiz.preguntas.count()
-        correctas = ProgresoUsuario.objects.filter(
+            es_correcta = False
+
+    # Actualizar progreso
+    if not es_correcta:
+        progreso.intentos_fallidos += 1
+        if progreso.intentos_fallidos >= 3:
+            es_correcta = True
+
+    progreso.respondida = True
+    progreso.es_correcta = es_correcta
+    progreso.respuesta_texto = respuesta if pregunta.tipo_respuesta != 'archivo' else ''
+
+    # Guardar archivo si corresponde
+    if pregunta.tipo_respuesta == 'archivo':
+        if archivo_empleado:
+            # Nuevo formato: tipo|||nombre|||url  (antes: tipo|||url)
+            tipo_final = resolver_tipo_archivo(nombre_original, archivo_final)
+            progreso.archivo_subido_url = f"{tipo_final}|||{nombre_original}|||{archivo_final}"
+        else:
+            # Si es URL, guardamos el texto original (con prefijo si existe)
+            tipo_final = resolver_tipo_archivo('', archivo_url)
+            progreso.archivo_subido_url = f"{tipo_final}|||{archivo_url_raw}"
+    else:
+        progreso.archivo_subido_url = ''
+
+    progreso.fecha_respuesta = timezone.now()
+    progreso.save()
+
+    # Verificar si el quiz está completado
+    total_preguntas = quiz.preguntas.count()
+    correctas = ProgresoUsuario.objects.filter(
+        usuario=progreso.usuario,
+        quiz=quiz,
+        es_correcta=True
+    ).count()
+
+    completado = correctas == total_preguntas
+    if completado:
+        ProgresoUsuario.objects.filter(
             usuario=progreso.usuario,
-            quiz=quiz,
-            es_correcta=True
-        ).count()
-        
-        completado = correctas == total_preguntas
-        if completado:
-            ProgresoUsuario.objects.filter(
-                usuario=progreso.usuario,
-                quiz=quiz
-            ).update(quiz_completado=True)
-        
-        return JsonResponse({
-            'success': True,
-            'es_correcta': es_correcta,
-            'pista': pregunta.pista if not es_correcta and pregunta.pista else '',
-            'explicacion': pregunta.explicacion if not es_correcta else '',
-            'nota_validacion': nota_validacion,
-            'intentos': progreso.intentos_fallidos,
-            'completado': completado,
-            'mensaje': 'Respuesta guardada exitosamente'
-        })
-    
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+            quiz=quiz
+        ).update(quiz_completado=True)
+
+    return JsonResponse({
+        'success': True,
+        'es_correcta': es_correcta,
+        'pista': pregunta.pista if not es_correcta and pregunta.pista else '',
+        'explicacion': pregunta.explicacion if not es_correcta else '',
+        'nota_validacion': nota_validacion,
+        'intentos': progreso.intentos_fallidos,
+        'completado': completado,
+        'mensaje': 'Respuesta guardada exitosamente'
+    })
+
+
+def es_tipo_media(tipo_archivo):
+    """Imagen, video y PDF se tratan igual: preview embebido con iframe."""
+    return tipo_archivo in ['imagen', 'video', 'pdf']
 
 
 @login_requerido
@@ -1113,31 +1397,59 @@ def ver_respuestas_quiz(request, id_curso, usuario_id):
         # Si la pregunta tiene archivo, procesarlo
         if pregunta.tipo_respuesta == 'archivo' and respuesta.archivo_subido_url:
             raw = respuesta.archivo_subido_url
-            
-            # Separar prefijo de tipo si existe (formato: "imagen_video|||<iframe>")
-            if '|||' in raw:
-                tipo_seleccionado, iframe_raw = raw.split('|||', 1)
-            else:
-                tipo_seleccionado, iframe_raw = '', raw
+            partes = raw.split('|||')
 
-            archivo_datos = preparar_archivo_sharepoint(iframe_raw)
+            if len(partes) == 3:
+                # Formato nuevo: tipo|||nombre|||url
+                tipo_seleccionado, nombre_guardado, iframe_raw = partes
+            elif len(partes) == 2:
+                # Formato antiguo: tipo|||url (sin nombre)
+                tipo_seleccionado, iframe_raw = partes
+                nombre_guardado = ''
+            else:
+                # Formato legacy: solo la URL (sin prefijo)
+                tipo_seleccionado, nombre_guardado, iframe_raw = '', '', raw
+
+            archivo_datos = preparar_archivo_sharepoint(iframe_raw, nombre_guardado)
             url_archivo = archivo_datos['url_limpia']
-            nombre_archivo = archivo_datos['nombre']
+            nombre_archivo = nombre_guardado or archivo_datos['nombre']
 
-            # El tipo seleccionado por el empleado es la fuente más confiable
-            if tipo_seleccionado == 'imagen_video':
-                tipo_archivo = 'imagen_video'   # ← iframe de imagen O video de SharePoint
-            elif tipo_seleccionado == 'documento':
-                tipo_archivo = 'sharepoint'
+            # ── NUEVA LÓGICA DE DETECCIÓN ──
+            # Prioridad 1: extensión del nombre guardado (el ÚNICO lugar donde
+            # realmente existe la extensión, ya que embed_url nunca la tiene).
+            tipo_por_extension = None
+            if nombre_guardado:
+                ext = nombre_guardado.lower()
+                if any(ext.endswith(x) for x in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']):
+                    tipo_por_extension = 'imagen'
+                elif any(ext.endswith(x) for x in ['.mp4', '.avi', '.mov', '.mkv', '.webm']):
+                    tipo_por_extension = 'video'
+                elif ext.endswith('.pdf'):
+                    tipo_por_extension = 'pdf'
+                elif any(ext.endswith(x) for x in ['.doc', '.docx']):
+                    tipo_por_extension = 'word'
+                elif any(ext.endswith(x) for x in ['.xls', '.xlsx']):
+                    tipo_por_extension = 'excel'
+                elif any(ext.endswith(x) for x in ['.ppt', '.pptx']):
+                    tipo_por_extension = 'powerpoint'
+
+            if tipo_por_extension:
+                # Confiamos en la extensión real del archivo, sin importar el dropdown
+                tipo_archivo = tipo_por_extension
+            elif tipo_seleccionado == 'imagen_video':
+                tipo_archivo = 'imagen_video'
             else:
-                # Registros antiguos sin prefijo: detectar automáticamente
+                # Último recurso: detección por URL (para registros muy antiguos)
                 tipo_archivo = detectar_tipo_archivo_contenido(url_archivo)
+
+            es_media_embebida = tipo_archivo in ['imagen', 'video', 'pdf', 'imagen_video']
 
             datos_respuesta['archivo_subido_url'] = url_archivo
             datos_respuesta['nombre_archivo'] = nombre_archivo
             datos_respuesta['tipo_archivo'] = tipo_archivo
-            datos_respuesta['es_media'] = tipo_archivo == 'imagen_video'
+            datos_respuesta['es_media'] = es_media_embebida
             datos_respuesta['es_sharepoint'] = archivo_datos['es_sharepoint']
+            datos_respuesta['url_embed'] = archivo_datos['url_embed']
             datos_respuesta['url_visualizacion'] = archivo_datos['url_visualizacion']
             datos_respuesta['url_descarga'] = archivo_datos['url_descarga']
         
@@ -1162,6 +1474,7 @@ def ver_respuestas_quiz(request, id_curso, usuario_id):
     }
     
     return render(request, 'contenido/quiz/ver_respuestas_quiz.html', context)
+
 
 @login_requerido
 @solo_empleado
@@ -1300,30 +1613,9 @@ def ver_curso_empleado(request, id_curso):
     return render(request, 'contenido/cursos/ver_curso_contenido_empleado.html', context)
 
 
-# =========================================================
-# COMO SUBIR UN ARCHIVO
-# =========================================================
 
 
-@login_requerido
-def subir_archivo(request, from_admin=False):
-    id_curso = (request.GET.get('id_curso') or '').strip()
-    volver_quiz_url = None
 
-    if id_curso:
-        volver_quiz_url = reverse('resolver_quiz', kwargs={'id_curso': id_curso})
-    else:
-        referer = request.META.get('HTTP_REFERER', '')
-        if '/empleado/quiz/' in referer:
-            volver_quiz_url = referer
-
-    # Determinación correcta del rol usando la sesión
-    es_admin = request.session.get('rol') == '1'   # '1' = Administrador
-
-    return render(request, "contenido/subir_archivo.html", {
-        'volver_quiz_url': volver_quiz_url,
-        'es_admin': es_admin,          # nueva variable
-    })
 # =========================================================
 # VIEW DE REPORTE DE CURSOS PARA LLEVAR CONTROL DE LOS CURSOS REALIZADOS POR MESES
 # =========================================================

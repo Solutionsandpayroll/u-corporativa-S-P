@@ -23,6 +23,7 @@ class NoticiaForm(forms.ModelForm):
             }),
         }
 
+# en forms.py, dentro de ContenidoForm
 class ContenidoForm(forms.ModelForm):
     class Meta:
         model = Contenido
@@ -30,7 +31,7 @@ class ContenidoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['url_recurso'].required = False  # ← ahora es opcional
+        self.fields['url_recurso'].required = False
 
 
 class CursoForm(forms.ModelForm):

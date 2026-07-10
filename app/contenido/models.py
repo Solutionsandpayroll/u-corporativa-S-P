@@ -159,10 +159,13 @@ class BloqueContenido(models.Model):
 
     @property
     def sharepoint_base(self):
-        """Extrae la base del sitio de SharePoint."""
-        url = self.url_recurso_limpia
-        if not url:
-            return ''
+        url = self.url_recurso or ''
+        m = re.search(r'(https?://[^/]+)/(?:[^/]+/)*personal/([^/\?#&]+)', url, re.IGNORECASE)
+        if m:
+            return f"{m.group(1)}/personal/{m.group(2)}"
+        m = re.search(r'(https?://[^/]+)/(?:[^/]+/)*sites/([^/\?#&]+)', url, re.IGNORECASE)
+        if m:
+            return f"{m.group(1)}/sites/{m.group(2)}"
         m = re.search(r'(https?://[^/]+/[^/]+/[^/]+)', url)
         return m.group(1) if m else ''
 
@@ -174,13 +177,18 @@ class BloqueContenido(models.Model):
 
     @property
     def url_visualizacion(self):
-        """URL para abrir el archivo en Office Online."""
         if not self.es_sharepoint:
-            return self.url_recurso_limpia
+            return self.url_recurso
+
+        # Para PDF, usar la URL embed.aspx original (la misma lógica que aplica el JS
+        # antes de recargar). Doc.aspx con PDFs suele abrir la carpeta en vez del visor.
+        if self.tipo_con == 'pdf':
+            return self.url_recurso
+
         uid = self.unique_id
         base = self.sharepoint_base
         if not uid or not base:
-            return self.url_recurso_limpia
+            return self.url_recurso
         return f"{base}/_layouts/15/Doc.aspx?sourcedoc=%7B{uid}%7D&action=default"
 
     @property
@@ -418,6 +426,10 @@ class Contenido(models.Model):
     @property
     def url_visualizacion(self):
         if not self.es_sharepoint:
+            return self.url_recurso
+        # Para PDF de SharePoint/OneDrive usamos la URL original,
+        # que coincide con el comportamiento dinámico del dashboard.
+        if self.tipo_con == 'pdf':
             return self.url_recurso
         uid = self.unique_id
         base = self.sharepoint_base
