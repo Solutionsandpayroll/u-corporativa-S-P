@@ -362,6 +362,7 @@ def ver_noticias(request, from_admin=False):
 def gestionar_cursos(request):
     cursos = Curso.objects.prefetch_related('contenidos').all().order_by('-fecha_public')
     form = CursoForm()
+    usuarios = Usuario.objects.all().order_by('nombre_completo')
 
     if request.method == 'POST':
         form = CursoForm(request.POST)
@@ -371,6 +372,15 @@ def gestionar_cursos(request):
                 from .utils import generar_id_unico
                 curso.id_curso = generar_id_unico('CURSO_')
             curso.save()
+
+            # --- Asignación de usuarios al curso (ahora se hace aquí, no en el quiz) ---
+            usuarios_ids = request.POST.getlist('usuarios_asignados')
+            usuarios_ids_validos = [int(uid) for uid in usuarios_ids if str(uid).isdigit()]
+            if usuarios_ids_validos:
+                AsignacionCurso.objects.bulk_create([
+                    AsignacionCurso(usuario_id=uid, curso=curso)
+                    for uid in usuarios_ids_validos
+                ])
 
             # Guardar imagen (subida de archivo, misma lógica que preguntas/noticias)
             archivo_imagen = request.FILES.get('imagen_archivo')
@@ -386,13 +396,18 @@ def gestionar_cursos(request):
                     import traceback
                     traceback.print_exc()
                     messages.error(request, f'Error subiendo imagen: {type(e).__name__}: {e}')
-                    context = {'cursos': cursos, 'form': form}
+                    context = {'cursos': cursos, 'form': form, 'usuarios': usuarios, 'usuarios_asignados_ids': []}
                     return render(request, 'contenido/cursos/gestionar_cursos.html', context)
 
             messages.success(request, 'Curso creado exitosamente.')
             return redirect('gestionar_cursos')
 
-    context = {'cursos': cursos, 'form': form}
+    context = {
+        'cursos': cursos,
+        'form': form,
+        'usuarios': usuarios,
+        'usuarios_asignados_ids': [],
+    }
     return render(request, 'contenido/cursos/gestionar_cursos.html', context)
 
 
@@ -408,10 +423,33 @@ def editar_curso(request, id_curso):
     if contenido_imagen:
         initial_data['imagen_url'] = contenido_imagen.url_recurso
 
+    usuarios = Usuario.objects.all().order_by('nombre_completo')
+    usuarios_asignados_ids = list(
+        AsignacionCurso.objects.filter(curso=curso).values_list('usuario_id', flat=True)
+    )
+
     if request.method == 'POST':
         form = CursoForm(request.POST, instance=curso)
         if form.is_valid():
             curso_guardado = form.save()
+
+            # --- Actualizar asignación de usuarios ---
+            usuarios_ids = request.POST.getlist('usuarios_asignados')
+            usuarios_ids_validos = [int(uid) for uid in usuarios_ids if str(uid).isdigit()]
+
+            AsignacionCurso.objects.filter(curso=curso_guardado).exclude(
+                usuario_id__in=usuarios_ids_validos
+            ).delete()
+
+            existentes = set(
+                AsignacionCurso.objects.filter(curso=curso_guardado).values_list('usuario_id', flat=True)
+            )
+            nuevas = [
+                AsignacionCurso(usuario_id=uid, curso=curso_guardado)
+                for uid in usuarios_ids_validos if uid not in existentes
+            ]
+            if nuevas:
+                AsignacionCurso.objects.bulk_create(nuevas)
 
             # Guardar imagen (subida de archivo, misma lógica que preguntas/noticias)
             archivo_imagen = request.FILES.get('imagen_archivo')
@@ -428,7 +466,10 @@ def editar_curso(request, id_curso):
                     traceback.print_exc()
                     messages.error(request, f'Error subiendo imagen: {type(e).__name__}: {e}')
                     cursos = Curso.objects.prefetch_related('contenidos').all()
-                    context = {'form': form, 'cursos': cursos, 'editando': True}
+                    context = {
+                        'form': form, 'cursos': cursos, 'editando': True,
+                        'usuarios': usuarios, 'usuarios_asignados_ids': usuarios_asignados_ids,
+                    }
                     return render(request, 'contenido/cursos/gestionar_cursos.html', context)
             # Si no subieron archivo nuevo, se conserva la imagen actual (no se toca)
 
@@ -438,7 +479,13 @@ def editar_curso(request, id_curso):
         form = CursoForm(instance=curso, initial=initial_data)
 
     cursos = Curso.objects.prefetch_related('contenidos').all()
-    context = {'form': form, 'cursos': cursos, 'editando': True}
+    context = {
+        'form': form,
+        'cursos': cursos,
+        'editando': True,
+        'usuarios': usuarios,
+        'usuarios_asignados_ids': usuarios_asignados_ids,
+    }
     return render(request, 'contenido/cursos/gestionar_cursos.html', context)
 
 
@@ -846,7 +893,7 @@ def eliminar_contenido_ajax(request, id):
 @login_requerido
 @solo_admin
 def crear_quiz(request, id_curso):
-    """Vista para crear/editar un quiz, incluyendo asignación de usuarios al curso."""
+    """Vista para crear/editar un quiz. La asignación de usuarios ahora vive en el curso."""
     curso = get_object_or_404(Curso, id_curso=id_curso)
     quiz = curso.quiz if hasattr(curso, 'quiz') else None
 
@@ -867,40 +914,16 @@ def crear_quiz(request, id_curso):
                 curso=curso
             )
 
-        # --- Asignación de usuarios al curso ---
-        usuarios_ids = data.get('usuarios_asignados', [])
-        if isinstance(usuarios_ids, list):
-            usuarios_ids_validos = [int(uid) for uid in usuarios_ids if str(uid).isdigit()]
-
-            AsignacionCurso.objects.filter(curso=curso).exclude(
-                usuario_id__in=usuarios_ids_validos
-            ).delete()
-
-            existentes = set(
-                AsignacionCurso.objects.filter(curso=curso).values_list('usuario_id', flat=True)
-            )
-            nuevas = [
-                AsignacionCurso(usuario_id=uid, curso=curso)
-                for uid in usuarios_ids_validos if uid not in existentes
-            ]
-            if nuevas:
-                AsignacionCurso.objects.bulk_create(nuevas)
-
         return JsonResponse({
             'success': True,
             'quiz_id': quiz.id,
             'mensaje': 'Quiz creado/actualizado exitosamente'
         })
 
-    usuarios_asignados_ids = list(
-        AsignacionCurso.objects.filter(curso=curso).values_list('usuario_id', flat=True)
-    )
-
     preguntas = quiz.preguntas.all().order_by('orden') if quiz else []
 
     # Limpiar imagen_url y archivo_apoyo si contienen iframes crudos
     for pregunta in preguntas:
-        # Limpiar imagen_url si tiene el iframe crudo
         if pregunta.imagen_url and pregunta.imagen_url.strip().startswith('<iframe'):
             pregunta.imagen_url = limpiar_iframe(pregunta.imagen_url)
 
@@ -915,8 +938,6 @@ def crear_quiz(request, id_curso):
         'curso': curso,
         'quiz': quiz,
         'preguntas': preguntas,
-        'usuarios': Usuario.objects.all().order_by('nombre_completo'),
-        'usuarios_asignados_ids': usuarios_asignados_ids,
     }
 
     return render(request, 'contenido/quiz/crear_quiz.html', context)
@@ -1479,18 +1500,24 @@ def ver_respuestas_quiz(request, id_curso, usuario_id):
 @login_requerido
 @solo_empleado
 def listar_cursos_empleado(request):
-    """Vista para que el empleado vea los cursos disponibles."""
-    cursos = Curso.objects.prefetch_related('contenidos').all().order_by('titulo')
+    """Vista para que el empleado vea los cursos disponibles (solo los asignados)."""
     usuario_id = request.session.get('id_usuario')
-    
-    # Obtener estado del quiz para cada curso
+
+    cursos_ids_asignados = AsignacionCurso.objects.filter(
+        usuario_id=usuario_id
+    ).values_list('curso_id', flat=True)
+
+    cursos = Curso.objects.filter(
+        id_curso__in=cursos_ids_asignados
+    ).prefetch_related('contenidos').order_by('titulo')
+
     cursos_data = []
     for curso in cursos:
         quiz = Quiz.objects.filter(curso=curso).first()
-        progreso = None
         estado_quiz = 'sin_iniciar'
         porcentaje = 0
-        
+        completado = False
+
         if quiz:
             respondidas = ProgresoUsuario.objects.filter(
                 usuario_id=usuario_id,
@@ -1498,43 +1525,35 @@ def listar_cursos_empleado(request):
                 respondida=True
             ).count()
 
-            # Contar preguntas respondidas correctamente
-            correctas = ProgresoUsuario.objects.filter(
-                usuario_id=usuario_id,
-                quiz=quiz,
-                es_correcta=True
-            ).count()
-            
-            # Verificar si está completado
             completado = ProgresoUsuario.objects.filter(
                 usuario_id=usuario_id,
                 quiz=quiz,
                 quiz_completado=True
             ).exists()
-            
+
             total = quiz.preguntas.count()
             porcentaje = (respondidas * 100) // total if total > 0 else 0
-            
+
             if completado:
                 estado_quiz = 'completado'
             elif respondidas > 0:
                 estado_quiz = 'en_progreso'
             else:
                 estado_quiz = 'sin_iniciar'
-        
+
         cursos_data.append({
             'curso': curso,
             'quiz': quiz,
             'estado_quiz': estado_quiz,
             'porcentaje': porcentaje,
-            'quiz_completado': completado if quiz else False
+            'quiz_completado': completado
         })
-    
+
     context = {
         'cursos_data': cursos_data,
         'nombre': request.session.get('nombre')
     }
-    
+
     return render(request, 'contenido/cursos/ver_cursos_empleado.html', context)
 
 
@@ -1544,22 +1563,34 @@ def ver_curso_empleado(request, id_curso):
     """Vista para que el empleado vea el contenido de un curso específico."""
     curso = get_object_or_404(Curso, id_curso=id_curso)
     usuario_id = request.session.get('id_usuario')
-    
+
+    es_admin = request.session.get('rol') == 'admin' or request.session.get('es_admin', False)
+
+    tiene_acceso_curso = AsignacionCurso.objects.filter(
+        curso=curso,
+        usuario_id=usuario_id
+    ).exists()
+
+    # Si no es admin y no tiene el curso asignado, no puede ver nada de su contenido
+    if not es_admin and not tiene_acceso_curso:
+        messages.error(request, 'No tienes acceso a este curso.')
+        return redirect('listar_cursos_empleado')
+
     # Obtener bloques de contenido (principal y lateral)
     bloques_principal = BloqueContenido.objects.filter(
-        curso=curso, 
+        curso=curso,
         seccion='principal'
     ).order_by('orden')
-    
+
     bloques_lateral = BloqueContenido.objects.filter(
-        curso=curso, 
+        curso=curso,
         seccion='lateral'
     ).order_by('orden')
-    
+
     # Obtener estado del quiz
     quiz = Quiz.objects.filter(curso=curso).first()
     quiz_data = None
-    
+
     if quiz:
         total_preguntas = quiz.preguntas.count()
         correctas = ProgresoUsuario.objects.filter(
@@ -1577,7 +1608,7 @@ def ver_curso_empleado(request, id_curso):
             quiz=quiz,
             quiz_completado=True
         ).exists()
-        
+
         quiz_data = {
             'quiz': quiz,
             'titulo': quiz.titulo,
@@ -1589,16 +1620,7 @@ def ver_curso_empleado(request, id_curso):
             'porcentaje': (respondidas * 100) // total_preguntas if total_preguntas > 0 else 0,
             'completado': completado
         }
-    
-    # Verificar si el usuario es admin (acceso a edición)
-    es_admin = request.session.get('rol') == 'admin' or request.session.get('es_admin', False)
 
-    # Verificar si el empleado está asignado a este curso
-    tiene_acceso_quiz = AsignacionCurso.objects.filter(
-        curso=curso,
-        usuario_id=usuario_id
-    ).exists()
-    
     context = {
         'curso': curso,
         'bloques_principal': bloques_principal,
@@ -1607,12 +1629,10 @@ def ver_curso_empleado(request, id_curso):
         'nombre': request.session.get('nombre'),
         'is_admin': es_admin,
         'readonly': not es_admin,
-        'tiene_acceso_quiz': tiene_acceso_quiz,
+        'tiene_acceso_quiz': tiene_acceso_curso,  # ahora es lo mismo que el acceso al curso
     }
-    
+
     return render(request, 'contenido/cursos/ver_curso_contenido_empleado.html', context)
-
-
 
 
 
