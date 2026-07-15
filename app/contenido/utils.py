@@ -165,11 +165,20 @@ def generar_id_unico(prefijo=''):
 def get_stats_mes(curso, quiz, year, month):
     from .models import ProgresoUsuario, AsignacionCurso
 
-    # Solo los empleados asignados a ESTE curso
+    # Total de empleados con acceso al curso (independiente de si hay quiz)
     total_empleados = AsignacionCurso.objects.filter(curso=curso).count()
     usuarios_asignados_ids = AsignacionCurso.objects.filter(
         curso=curso
     ).values_list('usuario_id', flat=True)
+
+    if not quiz:
+        return {
+            'total_completados': 0,
+            'completados_mes':   0,
+            'en_progreso':       0,
+            'pendientes':        total_empleados,
+            'total_empleados':   total_empleados,
+        }
 
     total_completados = ProgresoUsuario.objects.filter(
         quiz=quiz,
@@ -210,6 +219,15 @@ def get_stats_rango(curso, quiz, fecha_inicio, fecha_fin):
     usuarios_asignados_ids = AsignacionCurso.objects.filter(
         curso=curso
     ).values_list('usuario_id', flat=True)
+
+    if not quiz:
+        return {
+            'total_completados': 0,
+            'completados_rango': 0,
+            'en_progreso': 0,
+            'pendientes': total_empleados,
+            'total_empleados': total_empleados,
+        }
 
     total_completados = ProgresoUsuario.objects.filter(
         quiz=quiz,
@@ -275,16 +293,7 @@ def get_meses_historicos(curso, quiz):
             m += 12
             y -= 1
 
-        if quiz:
-            stats = get_stats_mes(curso, quiz, y, m)
-        else:
-            stats = {
-                'total_completados': 0,
-                'completados_mes': 0,
-                'en_progreso': 0,
-                'pendientes': 0,
-                'total_empleados': 0,
-            }
+        stats = get_stats_mes(curso, quiz, y, m)
 
         historico.append({
             'label': f"{MESES_ES[m-1]} {y}",
@@ -308,18 +317,8 @@ def get_cursos_stats(year=None, month=None):
     for curso in cursos:
         quiz = getattr(curso, 'quiz', None)
 
-        if quiz:
-            stats_actual  = get_stats_mes(curso, quiz, year, month)
-            meses_hist    = get_meses_historicos(curso, quiz)
-        else:
-            stats_actual = {
-                'total_completados': 0,
-                'completados_mes':   0,
-                'en_progreso':       0,
-                'pendientes':        0,
-                'total_empleados':   0,
-            }
-            meses_hist = []
+        stats_actual = get_stats_mes(curso, quiz, year, month)
+        meses_hist = get_meses_historicos(curso, quiz)
 
         resultado.append({
             'curso':        curso,
@@ -425,18 +424,7 @@ def generar_excel(cursos_ids, fecha_inicio, fecha_fin):
         fill = fill_alt if i % 2 == 0 else fill_blanco
 
         quiz = getattr(curso, 'quiz', None)
-
-        # Llamada corregida: get_stats_rango solo necesita el quiz y las fechas
-        if quiz:
-            stats = get_stats_rango(curso, quiz, fecha_inicio, fecha_fin)
-        else:
-            stats = {
-                'total_empleados': 0,
-                'total_completados': 0,
-                'completados_rango': 0,
-                'en_progreso': 0,
-                'pendientes': 0,
-            }
+        stats = get_stats_rango(curso, quiz, fecha_inicio, fecha_fin)
 
         valores = [
             curso.titulo,
