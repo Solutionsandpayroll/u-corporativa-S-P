@@ -52,4 +52,7 @@ urlpatterns = [
     path('estadisticas/', cursos_estadisticas, name='estadisticas_cursos'),
     path('estadisticas/descargar/', descargar_excel_estadisticas, name='descargar_excel'),
 
+    # ELIMINAR QUIZ
+    path('curso/<int:id_curso>/eliminar-quiz/', eliminar_quiz, name='eliminar_quiz'),
+
 ]

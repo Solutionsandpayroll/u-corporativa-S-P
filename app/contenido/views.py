@@ -1720,3 +1720,37 @@ def _opciones_ultimos_meses(hoy, n=12):
         if m == 0:
             m, y = 12, y - 1
     return opts
+# ELIMINAR QUIZ EN SU TOTALIDAD (ADMIN)
+@login_requerido
+@solo_admin
+def eliminar_quiz(request, id_curso):
+    """
+    Elimina el quiz asociado a un curso (incluye preguntas, opciones y progresos).
+    Solo permite método POST.
+    """
+    curso = get_object_or_404(Curso, id_curso=id_curso)
+
+    if not hasattr(curso, 'quiz'):
+        return JsonResponse({
+            'success': False,
+            'error': 'Este curso no tiene un quiz asociado.'
+        }, status=404)
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Método no permitido. Use POST.'
+        }, status=405)
+
+    quiz = curso.quiz
+    # Eliminar el quiz; en cascada se borrarán preguntas, opciones, progresos, etc.
+    quiz.delete()
+
+    # (Opcional) Si quieres eliminar también los ArchivoPregunta huérfanos:
+    # from .models import ArchivoPregunta
+    # ArchivoPregunta.objects.filter(pregunta__isnull=True).delete()
+
+    return JsonResponse({
+        'success': True,
+        'mensaje': f'Quiz "{quiz.titulo}" eliminado correctamente.'
+    })
