@@ -1889,7 +1889,7 @@
             .then(data => {
                 if (data.success) {
                     alert(data.mensaje || 'Quiz eliminado correctamente');
-                    window.location.href = '/cursos/';  // Redirige a la lista de cursos
+                    window.location.href = "{% url 'gestionar_cursos' %}";  // Redirige a la lista de cursos
                 } else {
                     alert('Error: ' + (data.error || 'No se pudo eliminar el quiz'));
                 }
