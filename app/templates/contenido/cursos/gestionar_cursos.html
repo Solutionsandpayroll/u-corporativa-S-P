@@ -782,6 +782,7 @@
                         data-titulo-real="{{ curso.titulo }}"
                         data-descripcion="{{ curso.descripcion }}"
                         data-estado="{{ curso.estado }}"
+                        data-usuarios="{% for a in curso.asignaciones.all %}{{ a.usuario_id }}{% if not forloop.last %},{% endif %}{% endfor %}"
                         data-imagen="{% for c in curso.contenidos.all %}{% if c.tipo_con == 'imagen' %}{{ c.url_recurso }}{% endif %}{% endfor %}">
                         <td>
                             {% with imagen_encontrada=False %}
@@ -914,8 +915,71 @@
                 <button class="btn-cancel" onclick="cerrarModalCurso()">
                     <i class="fas fa-times"></i> Cancelar
                 </button>
+                <!-- Botón Asignar Usuarios -->
+                <button type="button" class="btn-cancel" id="btnAbrirAsignacion" style="flex:1;">
+                    <i class="fas fa-users"></i> Asignar Usuarios
+                    <span id="contador-asignados" class="badge bg-primary" style="margin-left:6px; background-color: #105788; color: white; border-radius: 12px; padding: 2px 8px;">0</span>
+                </button>
                 <button class="btn-save" id="guardarCursoBtn">
                     <i class="fas fa-save"></i> Guardar Curso
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ASIGNACIÓN DE USUARIOS AL CURSO -->
+    <div id="modalAsignacion" class="modal-overlay">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <h3 class="modal-titulo">Asignar Usuarios</h3>
+                        <p class="modal-subtitulo">Selecciona quiénes pueden ver este curso (y su quiz)</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="cerrarModalAsignacion()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-input" id="buscador-usuarios"
+                           placeholder="Buscar usuario por nombre...">
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size: 12px; color: #64748b; font-weight: 600;">
+                        <span id="contador-visible">{{ usuarios|length }}</span> usuario(s)
+                    </span>
+                    <div>
+                        <button type="button" class="btn" style="padding: 4px 10px; font-size: 12px;" onclick="seleccionarTodosUsuarios(true)">
+                            Seleccionar todos
+                        </button>
+                        <button type="button" class="btn" style="padding: 4px 10px; font-size: 12px;" onclick="seleccionarTodosUsuarios(false)">
+                            Deseleccionar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="lista-usuarios-asignacion" style="max-height: 320px; overflow-y: auto; border: 2px solid #e5e7eb; border-radius: 10px; padding: 8px;">
+                    {% for usuario in usuarios %}
+                    <label class="usuario-item" style="cursor: pointer; display: flex; gap: 10px; padding: 8px 10px; border-radius: 8px;" data-nombre="{{ usuario.nombre_completo|lower }}">
+                        <input type="checkbox" class="usuario-checkbox" name="usuarios_asignados" value="{{ usuario.id_usuario }}" form="cursoForm">
+                        <span>{{ usuario.nombre_completo }}</span>
+                        <span style="margin-left:auto; font-size:11px; color:#94a3b8;">{{ usuario.get_rol_display }}</span>
+                    </label>
+                    {% empty %}
+                    <p style="text-align:center; padding: 20px; color:#94a3b8;">No hay usuarios registrados.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="cerrarModalAsignacion()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn-save" onclick="guardarAsignacionUsuarios()">
+                    <i class="fas fa-check"></i> Confirmar Selección
                 </button>
             </div>
         </div>
@@ -984,6 +1048,10 @@
         const dropzoneFileName  = document.getElementById('dropzoneFileName');
         const dropzoneFileSize  = document.getElementById('dropzoneFileSize');
         const dropzoneRemoveBtn = document.getElementById('dropzoneRemoveBtn');
+
+        // Elementos de asignación
+        const modalAsignacion   = document.getElementById('modalAsignacion');
+        const contadorAsignados = document.getElementById('contador-asignados');
 
         let confirmCallback = null;
         let isEditMode = false;
@@ -1101,6 +1169,64 @@
             }
         });
 
+        // ---- Funciones de asignación de usuarios ----
+        function actualizarContadorAsignados() {
+            const total = document.querySelectorAll('.usuario-checkbox:checked').length;
+            contadorAsignados.textContent = total;
+        }
+
+        function abrirModalAsignacion() {
+            modalAsignacion.style.display = 'flex';
+            document.getElementById('buscador-usuarios').value = '';
+            filtrarUsuarios('');
+        }
+
+        function cerrarModalAsignacion() {
+            modalAsignacion.style.display = 'none';
+        }
+
+        function filtrarUsuarios(texto) {
+            const filtro = texto.trim().toLowerCase();
+            let visibles = 0;
+            document.querySelectorAll('#lista-usuarios-asignacion label.usuario-item').forEach(label => {
+                const coincide = label.dataset.nombre.includes(filtro);
+                label.style.display = coincide ? 'flex' : 'none';
+                if (coincide) visibles++;
+            });
+            document.getElementById('contador-visible').textContent = visibles;
+        }
+
+        function seleccionarTodosUsuarios(valor) {
+            document.querySelectorAll('#lista-usuarios-asignacion label.usuario-item').forEach(label => {
+                if (label.style.display !== 'none') {
+                    const checkbox = label.querySelector('.usuario-checkbox');
+                    if (checkbox) checkbox.checked = valor;
+                }
+            });
+            actualizarContadorAsignados();
+        }
+
+        function guardarAsignacionUsuarios() {
+            actualizarContadorAsignados();
+            cerrarModalAsignacion();
+        }
+
+        function limpiarCheckboxesUsuarios() {
+            document.querySelectorAll('.usuario-checkbox').forEach(cb => cb.checked = false);
+            actualizarContadorAsignados();
+        }
+
+        function marcarUsuariosAsignados(idsCsv) {
+            limpiarCheckboxesUsuarios();
+            if (!idsCsv) return;
+            const ids = idsCsv.split(',').map(s => s.trim()).filter(Boolean);
+            ids.forEach(id => {
+                const cb = document.querySelector(`.usuario-checkbox[value="${id}"]`);
+                if (cb) cb.checked = true;
+            });
+            actualizarContadorAsignados();
+        }
+
         // ---- Modales ----
         function abrirModalCrear() {
             cursoForm.reset();
@@ -1111,6 +1237,7 @@
             // Limpiar aviso de imagen actual y dropzone
             imagenActualNombre.style.display = 'none';
             limpiarDropzone();
+            limpiarCheckboxesUsuarios();          // Limpiar selección
             isEditMode = false;
             modalCurso.style.display = 'flex';
             aplicarClasesInputs();
@@ -1132,6 +1259,7 @@
             const descripcion = row.dataset.descripcion;
             const estado = row.dataset.estado;
             const imagenUrl = row.dataset.imagen || '';
+            const usuariosAsignados = row.dataset.usuarios || '';
 
             document.getElementById('id_estado').value = estado;
             document.getElementById('id_titulo').value = titulo;
@@ -1140,6 +1268,9 @@
             // Limpiar dropzone y mostrar aviso de imagen actual
             limpiarDropzone();
             imagenActualNombre.style.display = imagenUrl ? 'flex' : 'none';
+
+            // Marcar usuarios asignados
+            marcarUsuariosAsignados(usuariosAsignados);
 
             cursoForm.action = "{% url 'editar_curso' 0 %}".replace('0', idCurso);
             modalTitleSpan.textContent = 'Editar Curso';
@@ -1189,11 +1320,24 @@
             confirmCallback = null;
         });
 
+        // Botón para abrir asignación
+        document.getElementById('btnAbrirAsignacion').addEventListener('click', abrirModalAsignacion);
+
+        // Buscador de usuarios
+        const buscadorUsuarios = document.getElementById('buscador-usuarios');
+        if (buscadorUsuarios) {
+            buscadorUsuarios.addEventListener('input', function() {
+                filtrarUsuarios(this.value);
+            });
+        }
+
+        // Cerrar modales al hacer clic fuera
         window.onclick = function(event) {
             if (event.target == modalCurso) cerrarModalCurso();
             if (event.target == confirmModal) confirmModal.style.display = 'none';
             if (event.target == successModal) successModal.style.display = 'none';
             if (event.target == descripcionModal) descripcionModal.style.display = 'none';
+            if (event.target == modalAsignacion) cerrarModalAsignacion();
         };
 
         // Procesar descripciones (truncar y añadir "Ver más")

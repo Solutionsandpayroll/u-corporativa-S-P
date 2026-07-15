@@ -967,14 +967,9 @@
                           placeholder="Describe el propósito de este quiz...">{{ quiz.descripcion }}</textarea>
             </div>
             <div class="text-end mt-3">
-                <button class="btn-secondary-custom" onclick="abrirModalAsignacion();" type="button">
-                    <i class="fas fa-users"></i> Asignar Usuarios
-                    <span id="contador-asignados" class="badge bg-light text-dark ms-1">{{ usuarios_asignados_ids|length }}</span>
-                </button>
                 <button class="btn-primary-custom" onclick="guardarQuiz();">
                     <i class="fas fa-save"></i> Actualizar Quiz
                 </button>
-                <!-- Botón Eliminar Quiz añadido aquí -->
                 <button class="btn-danger-custom" onclick="eliminarQuiz();">
                     <i class="fas fa-trash"></i> Eliminar Quiz
                 </button>
@@ -1254,64 +1249,6 @@
         </div>
     </div>
 
-    <div id="modalAsignacion" class="modal-editar-overlay">
-        <div class="modal-editar-content" style="max-width: 520px;">
-            <div class="modal-editar-header">
-                <div class="modal-editar-header-left">
-                    <div class="modal-editar-icon"><i class="fas fa-users"></i></div>
-                    <div>
-                        <h3 class="modal-editar-titulo">Asignar Usuarios</h3>
-                        <p class="modal-editar-subtitulo">Selecciona quiénes deben hacer este curso</p>
-                    </div>
-                </div>
-                <button class="modal-editar-close" onclick="cerrarModalAsignacion()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-editar-body">
-                <div class="form-full-width">
-                    <input type="text" class="editar-input" id="buscador-usuarios"
-                           placeholder="Buscar usuario por nombre...">
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span style="font-size: 12px; color: #64748b; font-weight: 600;">
-                        <span id="contador-visible">{{ usuarios|length }}</span> usuario(s)
-                    </span>
-                    <div>
-                        <button type="button" class="btn-agregar-opcion" style="padding: 4px 10px; font-size: 12px;" onclick="seleccionarTodosUsuarios(true)">
-                            Seleccionar todos
-                        </button>
-                        <button type="button" class="btn-agregar-opcion" style="padding: 4px 10px; font-size: 12px; background:#6c757d;" onclick="seleccionarTodosUsuarios(false)">
-                            Deseleccionar
-                        </button>
-                    </div>
-                </div>
-
-                <div id="lista-usuarios-asignacion" style="max-height: 320px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px;">
-                    {% for usuario in usuarios %}
-                    <label class="opcion-item" style="cursor: pointer; display: flex; gap: 10px;" data-nombre="{{ usuario.nombre_completo|lower }}">
-                        <input type="checkbox" class="usuario-checkbox" value="{{ usuario.id_usuario }}"
-                               {% if usuario.id_usuario in usuarios_asignados_ids %}checked{% endif %}>
-                        <span>{{ usuario.nombre_completo }}</span>
-                        <span class="text-muted" style="margin-left:auto; font-size:11px;">{{ usuario.get_rol_display }}</span>
-                    </label>
-                    {% empty %}
-                    <p class="text-muted text-center py-3">No hay usuarios registrados.</p>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="modal-editar-footer">
-                <button class="editar-btn-cancelar" onclick="cerrarModalAsignacion()">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-                <button class="editar-btn-guardar" onclick="guardarAsignacionUsuarios()">
-                    <i class="fas fa-check"></i> Confirmar Selección
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let quizId = {% if quiz %}{{ quiz.id }}{% else %}null{% endif %};
@@ -1328,7 +1265,6 @@
         const successModal = document.getElementById('successModal');
         const successMessageSpan = document.getElementById('successMessage');
         const successIcon = document.getElementById('successIcon');
-        const modalAsignacion = document.getElementById('modalAsignacion');
 
         // ========== DROPZONE: IMAGEN ==========
         const dropzoneImagen = document.getElementById('dropzoneImagenPregunta');
@@ -1833,10 +1769,6 @@
             });
         }
 
-        function getUsuariosSeleccionados() {
-            return Array.from(document.querySelectorAll('.usuario-checkbox:checked')).map(cb => cb.value);
-        }
-
         function guardarQuiz() {
             const titulo = $('#quiz-titulo').val().trim();
             if (!titulo) {
@@ -1852,8 +1784,7 @@
                 data: JSON.stringify({
                     titulo: titulo,
                     descripcion: $('#quiz-descripcion').val() || descripcionPorDefectoQuiz,
-                    activo: $('#quiz-activo').val() === '1',
-                    usuarios_asignados: getUsuariosSeleccionados()
+                    activo: $('#quiz-activo').val() === '1'
                 }),
                 success: function(resp) {
                     if (resp.success) {
@@ -1905,44 +1836,6 @@
             item.classList.toggle('active');
         }
 
-        function abrirModalAsignacion() {
-            modalAsignacion.style.display = 'flex';
-            document.getElementById('buscador-usuarios').value = '';
-            filtrarUsuarios('');
-        }
-
-        function cerrarModalAsignacion() {
-            modalAsignacion.style.display = 'none';
-        }
-
-        function filtrarUsuarios(texto) {
-            const filtro = texto.trim().toLowerCase();
-            let visibles = 0;
-            document.querySelectorAll('#lista-usuarios-asignacion label.opcion-item').forEach(label => {
-                const coincide = label.dataset.nombre.includes(filtro);
-                label.style.display = coincide ? 'flex' : 'none';
-                if (coincide) visibles++;
-            });
-            const contador = document.getElementById('contador-visible');
-            if (contador) contador.textContent = visibles;
-        }
-
-        function seleccionarTodosUsuarios(valor) {
-            document.querySelectorAll('#lista-usuarios-asignacion label.opcion-item').forEach(label => {
-                if (label.style.display !== 'none') {
-                    const checkbox = label.querySelector('.usuario-checkbox');
-                    if (checkbox) checkbox.checked = valor;
-                }
-            });
-        }
-
-        function guardarAsignacionUsuarios() {
-            const seleccionados = getUsuariosSeleccionados();
-            document.getElementById('contador-asignados').textContent = seleccionados.length;
-            cerrarModalAsignacion();
-            mostrarAlerta('Listo', 'Selección actualizada. No olvides hacer clic en "Actualizar Quiz" para guardar.', 'success');
-        }
-
         $(document).ready(function() {
             inicializarSelectorTipo();
             configurarOpciones('unica');
@@ -1968,7 +1861,6 @@
                 if (event.target === modalPregunta) cerrarModalPregunta();
                 if (event.target === confirmModal) confirmModal.style.display = 'none';
                 if (event.target === successModal) successModal.style.display = 'none';
-                if (event.target === modalAsignacion) cerrarModalAsignacion();
             };
 
             document.querySelectorAll('.adjunto-card').forEach(card => {
@@ -1995,13 +1887,6 @@
                     }
                 }
             });
-
-            const buscador = document.getElementById('buscador-usuarios');
-            if (buscador) {
-                buscador.addEventListener('input', function() {
-                    filtrarUsuarios(this.value);
-                });
-            }
         });
     </script>
 </body>
