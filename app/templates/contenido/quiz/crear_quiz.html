@@ -1875,7 +1875,7 @@
                 return;
             }
 
-            const url = `/curso/${cursoId}/eliminar-quiz/`;  // Ajusta la URL según tu configuración
+            const url = `{% url 'eliminar_quiz' id_curso=curso.id_curso %}`; // Ajusta la URL según tu configuración
 
             fetch(url, {
                 method: 'POST',
