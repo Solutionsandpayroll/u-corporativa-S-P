@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'img/Favicon_syp.png' %}">
     <title>Panel de Administración</title>
 
     <!-- Bootstrap 5 CSS (necesario para el modal) -->
@@ -91,7 +92,7 @@
         .logo-wrapper img {
             width: 100%;
             height: auto;
-            max-height: 78px;
+            max-height: 120px;
             object-fit: contain;
             display: block;
             background: transparent;
@@ -440,7 +441,7 @@
             .cards-grid { grid-template-columns: 1fr; }
             .welcome-text h3 { font-size: 1.3rem; }
             .sidebar-brand { padding: 16px 8px 8px 8px; }
-            .logo-wrapper img { max-height: 58px; }
+            .logo-wrapper img { max-height: 90px; }
         }
 
         @media (max-width: 480px) {
@@ -448,7 +449,7 @@
             .main-content { margin-left: 56px; padding: 14px 10px; }
             .avatar-circle { width: 40px; height: 40px; min-width: 40px; font-size: 1.1rem; }
             .sidebar-brand { padding: 12px 4px 6px 4px; }
-            .logo-wrapper img { max-height: 46px; }
+            .logo-wrapper img { max-height: 70px; }
         }
 
         @keyframes rippleEffect {
@@ -581,7 +582,7 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="logo-wrapper" title="Dashboard">
-                <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo de la marca">
+                <img src="{% static 'img/Logo_completo_syp_v2.png' %}" alt="Logo de la marca">
             </div>
         </div>
 
