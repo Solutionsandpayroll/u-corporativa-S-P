@@ -17,6 +17,7 @@ from django.utils import timezone
 from datetime import date
 import calendar
 from .graph_adjuntos import *
+from . import blob_adjuntos
 
 
 def detectar_tipo_archivo_contenido(url_archivo, tipo_forzado=''):
@@ -53,12 +54,12 @@ def detectar_tipo_archivo_contenido(url_archivo, tipo_forzado=''):
 
 def _procesar_archivo_subido(archivo_django):
     """
-    Sube un archivo de Django (InMemoryUploadedFile) a OneDrive usando la carpeta de ADMIN.
-    Retorna el embed_html listo para guardar, igual que si el admin lo hubiera pegado.
+    Sube un archivo de Django (InMemoryUploadedFile) a Vercel Blob (carpeta de ADMIN).
+    Retorna un dict con embed_url, embed_html, nombre, web_url.
     """
     if not archivo_django:
         return None
-    resultado = subir_archivo_admin(
+    resultado = blob_adjuntos.subir_archivo_admin(
         nombre_archivo=archivo_django.name,
         contenido_bytes=archivo_django.read(),
     )
@@ -72,7 +73,7 @@ def _procesar_archivo_empleado(archivo_django):
     """
     if not archivo_django:
         return None
-    resultado = subir_archivo_empleado(
+    resultado = blob_adjuntos.subir_archivo_empleado(
         nombre_archivo=archivo_django.name,
         contenido_bytes=archivo_django.read(),
     )
